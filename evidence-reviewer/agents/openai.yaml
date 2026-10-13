@@ -1,0 +1,4 @@
+interface:
+  display_name: "审计证据核查与复核助手"
+  short_description: "按审计目标核查材料、金额与结论，保留证据出处、复算、未核范围及变更历史"
+  default_prompt: "使用 $evidence-reviewer 按我的审计目标和适用要求核查指定材料，给出可回查出处、必要复算、结论边界及修改建议。"

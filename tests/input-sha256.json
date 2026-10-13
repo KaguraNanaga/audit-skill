@@ -1,0 +1,18 @@
+{
+  "tests/cases/contract/request.md": "e5964714a006c16e41416e19ae252cbe29e1577f6efed488d49f5b0d38e3bcec",
+  "tests/cases/contract/sources/不完整收款凭据.pdf": "01a74c684581757011345987168b936cf142a1af2f4e49e5f47244dbfd817a69",
+  "tests/cases/contract/sources/合同及补充页.pdf": "1943d903e21745ab1688e3ec86b4db077c56d438c2a9e8c0dc41cce9d1030ac6",
+  "tests/cases/contract/sources/复核稿.md": "8b677e71ea3debdc2cbe7a87eb49e894f308d054c20298699b1272f7981442ba",
+  "tests/cases/contract/sources/资料范围.md": "5da152751bdfb09cbe3b02e90e0f7bad5ced64f9f666b073eae70d2d6c4ab65f",
+  "tests/cases/controls/request.md": "ecc526e29a567890d1233ba98e92327a9350f364d1124b13553bf7c007847287",
+  "tests/cases/controls/sources/003-approval.png": "0ecba6c34347847500899a0c37c7eef5e818d6804e1fdf033a29a38d831ca4cd",
+  "tests/cases/controls/sources/制度与抽样记录.md": "5c1575f41a706373591003fbeef4164211491c695a67755868d850808122f785",
+  "tests/cases/controls/sources/复核稿.md": "cd2ed08cdf87dbe7360191945bbb4a5b6c641d53fdace04b30b1cc6fe825e919",
+  "tests/cases/financial/request.md": "76ff085614979c36a39ca885431afc44c9ba8267ef1167ed6103acee0560e9cd",
+  "tests/cases/financial/sources/复核稿.md": "cf9fe44d5187f7ebb118c3d7539ea24f93a1182dff73229b36b509589d6d3e8d",
+  "tests/cases/financial/sources/权益桥接.xlsx": "b849dba89d264aa4cf73f99c5b1c931e6a1812944156e04fb1f934e9af42b3ff",
+  "tests/cases/financial/sources/账务口径与调整表.md": "766aa7466ad0503e01df934e563dd02a6bcb30d32113cf3d73a6fff73e1999dc",
+  "tests/cases/responsibility/request.md": "2a91e6ddcb9343cfba26008df049068cc70307759b6c33f76152d1e669367f2e",
+  "tests/cases/responsibility/sources/复核稿.md": "639d5b7b15dc28b7af615c7590ae2f47f8b7bf36c25adcd1a74c8ac1c4e22c21",
+  "tests/cases/responsibility/sources/时间线与现有证据.md": "c332150a7508ea76415f85276dd95c406ca7c5dab9b6da8b5c2c694c69647b03"
+}

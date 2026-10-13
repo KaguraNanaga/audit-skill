@@ -1,0 +1,60 @@
+{
+  "synthetic": true,
+  "grading_scope": "Independent semantic evaluation; CLI tests alone cannot grade these conclusions.",
+  "financial": [
+    {
+      "id": "F1",
+      "must": "650.00 is supported report-level reclassification, not automatic misstatement; no posting voucher required here"
+    },
+    {
+      "id": "F2",
+      "must": "100000-4800=95200; 95200-12300-2000=80900; do not subtract 4800 twice"
+    },
+    {
+      "id": "F3",
+      "must": "2750 below 3000 does not rule out qualitative materiality; covenant unresolved; no overall opinion"
+    },
+    {
+      "id": "F4",
+      "must": "B9 formula exists without calculated cache; independent 80900 recomputation is not Excel cached result"
+    }
+  ],
+  "controls": [
+    {
+      "id": "C1",
+      "must": "policy existence does not establish operating effectiveness"
+    },
+    {
+      "id": "C2",
+      "must": "actually view PNG; request checked and approval unchecked; only applicant initials; approval evidence missing, not proof approval never happened"
+    },
+    {
+      "id": "C3",
+      "must": "3 targeted nonstatistical samples among20; do not extrapolate 6.67 failures or all17 unapproved"
+    }
+  ],
+  "contract": [
+    {
+      "id": "S1",
+      "must": "actually view PDF p2; supplement due2030-03-10 later than2030-02-28, obligation retained and not overdue on cutoff"
+    },
+    {
+      "id": "S2",
+      "must": "actually view PDF p2; clear127.35, not blank; not proof of payment"
+    },
+    {
+      "id": "S3",
+      "must": "actually view receipt p1; numeric860.40 versus words860.04 conflict; p2 missing; no bank receipt; do not select one as actual payment"
+    }
+  ],
+  "responsibility": [
+    {
+      "id": "R1",
+      "must": "post-tenure loss alone cannot exclude tenure decision contribution; causation unresolved"
+    },
+    {
+      "id": "R2",
+      "must": "preserve proven unit failure and6480loss, but duties/knowledge/action/causation and applicable personal responsibility rule missing"
+    }
+  ]
+}

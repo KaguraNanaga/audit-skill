@@ -1,0 +1,5 @@
+# Core readers: install in a virtual environment.
+# Tested dependency versions and environment are recorded in VALIDATION.md.
+# These ranges constrain installation; they are not a claim that every version was tested.
+pypdf>=6.10,<7
+openpyxl>=3.1.5,<4

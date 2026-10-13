@@ -1,0 +1,25 @@
+# Local runtimes and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+~$*
+
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+
+# Never keep real evidence or review projects in this distribution.
+# Put them outside the release directory; these names are only a second line of defense.
+/private-materials/
+/local-projects/
+/workspaces/
+/outputs/
+/cache/
+/ledger/
+/staging/
+/sources/
+/test-results/
