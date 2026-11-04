@@ -1,0 +1,8 @@
+{
+  "frozen_on": "2026-11-05",
+  "synthetic": true,
+  "files": {
+    "tests/ocr-fixtures/blocks.json": "422b6cb19e121ad1c117cdf064edce2c318f3cce69c6fe0f7c73ca222b6b3bd5",
+    "tests/ocr-fixtures/synthetic.png": "c70ff0862738f48bb7667906962a2a619efdd0551260a0e05f4124035e0ac3b2"
+  }
+}

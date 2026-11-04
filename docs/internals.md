@@ -35,3 +35,9 @@
 - 原件SHA256、正文、locator、公式、缓存、状态、限制和版本不屏蔽；副本内的原件字节不改写。
 
 另比较排除import节点后的Python AST、搬迁参考文档的原文，以及旧/新台账的 inspect、validate、update、export。对调整前已提交的renderer 7项目删除临时副本中的导出后重建，要求恢复为原字节；旧renderer 1–6历史仍按冻结指纹校验。链接检查为离线文件/锚点检查，不验证外部网站的当前可用性。
+
+## 阶段3实现与历史范围
+
+OCR共用能力放在core，不新增业务模块或skill。schema3新增OCRAttempt和ocr_derived单元，每轮snapshot保存unit_ids；as_of只返回该轮ID范围。历史单位内容不可变，recovery比较原单元的逐ID内容和每轮视图；旧schema前缀重建必须精确匹配事务原哈希。旧账仅在明确update/finalize时升级并备份。新导出器8追加OCR来源警示，旧1–7实现保持；portable显式视图仍使用原renderer7契约。
+
+阶段1.5的AST/文档原文/输出前后对照固定到阶段1提交a0cb3714和阶段1.5提交4701ac6f，两份均按发布清单验证。当前代码继续单独执行旧台账操作和字节回归，不再把新增功能错误要求为结构迁移。CI设置EVIDENCE_REVIEWER_STRUCTURE_CANDIDATE指向固定阶段1.5目录。

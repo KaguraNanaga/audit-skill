@@ -72,3 +72,7 @@ python3 scripts/prepare.py --root /材料目录 --goal '核对2025年付款与�
 SourceVersion.processing 保存原件 parent_sha256、converter、version、parameters、state 及成功产物的相对路径/指纹。每次不可用或失败尝试也保留；缺工具记 tool_unavailable，读取单元记 failed，继续其他材料。转换后的 locator 属于派生文档，原件视觉事实仍需实际回看。派生物不会替代 SourceVersion.sha256，update 同字节匹配只使用原件指纹。
 
 Windows 文件名预检查在 stat/open 前执行。保留名（包括带扩展名）、尾随点/空格及非法字符在 run.errors 逐文件记 state=failed，读取覆盖汇总继续披露；无法取得的文件不伪造快照或原件指纹。长路径受系统配置与外部工具限制，中文、空格及内部相对路径使用明确编码和 pathlib。
+
+## 阶段 3：扫描定位
+
+可选后端、安装条件及已验证边界见[OCR定位层](ocr.md)。search可以包含已登记的OCR派生单元，仍不覆盖未处理图像、失败页或未抽取单元；未命中不能证明不存在。

@@ -54,6 +54,14 @@ def check_files(project, work, check_outputs=False):
                 if operation.get('state') == 'converted':
                     p = local_path(project, operation['artifact'])
                     L.require(p.is_file() and readers.digest(p) == operation['sha256'], 'Converted artifact missing or changed: ' + str(p))
+    from core import derived
+    for row in work['records'].values():
+        if row['kind'] == 'OCRAttempt' and row.get('raw_path'):
+            p = local_path(project, row['raw_path'])
+            L.require(p.is_file() and readers.digest(p) == row['raw_sha256'], 'OCR result missing or changed')
+            blocks = load(p)
+            units = [derived.unit_at(work, row['source_version_id'], uid) for uid in row['unit_ids']]
+            L.require(len(blocks) == len(units) and all(u and all(u.get(k) == block.get(k, 1) for k in ('text', 'bbox', 'confidence', 'frame')) for u, block in zip(units, blocks)), 'OCR result and registered units differ')
     for artifact in work['artifacts']:
         p = local_path(project, artifact['path'])
         L.require(p.is_file() and readers.digest(p) == artifact['sha256'], 'Registered rendering/image changed or unavailable')
@@ -110,7 +118,7 @@ def begin(args):
             'excluded_roots': request.get('exclusions', []), 'selected_main_version': None,
             'main_selection_reason': None, 'output_request': output},
             'run': {'id': run_id, 'previous_run_id': None, 'started_at': L.now(), 'finished_at': None,
-                    'state': 'staging', 'validation_version': 2, 'visual_checks_version': 1, 'visual_checks': [], 'source_version_snapshot': [], 'selected_main_version': None,
+                    'state': 'staging', 'derived_units_version': 1, 'validation_version': 2, 'visual_checks_version': 1, 'visual_checks': [], 'source_version_snapshot': [], 'selected_main_version': None,
                     'skill_version': L.VERSION, 'tool_versions': {'reader': readers.VERSION, 'python': sys.version},
                     'model_version': request.get('model_version'), 'errors': [], 'unfinished_steps': ['session_review', 'validation', 'commit', 'export']},
             'records': {}, 'units': {}, 'artifacts': [], 'excluded': [], 'outcome': None}
@@ -210,10 +218,13 @@ def search(args):
                 if u['state'] in {'unread', 'failed', 'manual_check'}:
                     unread.append({'source_version_id': vid, 'unit_id': u['id'], 'state': u['state']})
                 if pattern.search(u['text']):
-                    results.append({'source_version_id': vid, 'unit_id': u['id'], 'locator': u['locator'], 'text': u['text']})
+                    hit = {'source_version_id': vid, 'unit_id': u['id'], 'locator': u['locator'], 'text': u['text']}
+                    from core.derived import is_ocr, WARNING
+                    if is_ocr(u): hit.update(warning=WARNING, derived_from=u['derived_from'])
+                    results.append(hit)
         record_id = L.add(work, 'SearchRecord', dict(purpose=args.purpose, material_snapshot=list(versions),
                           scope=[work['records'][work['records'][v]['source_id']]['actual_name'] for v in versions],
-                          keywords=[args.pattern], method='regex over all extracted units of selected snapshots; no OCR',
+                          keywords=[args.pattern], method='regex over extracted text and OCR locator units; images and unextracted units are not searched',
                           tool='review.py search', queried_at=L.now(), results=results, unread_parts=unread,
                           task_ids=[], claim_ids=[], external=False))
         save_work(project, work)
@@ -376,7 +387,7 @@ def assess(args, commit=False):
                 return history.finalize(project, work, sys.modules[__name__])
             work = L.thaw(ledger)
             L.require(work['assessment_sha256'] == L.checksum(assessment), 'Committed assessment differs; stage a new update instead of overwriting it')
-            if ledger.get('schema_version') == 'evidence-ledger-2.0': write_exports(project, ledger)
+            if ledger.get('schema_version') in {'evidence-ledger-2.0', 'evidence-ledger-3.0'}: write_exports(project, ledger)
             check_files(project, work, check_outputs=True)
             L.validate_records(work)
             return {'state': 'completed', 'idempotent_replay': True, 'run_id': work['run']['id']}
@@ -393,7 +404,7 @@ def assess(args, commit=False):
         for name, content in exports.items():
             path = f"outputs/{work['run']['id']}/{name}"
             L.add(work, 'OutputRecord', dict(run_id=work['run']['id'], output_kind=name.split('.')[0], path=path,
-                       renderer_version=7,
+                       renderer_version=8 if work['run'].get('derived_units_version') else 7,
                        sha256=__import__('hashlib').sha256(content.encode()).hexdigest(), source_role='workpaper_or_draft',
                        actual_confirmation_status='unconfirmed', evidence_ids=[e['id'] for e in work['records'].values() if e['kind'] == 'Evidence']))
         L.validate_records(work)
@@ -443,8 +454,9 @@ def main():
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, 'reconfigure'): stream.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--version', action='version', version='Evidence Reviewer package 0.4.0-beta.1; engine 0.4.0. Package version identifies the distributed skill; engine version identifies ledger and validation behavior.')
     sub = parser.add_subparsers(dest='command', required=True)
-    for name in ['begin', 'update', 'annotate-sources', 'inspect', 'search', 'select-main', 'render', 'import-web', 'check-assessment', 'finalize', 'validate', 'export', 'recover']:
+    for name in ['begin', 'update', 'annotate-sources', 'inspect', 'search', 'select-main', 'render', 'import-web', 'check-assessment', 'finalize', 'validate', 'export', 'recover', 'ocr']:
         p = sub.add_parser(name)
         p.add_argument('--project', type=Path, required=True)
         if name == 'export': p.add_argument('--portable', action='store_true', help='Create renderer-7 views in a new directory; preserve ledger and all historical outputs')
@@ -466,13 +478,19 @@ def main():
             p.add_argument('--pages', type=int, nargs='+')
             p.add_argument('--docx-renderer')
             p.add_argument('--fontconfig')
+        if name == 'ocr':
+            p.add_argument('--version', required=True)
+            p.add_argument('--pages', type=int, nargs='+')
+            p.add_argument('--engine', choices=['tesseract', 'rapidocr'], default='tesseract')
+            p.add_argument('--timeout', type=float, default=120)
         if name == 'import-web': p.add_argument('--record', type=Path, required=True)
         if name in {'check-assessment', 'finalize'}: p.add_argument('--assessment', type=Path, required=True)
     args = parser.parse_args()
     try:
         from core import updates
         from core import history
-        commands = {'begin': begin, 'inspect': inspect, 'search': search, 'select-main': select_main,
+        from core import ocr
+        commands = {'ocr': lambda a: ocr.run(a, sys.modules[__name__]), 'begin': begin, 'inspect': inspect, 'search': search, 'select-main': select_main,
                     'render': render_source, 'import-web': import_web,
                     'check-assessment': assess, 'finalize': lambda a: assess(a, True),
                     'validate': validate, 'export': lambda a: validate(a, True),

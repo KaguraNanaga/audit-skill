@@ -9,8 +9,10 @@ from pathlib import Path
 from . import ledger as L
 
 SCHEMA = 'evidence-ledger-2.0'
+DERIVED_SCHEMA = 'evidence-ledger-3.0'
+SCHEMAS = {SCHEMA, DERIVED_SCHEMA}
 BUSINESS = {'ReviewTask', 'Claim', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding'}
-IMMUTABLE = {'SourceVersion', 'Evidence', 'EvidenceLink', 'ReadRecord', 'SearchRecord', 'HumanDecision', 'OutputRecord'}
+IMMUTABLE = {'SourceVersion', 'Evidence', 'EvidenceLink', 'ReadRecord', 'SearchRecord', 'HumanDecision', 'OutputRecord', 'OCRAttempt'}
 
 
 def fault(name):
@@ -26,7 +28,7 @@ def signed(value):
 
 
 def snapshot(work, current):
-    return dict(project=copy.deepcopy(work['project']), outcome=copy.deepcopy(work['outcome']),
+    return dict(unit_ids={v: [u['id'] for u in units] for v, units in work['units'].items()}, project=copy.deepcopy(work['project']), outcome=copy.deepcopy(work['outcome']),
                 current=copy.deepcopy(current), record_order=list(work['records']),
                 unit_version_ids=list(work['units']), artifact_ids=[a['id'] for a in work['artifacts']],
                 assessment_sha256=work['assessment_sha256'])
@@ -36,11 +38,12 @@ def upgrade(base):
     L.thaw(base)  # Verify before conversion; never repair by silently discarding data.
     out = copy.deepcopy(base)
     out.pop('integrity_sha256', None)
-    if base['schema_version'] == SCHEMA:
-        return out
-    w = L.thaw(base)
-    out.update(schema_version=SCHEMA, run_order=[base['latest_run_id']],
-               run_snapshots={base['latest_run_id']: snapshot(w, base['current'])})
+    if base['schema_version'] not in SCHEMAS:
+        w = L.thaw(base)
+        out.update(run_order=[base['latest_run_id']], run_snapshots={base['latest_run_id']: snapshot(w, base['current'])})
+    for snap in out['run_snapshots'].values():
+        snap.setdefault('unit_ids', {v: [u['id'] for u in base['units'][v]] for v in snap['unit_version_ids']})
+    out['schema_version'] = DERIVED_SCHEMA
     return out
 
 
@@ -83,7 +86,7 @@ def build(base, work):
 
 
 def as_of(ledger, run_id):
-    if ledger['schema_version'] != SCHEMA:
+    if ledger['schema_version'] not in SCHEMAS:
         L.require(run_id == ledger['latest_run_id'], 'Unknown run')
         return L.thaw(ledger)
     snap = ledger['run_snapshots'][run_id]
@@ -91,7 +94,7 @@ def as_of(ledger, run_id):
     known = ledger['run_order'][:index + 1]
     records = {eid: copy.deepcopy(ledger['revisions'][snap['current'][eid]]['after']) for eid in snap['record_order']}
     work = dict(project=copy.deepcopy(snap['project']), run=copy.deepcopy(ledger['runs'][run_id]),
-                records=records, units={v: copy.deepcopy(ledger['units'][v]) for v in snap['unit_version_ids']},
+                records=records, units={v: [copy.deepcopy(u) for u in ledger['units'][v] if 'unit_ids' not in snap or u['id'] in snap['unit_ids'][v]] for v in snap['unit_version_ids']},
                 artifacts=[copy.deepcopy(a) for a in ledger['artifacts'] if a['id'] in snap['artifact_ids']],
                 outcome=copy.deepcopy(snap['outcome']), assessment_sha256=snap['assessment_sha256'],
                 _known_run_ids=known,
@@ -127,6 +130,11 @@ def thaw(ledger):
             rev = ledger['revisions'].get(rev_id)
             L.require(rev and rev['entity_id'] == eid and positions[rev['run_id']] <= i, 'Historical snapshot cites a future/missing revision')
         L.require(set(snap['unit_version_ids']) == set(run['source_version_snapshot']), 'Historical material snapshot mismatch')
+        if ledger['schema_version'] == DERIVED_SCHEMA:
+            L.require(set(snap.get('unit_ids', {})) == set(snap['unit_version_ids']), 'Missing historical unit-ID scope')
+            for v, ids in snap['unit_ids'].items():
+                L.require(isinstance(ids,list) and len(ids) == len(set(ids)) and ids == [u['id'] for u in ledger['units'][v] if u['id'] in ids], 'Invalid historical unit-ID scope')
+                if i: L.require(set(ledger['run_snapshots'][order[i-1]]['unit_ids'].get(v, [])) <= set(ids), 'Historical units disappeared')
         active = run.get('active_source_version_ids', run['source_version_snapshot'])
         L.require(set(active) <= set(run['source_version_snapshot']) and len(active) == len(set(active)), 'Invalid active source snapshot')
         if i:
@@ -170,6 +178,8 @@ def thaw(ledger):
             tail = previous
     L.require(reachable == set(ledger['revisions']), 'Orphan revision')
     current = ledger['run_snapshots'][order[-1]]
+    if ledger['schema_version'] == DERIVED_SCHEMA:
+        L.require(current['unit_ids'] == {v: [u['id'] for u in units] for v, units in ledger['units'].items()}, 'Latest unit snapshot differs from ledger units')
     for field in ('current', 'record_order', 'project', 'outcome', 'assessment_sha256'):
         L.require(ledger[field] == current[field], 'Latest snapshot/top-level mismatch: ' + field)
     return as_of(ledger, order[-1])
@@ -284,7 +294,7 @@ def finalize(project, work, api):
     for name, content in exports.items():
         eid = L.uid()
         body = dict(id=eid, kind='OutputRecord', run_id=work['run']['id'], output_kind=name.split('.')[0],
-                    path=f"outputs/{work['run']['id']}/{name}", renderer_version=7,
+                    path=f"outputs/{work['run']['id']}/{name}", renderer_version=8 if work['run'].get('derived_units_version') else 7,
                     sha256=hashlib.sha256(content.encode()).hexdigest(), source_role='workpaper_or_draft',
                     actual_confirmation_status='unconfirmed', evidence_ids=[x['id'] for x in work['records'].values() if x['kind'] == 'Evidence'])
         append_revision(ledger, body, work['run'], 'Export of this committed run', [])

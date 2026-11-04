@@ -153,3 +153,7 @@ python3 -B tools/check_release.py
 名称仍为 evidence-reviewer；唯一 SKILL.md 保留共同原则并路由到 evidence-review 模块。共享文档在 references/common/，专用方法在 references/evidence-review/；通用 Python 实现在 scripts/core/。CLI 仍为 scripts/review.py，既有命令、参数和输出不变，原 scripts/prepare.py 也保留兼容入口。当前没有独立的证据复核专用算法，不创建空的 evidence_review 代码包。
 
 升级已安装版本时，先备份旧 evidence-reviewer 目录，再用新的整个同名目录完整替换；不要把新旧文件合并为混合安装。原业务项目及台账保留，不执行迁移或重写。frontmatter 名称与 agents 元数据不变。模块接入见[维护者说明](docs/internals.md)，文档只随仓库分发，不随安装的 skill 子目录分发。
+
+## 可选OCR定位（阶段3）
+
+引擎0.4.0支持离线Tesseract（本地chi_sim+eng）或可选RapidOCR；依赖单独放在requirements-ocr.txt，Python3.13及以上使用Tesseract。先登记/渲染原页，再执行ocr；识别不改变原页未核状态。安装与命令见[OCR定位层](evidence-reviewer/references/common/ocr.md)。包版本仍为0.4.0-beta.1，目标0.5.0-beta.1待全部阶段完成后统一更新。

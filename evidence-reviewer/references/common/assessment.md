@@ -49,3 +49,7 @@ calculations：`{key,purpose,inputs:[],formula,rounding:{places:2,mode:"ROUND_HA
 增量更新另支持screening、impact_review、link_retirements及既有对象id/revision_reason字段，按[incremental.md](incremental.md)使用；初次评估不接受更新操作。既有来源的实质source_annotations应先暂存，直接写入assessment会提示先执行annotate-sources；新来源仍可在评估时分类。
 
 0.3.1增量评估另可提供visual_resolutions，每项含check_id、decision（withdrawn/not_relevant）和reason，明确退出未核视觉事项；仍被主稿、当前判断或本轮答案采用时拒绝。实际补看只需登记匹配版本及范围的observations，程序据此解决。见[原页核查跟进](visual-followup.md)。
+
+## 阶段 3：OCR引用
+
+OCR派生单元的Evidence需要匹配原页版本/单元/页图指纹的observation，且不可标original_viewed；观察引用原页read_id，不引用OCR read_id。Calculation的事实输入不接受OCR单元。结构验证与实际阅读分别执行，完整契约见[OCR定位层](ocr.md)。

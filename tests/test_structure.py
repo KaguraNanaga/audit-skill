@@ -45,13 +45,14 @@ class StructureBaseline(unittest.TestCase):
         value=os.environ.get('EVIDENCE_REVIEWER_BASELINE')
         if not value: raise unittest.SkipTest('Provide verified stage-1 directory with EVIDENCE_REVIEWER_BASELINE; baseline comparisons not executed')
         cls.baseline=Path(value).resolve()
+        cls.candidate=Path(os.environ.get('EVIDENCE_REVIEWER_STRUCTURE_CANDIDATE', str(ROOT))).resolve()
         manifest=json.loads((cls.baseline/'RELEASE_MANIFEST.json').read_text(encoding='utf-8'))
         for rel,sha in manifest['files'].items():
             if hashlib.sha256((cls.baseline/rel).read_bytes()).hexdigest()!=sha:
                 raise ValueError('Baseline differs from stage-1 manifest: '+rel)
 
     def test_before_after_begin_inspect(self):
-        result=compare(self.baseline,ROOT)
+        result=compare(self.baseline,self.candidate)
         self.assertTrue(result['ok']);self.assertEqual(result['excluded_fields'],[])
         self.assertEqual(len(result['cases']),4)
 
@@ -60,7 +61,8 @@ class StructureBaseline(unittest.TestCase):
             def visit_Import(self,node): return None
             def visit_ImportFrom(self,node): return None
         for old in (self.baseline/'evidence-reviewer/scripts').glob('*.py'):
-            new=SCRIPTS/old.name if old.name=='review.py' else SCRIPTS/'core'/old.name
+            scripts=self.candidate/'evidence-reviewer/scripts'
+            new=scripts/old.name if old.name=='review.py' else scripts/'core'/old.name
             with self.subTest(file=old.name):
                 def structure(path): return ast.dump(WithoutImports().visit(ast.parse(path.read_text(encoding='utf-8'))),include_attributes=False)
                 self.assertEqual(structure(old),structure(new))
@@ -71,9 +73,9 @@ class StructureBaseline(unittest.TestCase):
             return re.sub(r'\.\./(?:common|evidence-review)/','',s)
         for old in (self.baseline/'evidence-reviewer/references').glob('*.md'):
             folder='common' if old.name in COMMON else 'evidence-review'
-            self.assertEqual(normalize(old.read_text(encoding='utf-8')),normalize((ROOT/'evidence-reviewer/references'/folder/old.name).read_text(encoding='utf-8')),old.name)
+            self.assertEqual(normalize(old.read_text(encoding='utf-8')),normalize((self.candidate/'evidence-reviewer/references'/folder/old.name).read_text(encoding='utf-8')),old.name)
         original=(self.baseline/'evidence-reviewer/SKILL.md').read_text(encoding='utf-8')
-        combined=normalize((ROOT/'evidence-reviewer/SKILL.md').read_text(encoding='utf-8')+'\n'+(ROOT/'evidence-reviewer/references/evidence-review/index.md').read_text(encoding='utf-8'))
+        combined=normalize((self.candidate/'evidence-reviewer/SKILL.md').read_text(encoding='utf-8')+'\n'+(self.candidate/'evidence-reviewer/references/evidence-review/index.md').read_text(encoding='utf-8'))
         for section in re.split(r'(?m)(?=^## )',original)[1:]:
             self.assertIn(normalize(section).strip(),combined,section.splitlines()[0])
 
@@ -81,7 +83,7 @@ class StructureBaseline(unittest.TestCase):
         def help_at(root):
             result=subprocess.run([sys.executable,'-B',str(root/'evidence-reviewer/scripts/prepare.py'),'--help'],capture_output=True,text=True,encoding='utf-8',check=True)
             return result.stdout
-        self.assertEqual(help_at(self.baseline),help_at(ROOT))
+        self.assertEqual(help_at(self.baseline),help_at(self.candidate))
 
     def test_stage1_export_rebuild_exact_bytes(self):
         with tempfile.TemporaryDirectory() as tmp:

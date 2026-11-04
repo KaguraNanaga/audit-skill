@@ -12,10 +12,10 @@ from pathlib import Path
 from urllib.parse import quote as urlquote
 
 SCHEMA = 'evidence-ledger-1.0'
-VERSION = '0.3.1'
+VERSION = '0.4.0'
 MODES = {'query', 'verify', 'coverage', 'draft', 'review', 'rules'}
 KINDS = {'Source', 'SourceVersion', 'ReadRecord', 'ReviewTask', 'Claim', 'Evidence', 'EvidenceLink',
-         'SearchRecord', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding', 'HumanDecision', 'OutputRecord'}
+         'SearchRecord', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding', 'HumanDecision', 'OutputRecord', 'OCRAttempt'}
 ASSESSMENTS = {'unassessed', 'insufficient', 'partial', 'supported', 'refuted'}
 ROLES = {'business', 'signed', 'draft', 'department_statement', 'transcript', 'template', 'ai_analysis',
          'workpaper', 'external_rule', 'policy_explanation', 'unknown'}
@@ -154,6 +154,8 @@ def materialize(work, assessment):
         read = work['records'].get(observation.get('read_id'))
         require(read and read['kind'] == 'ReadRecord', 'Observation read_id missing')
         require(nonempty(observation.get('observation')), 'Visual observation required')
+        from .derived import unit_at, is_ocr
+        require(not is_ocr(unit_at(work, read['source_version_id'], read['unit_id']) or {}), 'Observe the original page, not an OCR-derived unit')
         artifact_id = observation.get('artifact_id')
         artifact = next((a for a in work['artifacts'] if a['id'] == artifact_id), None)
         require(artifact and artifact['source_version_id'] == read['source_version_id'], 'Observation must link a registered rendering/image')
@@ -425,6 +427,8 @@ def validate_records(work):
     main = work['project'].get('selected_main_version')
     if main: ref(main, 'SourceVersion', 'selected_main_version')
     require(not errors, '\n'.join(errors))
+    from .derived import validate as validate_derived
+    validate_derived(work)
     from .visual_checks import validate as validate_visual_checks
     validate_visual_checks(work)
     from .reporting import reading_coverage
@@ -446,11 +450,14 @@ def freeze(work):
                                           'run_id': work['run']['id'], 'time': work['run']['finished_at'], 'actor': 'Codex session with deterministic tools',
                                           'before': None, 'after': body, 'reason': 'Initial single-review record', 'trigger_refs': work['run']['source_version_snapshot']}
         ledger['current'][key] = revision_id
+    if work['run'].get('derived_units_version'):
+        from . import history
+        ledger.update(schema_version='evidence-ledger-3.0', run_order=[work['run']['id']], run_snapshots={work['run']['id']: history.snapshot(work, ledger['current'])})
     return ledger
 
 
 def thaw(ledger):
-    if ledger.get('schema_version') == 'evidence-ledger-2.0':
+    if ledger.get('schema_version') in {'evidence-ledger-2.0', 'evidence-ledger-3.0'}:
         from . import history
         return history.thaw(ledger)
     require(ledger.get('schema_version') == SCHEMA, 'Unknown ledger schema')
@@ -485,7 +492,10 @@ def render(work, project_path):
     work = normalized
     r, outcome, run = work['records'], work['outcome'], work['run']
     old_outputs = [x for x in r.values() if x['kind'] == 'OutputRecord' and x.get('run_id') == run['id']]
-    renderer_version = work.get('_renderer_version', old_outputs[0].get('renderer_version', 1) if old_outputs else 7)
+    renderer_version = work.get('_renderer_version', old_outputs[0].get('renderer_version', 1) if old_outputs else (8 if work['run'].get('derived_units_version') else 7))
+    if renderer_version >= 8:
+        from . import reporting_v8
+        return reporting_v8.render(work, project_path)
     if renderer_version >= 7:
         from . import reporting_v7
         return reporting_v7.render(work, project_path)

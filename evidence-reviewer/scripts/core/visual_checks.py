@@ -6,7 +6,7 @@ from . import ledger as L
 def scopes_for(work, change, visual):
     wanted = {v for v in (change.get('old_version_id'), change.get('new_version_id')) if v}
     scopes = copy.deepcopy(visual.get('scopes')) if 'scopes' in visual else [
-        dict(source_version_id=v, unit_ids=[u['id'] for u in work['units'][v]]) for v in sorted(wanted)]
+        dict(source_version_id=v, unit_ids=[u['id'] for u in work['units'][v] if u['locator'].get('unit') != 'ocr_derived']) for v in sorted(wanted)]
     validate_scopes(work, scopes, wanted)
     return scopes
 

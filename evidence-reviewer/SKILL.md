@@ -3,8 +3,8 @@ name: evidence-reviewer
 description: 为内审、财务报表及专项审计提供证据核查与复核辅助：查询原始材料，核对事实、金额、口径和适用依据，检查遗漏，整理底稿并复核报告、补证和改稿。按业务目标选用方法，给出可追溯出处、结论边界及最小必要修改。
 metadata:
   version: "0.4.0-beta.1"
-  engine_version: "0.3.1"
-  instructions_revision: "2026-11-04-stage1.5"
+  engine_version: "0.4.0"
+  instructions_revision: "2026-11-05-stage3"
 ---
 
 # 审计证据核查与复核助手
@@ -50,3 +50,5 @@ metadata:
 | 材料查询、事实金额核对、报告/底稿复核、编制、制度核查及补证更新 | evidence-review | [证据复核模块](references/evidence-review/index.md) | scripts/review.py；原有命令和参数 |
 
 新增模块时，增加 references/<模块>/ 和有实际专用代码的 scripts/<模块包>/，并在本表加一行。文档和路由标识用连字符，Python 包名用下划线；例如 evidence-review 对应 evidence_review。通用能力使用 scripts/core/，当前没有独立的证据复核专用算法，因此不创建空的 evidence_review 包。维护者的接入步骤在仓库根目录 docs/internals.md；该文档不随 skill 子目录分发。
+
+扫描材料需要可搜索定位时，读[可选OCR定位层](references/common/ocr.md)；OCR命中需回到匹配原页确认。

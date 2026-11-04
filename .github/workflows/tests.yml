@@ -38,22 +38,23 @@ jobs:
         shell: python
         run: |
           import io, os, pathlib, shutil, subprocess, tarfile, tempfile
-          baseline = pathlib.Path(tempfile.mkdtemp(prefix='stage1-baseline-', dir=os.environ['RUNNER_TEMP'])).resolve()
-          archive = subprocess.check_output(['git', 'archive', 'a0cb3714fa7a9d543eb1af0b9b436c38204a73b9'])
-          with tarfile.open(fileobj=io.BytesIO(archive)) as source:
-              for member in source.getmembers():
-                  relative = pathlib.PurePosixPath(member.name)
-                  if relative.is_absolute() or '..' in relative.parts or member.issym() or member.islnk():
-                      raise ValueError('Unexpected archive member')
-                  target = baseline.joinpath(*relative.parts)
-                  if member.isdir():
-                      target.mkdir(parents=True, exist_ok=True)
-                  elif member.isfile():
-                      target.parent.mkdir(parents=True, exist_ok=True)
-                      with source.extractfile(member) as original, target.open('wb') as output:
-                          shutil.copyfileobj(original, output)
-          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as output:
-              output.write('EVIDENCE_REVIEWER_BASELINE=' + str(baseline) + '\n')
+          for variable, commit in [('EVIDENCE_REVIEWER_BASELINE','a0cb3714fa7a9d543eb1af0b9b436c38204a73b9'), ('EVIDENCE_REVIEWER_STRUCTURE_CANDIDATE','4701ac6fcc9746008ba16f9d40dd1bf2936cc42a')]:
+              baseline = pathlib.Path(tempfile.mkdtemp(prefix='verified-baseline-', dir=os.environ['RUNNER_TEMP'])).resolve()
+              archive = subprocess.check_output(['git', 'archive', commit])
+              with tarfile.open(fileobj=io.BytesIO(archive)) as source:
+                  for member in source.getmembers():
+                      relative = pathlib.PurePosixPath(member.name)
+                      if relative.is_absolute() or '..' in relative.parts or member.issym() or member.islnk():
+                          raise ValueError('Unexpected archive member')
+                      target = baseline.joinpath(*relative.parts)
+                      if member.isdir():
+                          target.mkdir(parents=True, exist_ok=True)
+                      elif member.isfile():
+                          target.parent.mkdir(parents=True, exist_ok=True)
+                          with source.extractfile(member) as original, target.open('wb') as output:
+                              shutil.copyfileobj(original, output)
+              with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as output:
+                  output.write(variable + '=' + str(baseline) + '\n')
       - name: CLI and platform tests (skips reported separately)
         run: python -B tests/test_public.py
       - name: Standalone platform tests
@@ -64,9 +65,32 @@ jobs:
         shell: python
         run: |
           import os, subprocess, sys
-          subprocess.run([sys.executable, '-B', 'tools/compare_structure.py', '--baseline', os.environ['EVIDENCE_REVIEWER_BASELINE']], check=True)
+          subprocess.run([sys.executable, '-B', 'tools/compare_structure.py', '--baseline', os.environ['EVIDENCE_REVIEWER_BASELINE'], '--candidate', os.environ['EVIDENCE_REVIEWER_STRUCTURE_CANDIDATE']], check=True)
       - name: Local documentation links
         run: python -B tools/check_links.py
       - name: Release integrity
         if: always()
         run: python -B tools/check_release.py
+  optional-ocr:
+    name: Optional local OCR / Python 3.12
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EVIDENCE_REVIEWER_REQUIRE_OCR: all
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install optional backends in this job only
+        run: |
+          python -m pip install -r requirements.txt -r requirements-ocr.txt
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-chi-sim
+      - name: Record installed OCR versions and language data
+        run: python -c "import sys; sys.path.insert(0,'evidence-reviewer/scripts'); from core.ocr_backends import describe; print(describe('tesseract')); print(describe('rapidocr'))"
+      - name: Actual local-only OCR tests (missing backend is an error)
+        run: python -B tests/test_ocr.py RealOCR

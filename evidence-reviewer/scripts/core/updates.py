@@ -56,7 +56,7 @@ def mark_candidates(work):
 
 
 def diff_versions(work, old, new):
-    def text(vid): return '\n'.join(u['text'] for u in work['units'].get(vid, []) if not u['locator'].get('layer'))
+    def text(vid): return '\n'.join(u['text'] for u in work['units'].get(vid, []) if not u['locator'].get('layer') and u['locator'].get('unit') != 'ocr_derived')
     a, b = text(old), text(new)
     old_images = [x['sha256'] for x in work['artifacts'] if x['source_version_id'] == old and x['method'] == 'embedded/original image']
     new_images = [x['sha256'] for x in work['artifacts'] if x['source_version_id'] == new and x['method'] == 'embedded/original image']
@@ -111,7 +111,7 @@ def start(args, api):
         run_id = L.uid(); work['_known_run_ids'].append(run_id)
         work['run'] = dict(id=run_id, previous_run_id=base['latest_run_id'], event_id=request['event_id'],
                            input_fingerprint=fingerprint, reason=request['reason'], started_at=L.now(), finished_at=None,
-                           state='staging', validation_version=2, visual_checks_version=1, visual_checks=visual_checks, evidence_link_retirements=copy.deepcopy(original['run'].get('evidence_link_retirements', [])),
+                           state='staging', derived_units_version=1, validation_version=2, visual_checks_version=1, visual_checks=visual_checks, evidence_link_retirements=copy.deepcopy(original['run'].get('evidence_link_retirements', [])),
                            intake_issues=copy.deepcopy(original['run'].get('intake_issues', original['run'].get('errors', []))), source_version_snapshot=list(original['units']), active_source_version_ids=active_versions(original),
                            selected_main_version=original['project'].get('selected_main_version'), scope_revision=original['project']['scope_revision'],
                            skill_version=L.VERSION, tool_versions=copy.deepcopy(original['run']['tool_versions']), model_version=None,

@@ -1,0 +1,4 @@
+# Optional OCR backend only; core commands do not import this dependency.
+# Install into an isolated environment; models must already exist locally at runtime.
+rapidocr-onnxruntime==1.4.4; python_version < "3.13"
+# Python 3.13+: use the optional external Tesseract backend; the pinned RapidOCR package does not support these interpreters.

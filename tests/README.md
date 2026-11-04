@@ -60,3 +60,7 @@ python3 tests/generate_fixtures.py
 单独运行 `python3 -B tests/test_platform.py` 和 `python3 -B tests/test_structure.py`；`test_public.py` 也纳入两组测试。`tools/check_links.py` 校验仓库本地Markdown链接；`tools/compare_structure.py --baseline BASELINE_DIRECTORY` 单独输出对照记录。两者均不联网，不重写冻结夹具。对照无字段被删除：UUID与时钟在隔离进程中固定，项目绝对根前缀规范化，正文/定位/指纹/状态/版本仍完整比较。
 
 CI沿用七组矩阵，从本地Git对象导出固定阶段1提交至RUNNER_TEMP，设置基线环境变量后执行上述命令。旧夹具生成器仍固定到旧提交51149fb和旧脚本路径；这是历史基线，不随本阶段目录迁移改写。
+
+## 阶段3：OCR
+
+ocr-fixtures由generate_ocr_fixtures.py用标准库和代码定义的字形从零生成；2026-11-05冻结于input-sha256-stage3.json，不改旧输入。blocks.json明确是结构测试模拟结果，不冒充引擎输出。test_ocr.py区分来源/拒绝规则的合成测试和实际可选后端测试；合成观察仅测试结构引用，不代表真实模型/人工查看。实际后端缺工具、语言包或本地模型时显式skip。CI另有Python3.12可选OCR任务，安装两后端并要求实际测试不跳过；基础七组不安装OCR依赖。

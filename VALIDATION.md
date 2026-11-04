@@ -119,3 +119,16 @@ python3 -B tools/check_release.py
 | Windows Server2025 10.0.26100 | 3.12.10 | 29 | 2 | 0/0 | [job126433069809](https://github.com/KaguraNanaga/audit-skill/actions/runs/41787553785/job/126433069809) |
 
 七组均实际单独执行test_platform.py（Windows13通过/2跳过，POSIX12通过/3跳过）、test_structure.py（每组8通过/0跳过）、四组合成输入前后begin/inspect对照、77个本地链接检查及73份发布清单校验。不存在因缺基线而跳过结构对照的情况。CI缺LibreOffice/Poppler，两项真实工具测试明确skip；POSIX另跳过Windows专属共享占用。此限制延续阶段1，不推断跨平台转换/渲染保真。
+
+## 8. 阶段 3：可选OCR定位层（2026-11-05）
+
+当前环境：macOS26.6.2 arm64、Python3.14.3、pypdf6.12.1、openpyxl3.1.5；本机没有Tesseract及rapidocr-onnxruntime包装库，已有onnxruntime1.26.0不等于OCR后端可用。旧包1.4.4的实际下载检查显示Requires-Python<3.13，已在requirements-ocr.txt加入解释器条件，并实际检查了其wheel中三个本地ONNX模型和配置文件；没有强行忽略Python版本要求安装。
+
+阶段1.5基线在修改前按73份发布清单实际验证并复制至包外临时目录。历史结构对照使用固定阶段1与阶段1.5两份基线；当前实现另执行旧账兼容和历史字节测试，不声称新功能与旧CLI输出全字段相同。
+
+- 完成代码及文档后，沙箱外实际执行`python3 -B tests/test_public.py`：41项，38通过、3跳过、0失败/错误。跳过为Windows专属共享占用及两个缺后端的真实OCR测试；LibreOffice真实转换和Poppler真实渲染通过。
+- `tests/test_ocr.py`提供阶段1.5基线后单独执行：10项，8通过、2真实后端测试跳过，0失败/错误。结构测试使用明确标注的模拟OCR块及合成观察，不作为实际识别或实际看图结果。
+- 已执行来源链、search警示、仅OCR的check-assessment/finalize拒绝、OCR观察伪装拒绝、不同页图哈希不能替代、失败继续、结果文件及来源篡改拒绝、后轮追加OCR不进入旧轮、真实进程中断及recover、旧schema1/2继续操作及显式提交升级测试。
+- `python3 -B tools/check_release.py --write-manifest`通过84份文件；quick_validate及git diff --check实际通过。清单普通校验将在收尾再次执行。
+- 开发中完整测试先有一次沙箱内LibreOffice退出1（原有环境限制）；随后沙箱外一轮因OCR文档链接尚未写入而失败。补齐文档后的上述完整测试通过，不将失败尝试记为成功。
+- 本机真实OCR：未验证，两个后端测试明确skip。Windows/Linux真实OCR、识别准确率、复杂版式、中文识别准确率及多帧图片：本机未验证。CI实际结果待执行后追加；不存在预填通过。

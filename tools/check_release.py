@@ -14,7 +14,7 @@ from check_links import check_links
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "RELEASE_MANIFEST.json"
 ROOT_FILES = {
-    "README.md", "README.zh-CN.md", "LICENSE", "requirements.txt", ".gitignore",
+    "README.md", "README.zh-CN.md", "LICENSE", "requirements.txt", "requirements-ocr.txt", ".gitignore",
     "RELEASE_NOTES.md", "VALIDATION.md", "RELEASE_MANIFEST.json", ".gitattributes",
 }
 TEXT_SUFFIXES = {".md", ".py", ".json", ".yaml", ".txt"}
@@ -102,7 +102,7 @@ def main():
     current = hashes(files)
     if args.write_manifest:
         MANIFEST.write_text(json.dumps({
-            "package_version": "0.4.0-beta.1", "engine_version": "0.3.1",
+            "package_version": "0.4.0-beta.1", "engine_version": "0.4.0",
             "scope": "Selected public package; manifest excludes itself. No authenticity or audit-accuracy guarantee.",
             "files": current,
         }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

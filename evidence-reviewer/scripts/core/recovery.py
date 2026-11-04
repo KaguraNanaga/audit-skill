@@ -15,11 +15,13 @@ def contains(descendant, ancestor):
     if d[:len(a)] != a: return False
     if any(descendant['runs'].get(k) != v for k, v in ancestor['runs'].items()): return False
     if any(descendant['revisions'].get(k) != v for k, v in ancestor['revisions'].items()): return False
-    if any(descendant['units'].get(k) != v for k, v in ancestor['units'].items()): return False
+    for v, units in ancestor['units'].items():
+        child = {u['id']:u for u in descendant['units'].get(v, [])}
+        if any(child.get(u['id']) != u for u in units): return False
     from . import history as H
     for rid in a:
         aw, dw = H.as_of(ancestor, rid), H.as_of(descendant, rid)
-        if any(aw[k] != dw[k] for k in ('project', 'records', 'outcome', 'artifacts', 'assessment_sha256')): return False
+        if any(aw[k] != dw[k] for k in ('project', 'records', 'units', 'outcome', 'artifacts', 'assessment_sha256')): return False
     return True
 
 
@@ -27,7 +29,7 @@ def reconstruct_base(candidate, wanted_hash):
     """Accept an archived prefix only when its exact hash matches the receipt."""
     from . import history as H
     rid = candidate['runs'][candidate['latest_run_id']]['previous_run_id']
-    if not rid or candidate.get('schema_version') != H.SCHEMA: return None
+    if not rid or candidate.get('schema_version') not in H.SCHEMAS: return None
     known = order(candidate)[:order(candidate).index(rid)+1]
     snap = candidate['run_snapshots'][rid]; work = H.as_of(candidate, rid)
     base = copy.deepcopy(candidate)
@@ -39,8 +41,11 @@ def reconstruct_base(candidate, wanted_hash):
                 units=work['units'], artifacts=work['artifacts'])
     for field in ('current', 'record_order', 'project', 'outcome', 'assessment_sha256'): base[field] = snap[field]
     variants = [base]
+    legacy = copy.deepcopy(base); legacy['schema_version'] = H.SCHEMA
+    for snap in legacy['run_snapshots'].values(): snap.pop('unit_ids', None)
+    variants.append(legacy)
     if len(known) == 1:
-        single = copy.deepcopy(base); single['schema_version'] = L.SCHEMA
+        single = copy.deepcopy(legacy); single['schema_version'] = L.SCHEMA
         single.pop('run_order'); single.pop('run_snapshots'); variants.append(single)
     for variant in variants:
         point = H.signed(variant)

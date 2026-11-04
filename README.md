@@ -153,3 +153,7 @@ Original code, method docs, and synthetic cases in this package are licensed und
 The name remains evidence-reviewer. Its single SKILL.md keeps shared principles and routes to evidence-review. Shared references live in references/common/, specialized methods in references/evidence-review/, and shared Python code in scripts/core/. The scripts/review.py CLI retains all existing commands, arguments and outputs; scripts/prepare.py remains a compatibility entry. There is no independent review-specific algorithm yet, so no empty evidence_review code package is created.
 
 To upgrade an existing install, back up the old evidence-reviewer folder and replace it with the complete new folder of the same name. Avoid merging old and new layouts. Existing engagement projects and ledgers are retained without migration or rewriting. The frontmatter name and agents metadata are unchanged. See the [maintainer guide](docs/internals.md) for module registration; that guide ships with the repository, outside the installed skill folder.
+
+## Optional OCR locators (stage 3)
+
+Engine 0.4.0 supports local Tesseract with chi_sim+eng and optional RapidOCR via requirements-ocr.txt. Python 3.13+ uses Tesseract. OCR adds searchable derived locators; it never marks original pages viewed. See the [OCR contract](evidence-reviewer/references/common/ocr.md). Package version remains 0.4.0-beta.1 until the complete planned release is finished.

@@ -67,3 +67,7 @@ inspect得到新source_version_id、unit ID、SearchRecord ID，再创建RuleApp
 POSIX 使用 fcntl，Windows 使用 msvcrt 系统锁。独立 `.writer.lock` 不写诊断内容，元数据在 `.writer.lock.json`；判断占用只看系统锁。两端默认等待最多5秒，异常关闭句柄释放系统锁。持锁进程异常退出后的sidecar仅提供残留提示，不据此拒绝新写入者。锁文件保持原位，不删除重建来绕过占用。
 
 文件写入flush/fsync后原子replace，Windows占用/访问错误有限重试6次（等待总计1.55秒）；失败保留旧权威台账及既有恢复材料。POSIX另外fsync目录，Windows跳过该步；两者不承诺相同的断电后目录持久性。第三方文档渲染器和转换器有各自保证，不能把生成成功当作已看原页。
+
+## 阶段 3：OCR定位
+
+可选 `ocr` 命令与search警示、失败处理及回原页观察步骤见[OCR定位层](ocr.md)。OCR只处理已登记页图，原件读取状态与核查边界继续保留。

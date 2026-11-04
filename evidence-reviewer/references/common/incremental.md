@@ -108,3 +108,7 @@ recover先验证权威台账、结构与引用文件。台账完整时保留它�
 原件SourceVersion.sha256及本批盘点原件指纹用于同字节匹配，转换器或派生物指纹不同本身不触发材料变更；同原件的新路径可登记path_added/path_moved，沿用已有快照与派生读取。显式reparse才建立新的读取版本。
 
 新轮输出使用renderer 7；1–6继续按原指纹保留。读取、validate和普通export均不自动生成可移动视图。需要时显式执行 `export --portable`，新建独立目录及派生manifest，不改历史台账、旧导出或current指针。旧版台账不要求重新导出才能validate。
+
+## 阶段 3：派生单元与历史
+
+引擎0.4.0继续读取schema 1/2。新轮提交schema 3，按轮unit_ids固定单元范围，OCRAttempt不可改写。OCR不参与原件文本变更比对，不触发原件指纹变更，也不自动完成视觉待办。旧台账和renderer 1–7不因读取/校验改写；新增能力见[OCR定位层](ocr.md)。
