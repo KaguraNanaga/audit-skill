@@ -9,6 +9,9 @@ import sys
 import tempfile
 
 
+PLATFORM = sys.platform
+
+
 def run_tool(argv, timeout=60):
     """Capture output; kill and reap the process (and POSIX group) on timeout."""
     options = {'start_new_session': True} if os.name != 'nt' else {}
@@ -45,7 +48,7 @@ def soffice_path():
         resolved = shutil.which(configured) or (str(Path(configured).expanduser().resolve()) if Path(configured).expanduser().is_file() else None)
         return resolved
     # Prefer the console binary on Windows, to wait for conversion completion.
-    return (shutil.which('soffice.com') if sys.platform == 'win32' else None) or shutil.which('soffice')
+    return (shutil.which('soffice.com') if PLATFORM == 'win32' else None) or shutil.which('soffice')
 
 
 def convert(path, cache, target, provenance, timeout=60):
@@ -53,7 +56,7 @@ def convert(path, cache, target, provenance, timeout=60):
     path, cache = Path(path), Path(cache)
     output = cache / ('converted.' + target)
     tools = []
-    if path.suffix.lower() == '.doc' and sys.platform == 'darwin':
+    if path.suffix.lower() == '.doc' and PLATFORM == 'darwin':
         tools.append(('textutil', shutil.which('textutil')))
     tools.append(('LibreOffice', soffice_path()))
     for name, executable in tools:

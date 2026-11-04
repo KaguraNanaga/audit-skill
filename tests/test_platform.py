@@ -177,7 +177,7 @@ class LocalMechanics(unittest.TestCase):
             # Metadata readable while the system byte lock is held.
             data=json.loads((self.base/'.writer.lock.json').read_text(encoding='utf-8'))
             self.assertEqual(data['pid'],p.pid)
-            self.assertEqual((self.base/'.writer.lock').read_bytes(),b'')
+            self.assertEqual((self.base/'.writer.lock').stat().st_size,0)
             with self.assertRaisesRegex(ValueError,'timeout'):
                 with locking.lock(self.base,timeout=0.12,interval=0.02): self.fail('Concurrent writer entered')
             p.kill();p.wait(timeout=5)
@@ -187,6 +187,7 @@ class LocalMechanics(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError,'synthetic'):
                 with locking.lock(self.base): raise RuntimeError('synthetic')
             with locking.lock(self.base,timeout=0): pass
+            self.assertEqual((self.base/'.writer.lock').read_bytes(),b'')
         finally:
             if p.poll() is None: p.kill();p.wait(timeout=5)
             p.stdout.close();p.stderr.close()
@@ -240,20 +241,20 @@ class LocalMechanics(unittest.TestCase):
             profiles.append(Path(unquote(argv[1].split('=',1)[1].removeprefix('file://'))))
             folder=Path(argv[argv.index('--outdir')+1]); (folder/'input.docx').write_bytes(b'Synthetic converted bytes')
             return ('converted','')
-        with patch.object(converters.sys,'platform','darwin'),patch.object(converters.shutil,'which',return_value=sys.executable),patch.object(converters,'run_tool',side_effect=run):
+        with patch.object(converters,'PLATFORM','darwin'),patch.object(converters.shutil,'which',return_value=sys.executable),patch.object(converters,'run_tool',side_effect=run):
             converters.convert(original,cache,'docx',records)
         self.assertEqual([r['state'] for r in records],['failed','converted'])
         self.assertEqual(records[-1]['parent_sha256'],readers.digest(original))
         self.assertTrue(records[-1]['sha256']);self.assertTrue(records[-1]['version']);self.assertTrue(records[-1]['parameters'])
         self.assertTrue(all(not p.parent.exists() for p in profiles))
         records=[]
-        with patch.object(converters.sys,'platform','linux'),patch.object(converters,'soffice_path',return_value=sys.executable),patch.object(converters,'run_tool',side_effect=[('Synthetic 1.0',''),TimeoutError('synthetic timeout')]):
+        with patch.object(converters,'PLATFORM','linux'),patch.object(converters,'soffice_path',return_value=sys.executable),patch.object(converters,'run_tool',side_effect=[('Synthetic 1.0',''),TimeoutError('synthetic timeout')]):
             with self.assertRaises(ValueError): converters.convert(original,cache,'docx',records)
         self.assertEqual(records[0]['state'],'failed')
         uri=records[0]['parameters'][0].split('=',1)[1]
         self.assertFalse(Path(unquote(uri.removeprefix('file://'))).parent.exists())
         records=[]
-        with patch.object(converters.sys,'platform','linux'),patch.object(converters,'soffice_path',return_value=None):
+        with patch.object(converters,'PLATFORM','linux'),patch.object(converters,'soffice_path',return_value=None):
             with self.assertRaises(ValueError): converters.convert(original,cache,'docx',records)
         self.assertEqual(records[0]['state'],'tool_unavailable')
 

@@ -69,3 +69,5 @@ python3 -B tools/check_release.py
 - `python3 -B tools/check_release.py --write-manifest`已实际执行并通过（66份文件）；普通校验也已执行并通过，未写清单。
 - Windows/Linux与七组GitHub Actions：待执行。CI日志须分别记录pass/skip及原因；缺系统工具的skip不算已验证其转换或渲染能力。
 - 未验证：本机原生Windows、Linux；NFS/SMB共享盘锁与断电恢复；全部第三方转换器、宏、签章或格式保真。本阶段自动测试不证明语义复核正确或真实业务准确率。
+
+阶段1首轮CI已实际执行：[运行41768979956](https://github.com/KaguraNanaga/audit-skill/actions/runs/41768979956)，代码1a82164f。macOS3.11/3.12及Ubuntu3.11/3.12共4组成功；Windows3.11/3.12和Ubuntu3.14共3组失败。失败分别来自测试持锁时读取Windows锁区，以及测试修改全局sys.platform导致Linux/Python3.14尝试导入macOS的_scproxy。修正为持锁时只读诊断sidecar、释放后才检查锁文件内容，并仅模拟转换器PLATFORM常量。修正后的CI结果待执行，不把失败轮记为通过。首轮七组发布清单校验均通过。
