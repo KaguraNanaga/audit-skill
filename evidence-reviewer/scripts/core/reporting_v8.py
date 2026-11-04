@@ -13,3 +13,7 @@ def render(work, project=None, **kwargs):
         section = '\n'.join(lines) + '\n'
         result['review.md'] += section; result['handoff.md'] += section
     return result
+
+
+def export_portable(project, ledger, api):
+    return reporting_v7.export_portable(project, ledger, api, renderer=render, renderer_version=8)

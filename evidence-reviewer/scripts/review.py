@@ -434,7 +434,10 @@ def validate(args, export=False):
         result = L.validate_records(work)
         check_files(project, work)
         if export and getattr(args, 'portable', False):
-            from core.reporting_v7 import export_portable
+            if work['run'].get('derived_units_version'):
+                from core.reporting_v8 import export_portable
+            else:
+                from core.reporting_v7 import export_portable
             # Validate the existing authority before creating an optional view.
             portable_requested = True
         else:

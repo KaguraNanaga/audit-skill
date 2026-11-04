@@ -132,3 +132,7 @@ python3 -B tools/check_release.py
 - `python3 -B tools/check_release.py --write-manifest`通过84份文件；quick_validate及git diff --check实际通过。清单普通校验将在收尾再次执行。
 - 开发中完整测试先有一次沙箱内LibreOffice退出1（原有环境限制）；随后沙箱外一轮因OCR文档链接尚未写入而失败。补齐文档后的上述完整测试通过，不将失败尝试记为成功。
 - 本机真实OCR：未验证，两个后端测试明确skip。Windows/Linux真实OCR、识别准确率、复杂版式、中文识别准确率及多帧图片：本机未验证。CI实际结果待执行后追加；不存在预填通过。
+
+阶段3首轮CI已实际执行：[41936507008](https://github.com/KaguraNanaga/audit-skill/actions/runs/41936507008)，提交aefed414。可选OCR任务中RapidOCR实际识别通过；Tesseract实际识别得到“SYNTHETIC AMOUNT 125,45”，与合成原图123.45不一致，使原来要求数字123正确的测试失败。原图及冻结指纹保持，改为验证AMOUNT定位标识、bbox/来源链、search警示和仅OCR不可提交的实际流程；金额识别错误作为能力限制保留，不把测试调整宣称为数值准确率提高。实际环境为Ubuntu26.04.1/Python3.12.15，Tesseract5.5.0（chi_sim+eng）、RapidOCR1.4.4、onnxruntime1.31.1、opencv-python5.0.0.93、numpy2.5.4。两后端的bbox/置信度结构实际返回；本轮没有中文识别准确率评测。
+
+收尾另实际测试新schema显式portable视图：选择renderer8保留OCR警示，旧轮仍用renderer7；原台账/历史导出字节不改写。再次完整测试结果及最终CI在实际执行后追加。

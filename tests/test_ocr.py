@@ -56,6 +56,10 @@ class OCRContract(unittest.TestCase):
         self.assertIn(derived.WARNING,text)
         before=(self.project/'ledger/ledger.json').read_bytes();self.call('export')
         self.assertEqual((self.project/'ledger/ledger.json').read_bytes(),before)
+        portable=self.call('export','--portable')
+        self.assertEqual(portable['renderer_version'],8)
+        self.assertIn(derived.WARNING,next(Path(portable['portable_directory']).glob('*/review.md')).read_text())
+        self.assertEqual((self.project/'ledger/ledger.json').read_bytes(),before)
 
     def test_wrong_image_hash_does_not_satisfy_observation(self):
         source=self.image();self.simulate(source);work=review.get_work(self.project)
@@ -135,6 +139,20 @@ class RealOCR(unittest.TestCase):
             blocks=ocr_backends.recognize(ROOT/'tests/ocr-fixtures/synthetic.png',Path(tmp)/'raw.json',metadata,120)
             self.assertTrue(blocks)
             for block in blocks:derived.validate_block(block)
-            self.assertIn('123', ' '.join(b['text'] for b in blocks))
+            # Locate a stable label; numeric correctness is not this layer's contract.
+            # Tesseract actually read the frozen 123.45 as 125,45 in the first CI run.
+            self.assertIn('AMOUNT', ' '.join(b['text'] for b in blocks))
+        case=OCRContract(methodName='test_frozen_fixture');case.setUp()
+        try:
+            source=case.image()
+            args=case.args(source);args.engine=engine
+            result=ocr.run(args,review);self.assertEqual(result['state'],'completed',result)
+            hit=case.call('search','--pattern','AMOUNT','--purpose','Actual OCR locator smoke test')['results'][0]
+            self.assertEqual(hit['warning'],derived.WARNING)
+            source=case.call('inspect')['sources'][0]
+            assessment=case.simple_assessment(source)
+            error=case.call('check-assessment','--assessment',case.json_file('a.json',assessment),success=False)
+            self.assertIn('OCR-only',error['error'])
+        finally:case.tearDown()
 
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -62,6 +62,7 @@ def validate(work):
             L.require(origin.get('physical_page') == parent['locator'].get('physical_page'), 'OCR physical page mismatch')
             attempt = attempts.get(unit.get('attempt_id'))
             L.require(attempt and attempt['state'] == 'extracted' and attempt['source_version_id'] == vid and attempt['unit_id'] == parent['id'] and attempt.get('artifact_id') == artifact['id'], 'OCR attempt lineage mismatch')
+            L.require(attempt.get('image_sha256') == artifact['sha256'] and unit.get('state') == 'extracted', 'OCR attempt image hash/state mismatch')
             L.require(unit['id'] in attempt['unit_ids'] and WARNING in unit.get('limitations', []), 'OCR unit not registered with its attempt/warning')
             L.require(unit['locator'].get('parent_unit_id') == parent['id'] and unit['locator'].get('physical_page') == origin.get('physical_page') and unit['locator'].get('attempt_id') == attempt['id'], 'OCR locator/provenance mismatch')
             validate_block(unit)
