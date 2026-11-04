@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "RELEASE_MANIFEST.json"
 ROOT_FILES = {
     "README.md", "README.zh-CN.md", "LICENSE", "requirements.txt", ".gitignore",
-    "RELEASE_NOTES.md", "VALIDATION.md", "RELEASE_MANIFEST.json",
+    "RELEASE_NOTES.md", "VALIDATION.md", "RELEASE_MANIFEST.json", ".gitattributes",
 }
 TEXT_SUFFIXES = {".md", ".py", ".json", ".yaml", ".txt"}
 PRIVATE_PATH = re.compile(r"/(?:Users|home)/[A-Za-z0-9_.-]+/|[A-Za-z]:\\Users\\[^\\]+\\")
@@ -42,6 +42,7 @@ def release_files():
         s = rel.as_posix()
         allowed = (
             (len(rel.parts) == 1 and s in ROOT_FILES)
+            or s == ".github/workflows/tests.yml"
             or s == "evidence-reviewer/SKILL.md"
             or s == "evidence-reviewer/LICENSE"
             or s == "evidence-reviewer/agents/openai.yaml"

@@ -4,7 +4,7 @@ description: 为内审、财务报表及专项审计提供证据核查与复核�
 metadata:
   version: "0.4.0-beta.1"
   engine_version: "0.3.1"
-  instructions_revision: "2026-10-13-public"
+  instructions_revision: "2026-11-04-stage1"
 ---
 
 # 审计证据核查与复核助手
@@ -90,3 +90,5 @@ metadata:
 如使用项目台账，已验证的outputs/<run_id>/review.md、handoff.md、changes.md与history.md为底稿导出，编制任务另有draft.md；面向用户的交付仍按其所需格式。已撤回/替代/关闭意见列入历史，不继续列当前问题待办。程序中断或未提交不能称本轮台账提交完成；已完成但存在缺证可正常交付，并明确实际范围、未读/未查部分及下一步。导出失败用export从同一台账重建，不拿旧文件冒充当前结果。
 
 读取失败自动列入结果和交接；结构有效不等于材料充分。新建及修订缺证的satisfied均须理由和实际证据；withdrawn须理由，只表示撤回要求。旧版无关闭依据的状态可回查，但在新轮报告中提示复核，兼容方式见[incremental.md](references/incremental.md)。
+
+阶段1新增跨平台写入与renderer 7相对链接，证据边界及台账schema不变。旧项目的可移动视图仅由用户显式要求后执行 `export --portable` 生成；不自动重写历史，详见[运行接口](references/workflow.md)。

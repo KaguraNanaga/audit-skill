@@ -6,7 +6,6 @@ import json
 import os
 import re
 import uuid
-from contextlib import contextmanager
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, localcontext, ROUND_HALF_UP, ROUND_HALF_EVEN, ROUND_DOWN
 from pathlib import Path
@@ -48,38 +47,15 @@ def nonempty(value):
 
 
 def atomic_json(path, value):
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + '.' + uid() + '.tmp')
-    try:
-        with tmp.open('xb') as f:
-            f.write(encoded(value))
-            f.flush()
-            os.fsync(f.fileno())
-        if path.name == 'ledger.json' and os.environ.get('EVIDENCE_REVIEWER_FAILPOINT') == 'before_replace':
-            os._exit(86)  # Explicit local fault-injection test; the previous ledger remains intact.
-        os.replace(tmp, path)
-        fd = os.open(path.parent, os.O_RDONLY)
-        try:
-            os.fsync(fd)
-        finally:
-            os.close(fd)
-    finally:
-        tmp.unlink(missing_ok=True)
+    from persistence import atomic_bytes
+    def before_replace():
+        if Path(path).name == 'ledger.json' and os.environ.get('EVIDENCE_REVIEWER_FAILPOINT') == 'before_replace':
+            os._exit(86)
+    atomic_bytes(path, encoded(value), before_replace=before_replace)
 
 
-@contextmanager
-def lock(project):
-    import fcntl
-    with (Path(project) / '.writer.lock').open('a') as f:
-        try:
-            fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            raise ValueError('Another writer holds the project lock')
-        try:
-            yield
-        finally:
-            fcntl.flock(f, fcntl.LOCK_UN)
+# Preserve the existing call interface; the platform implementations live separately.
+from locking import lock
 
 
 def add(work, kind, body, entity_id=None):
@@ -509,7 +485,10 @@ def render(work, project_path):
     work = normalized
     r, outcome, run = work['records'], work['outcome'], work['run']
     old_outputs = [x for x in r.values() if x['kind'] == 'OutputRecord' and x.get('run_id') == run['id']]
-    renderer_version = work.get('_renderer_version', old_outputs[0].get('renderer_version', 1) if old_outputs else 6)
+    renderer_version = work.get('_renderer_version', old_outputs[0].get('renderer_version', 1) if old_outputs else 7)
+    if renderer_version >= 7:
+        import reporting_v7
+        return reporting_v7.render(work, project_path)
     if renderer_version >= 6:
         import reporting
         return reporting.render(work, project_path)

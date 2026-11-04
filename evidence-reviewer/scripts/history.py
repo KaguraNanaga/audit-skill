@@ -250,6 +250,9 @@ def write_exports(project, ledger, api):
     for rid in order:
         work = as_of(ledger, rid)
         api.check_files(project, work)
+        outputs = [r for r in work['records'].values() if r['kind'] == 'OutputRecord' and r['run_id'] == rid]
+        if outputs and all(api.local_path(project, r['path']).is_file() and hashlib.sha256(api.local_path(project, r['path']).read_bytes()).hexdigest() == r['sha256'] for r in outputs):
+            continue
         exports = L.render(work, project)
         for number, (name, content) in enumerate(exports.items()):
             rel = f'outputs/{rid}/{name}'
@@ -257,10 +260,8 @@ def write_exports(project, ledger, api):
             L.require(hashlib.sha256(content.encode()).hexdigest() == record['sha256'], 'Renderer differs from committed output fingerprint: ' + rel)
             path = project / rel
             path.parent.mkdir(parents=True, exist_ok=True)
-            tmp = path.with_name(path.name + '.tmp-' + L.uid())
-            with tmp.open('xb') as f:
-                f.write(content.encode()); f.flush(); os.fsync(f.fileno())
-            os.replace(tmp, path)
+            from persistence import atomic_bytes
+            atomic_bytes(path, content.encode('utf-8'))
             if rid == ledger['latest_run_id'] and number == 0: fault('after_first_export')
     work = L.thaw(ledger)
     api.check_files(project, work, check_outputs=True)
@@ -283,7 +284,7 @@ def finalize(project, work, api):
     for name, content in exports.items():
         eid = L.uid()
         body = dict(id=eid, kind='OutputRecord', run_id=work['run']['id'], output_kind=name.split('.')[0],
-                    path=f"outputs/{work['run']['id']}/{name}", renderer_version=6,
+                    path=f"outputs/{work['run']['id']}/{name}", renderer_version=7,
                     sha256=hashlib.sha256(content.encode()).hexdigest(), source_role='workpaper_or_draft',
                     actual_confirmation_status='unconfirmed', evidence_ids=[x['id'] for x in work['records'].values() if x['kind'] == 'Evidence'])
         append_revision(ledger, body, work['run'], 'Export of this committed run', [])

@@ -1,0 +1,40 @@
+name: Cross-platform verification
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        python: ['3.11', '3.12']
+        include:
+          - os: ubuntu-latest
+            python: '3.14'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    env:
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: utf-8
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install existing reader dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Record actual environment and optional tools
+        run: python -c "import sys,platform,shutil,importlib.metadata as m; print(platform.platform(),sys.version); print({p:m.version(p) for p in ('pypdf','openpyxl')}); print({p:shutil.which(p) for p in ('pdftoppm','soffice','textutil')})"
+      - name: CLI and platform tests (skips reported separately)
+        run: python -B tests/test_public.py
+      - name: Release integrity
+        if: always()
+        run: python -B tools/check_release.py

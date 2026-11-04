@@ -1,0 +1,7 @@
+{
+  "frozen_on": "2026-11-04",
+  "baseline_commit": "51149fb",
+  "files": {
+    "tests/platform-fixtures/legacy.json": "48290e87e97925a410dba6295180394d44d2f3c2e5c06405769def6b6f65c7fe"
+  }
+}

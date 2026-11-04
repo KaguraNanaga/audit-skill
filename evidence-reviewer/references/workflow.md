@@ -4,7 +4,7 @@ review.py是确定性助手；Codex会话实际读材料、查反证、判断并
 
 ## 环境与开始
 
-先检查当前环境；有工作区依赖定位工具时用其取得运行库，否则使用已配置的Python环境，验证解释器及所需模块。文本/CSV/SRT/VTT/DOCX用标准库，PDF需pypdf，XLSX只读需openpyxl；当前脚本DOC需macOS的textutil、XLS需LibreOffice，PDF页图需Poppler的pdftoppm。缺依赖记failed，可用其他读取路径补足但须保留派生来源和限制，不静默猜测。文档编辑、原页查看和联网搜索需要宿主提供相应工具。
+先检查当前环境；有工作区依赖定位工具时用其取得运行库，否则使用已配置的Python环境，验证解释器及所需模块。文本/CSV/SRT/VTT/DOCX用标准库，PDF需pypdf，XLSX只读需openpyxl；DOC可选macOS textutil，缺失/失败后用LibreOffice；XLS需LibreOffice，PDF页图需Poppler的pdftoppm。缺依赖记failed，可用其他读取路径补足但须保留派生来源和限制，不静默猜测。文档编辑、原页查看和联网搜索需要宿主提供相应工具。
 
 请求JSON：
 
@@ -48,7 +48,7 @@ check-assessment只校验候选并返回计算结果，不提交台账。finaliz
 
 同一已提交评估重放返回原run，不新增对象；不同评估拒绝覆盖，需先update建立新轮次。采用单写入者锁、完整候选暂存、fsync及原子replace；导出全部核验后才更新outputs/current.json。提交后导出中断可export重建；台账损坏保留现场，不初始化为空。staging/validated-candidate.json供检查/人工恢复，不是第二份可编辑权威台账。
 
-跨批匹配、状态传播和恢复流程见[incremental.md](incremental.md)。原件路径迁移可识别并保留旧快照；整个项目目录迁移涉及旧导出绝对链接，目前需保留原路径或另做显式迁移，不无声改写旧导出。
+跨批匹配、状态传播和恢复流程见[incremental.md](incremental.md)。原件路径迁移可识别并保留旧快照；新轮使用renderer 7相对链接。旧renderer 1–6的导出不改字节；显式 `export --portable` 才在新目录产生带来源清单的可移动视图，普通validate/export不自动生成。旧项目无须重新导出即可validate；若旧导出丢失且新位置无法按原指纹重建，报错并保留现场。
 
 ## 外部搜索接入
 
@@ -61,3 +61,9 @@ check-assessment只校验候选并返回计算结果，不提交台账。finaliz
 调用 `import-web --project /新项目 --record /记录.json`。状态full_body/partial_body/snippet_only/unavailable/tool_unavailable。成功需原始响应且text是精确子串；失败text为空并保留错误。保存类型是工具响应摘录，不是网站HTML原始字节。脚本不能鉴定响应是否人为伪造，真实性由实际工具调用记录支持。不同尝试分别登记，不覆盖失败。
 
 inspect得到新source_version_id、unit ID、SearchRecord ID，再创建RuleApplication。摘要不能标body_verified；页面正文已打开不等于附件、现行效力或历史适用已核验。
+
+## 阶段 1：平台与写入
+
+POSIX 使用 fcntl，Windows 使用 msvcrt 系统锁。独立 `.writer.lock` 不写诊断内容，元数据在 `.writer.lock.json`；判断占用只看系统锁。两端默认等待最多5秒，异常关闭句柄释放系统锁。持锁进程异常退出后的sidecar仅提供残留提示，不据此拒绝新写入者。锁文件保持原位，不删除重建来绕过占用。
+
+文件写入flush/fsync后原子replace，Windows占用/访问错误有限重试6次（等待总计1.55秒）；失败保留旧权威台账及既有恢复材料。POSIX另外fsync目录，Windows跳过该步；两者不承诺相同的断电后目录持久性。第三方文档渲染器和转换器有各自保证，不能把生成成功当作已看原页。

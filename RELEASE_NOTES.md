@@ -20,3 +20,13 @@
 - 台账与导出可能保存原件路径和内容；分享项目底稿前需要单独处理，不能因本skill公开而认为业务数据也可公开。
 
 公开包只保存方法与合成验证材料。许可证适用范围见[LICENSE](LICENSE)及[README.md](README.md)；引用的官方准则仍应从原发布渠道核查其版本及使用条件。
+
+## 0.5.0-beta.1 开发中 · 阶段 1（2026-11-04）
+
+- 抽离fcntl/msvcrt系统锁及独立诊断sidecar；统一有限等待、异常释放及残留提示。
+- 统一文件fsync、原子替换和Windows有限重试；如实区分Windows不执行目录fsync的保证。
+- DOC使用可选macOS textutil→LibreOffice，XLS使用LibreOffice；独立临时profile、超时终止、工具版本/参数及成功/失败来源记录。原件指纹继续负责跨批匹配。
+- 明确UTF-8、pathlib、Windows非法名称逐文件failed和相对派生路径。新轮renderer 7支持可移动链接；显式export --portable在新目录另出视图，旧台账/renderer 1–6/历史输出不改写。
+- 新增独立冻结兼容夹具、平台回归、二进制属性及7组CI矩阵；实际结果见VALIDATION.md。
+
+本阶段不增加Python依赖、网络/遥测/上传接口，不改变schema 1/2或引擎0.3.1。包版本暂保留0.4.0-beta.1，六阶段全部完成再统一切换目标版本。

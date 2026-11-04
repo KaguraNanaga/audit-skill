@@ -8,6 +8,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+WINDOWS = sys.platform == 'win32'
+
 EXCLUDED = {'cache','ledger','outputs','expected','results','research','design','tests','audit-skill','node_modules','__pycache__'}
 MODES = ('query','verify','coverage','draft','review','rules','update')
 
@@ -18,6 +20,17 @@ def digest(path):
             h.update(chunk)
     return h.hexdigest()
 
+def windows_name_error(relative):
+    """Check names before stat/open: Win32 may redirect reserved names to devices."""
+    reserved = {'CON', 'PRN', 'AUX', 'NUL', 'CONIN$', 'CONOUT$'} | {
+        prefix + digit for prefix in ('COM', 'LPT') for digit in '123456789¹²³'}
+    for name in Path(relative).parts:
+        if (name.endswith(('.', ' ')) or name.split('.')[0].rstrip(' ').upper() in reserved
+                or any(ord(c) < 32 or c in '<>:"|?*' for c in name)):
+            return 'Windows unsupported filename; file failed before opening: ' + name
+    return None
+
+
 def inventory(root, exclusions):
     files, skipped, errors = [], [], []
     def rejected(rel):
@@ -27,13 +40,21 @@ def inventory(root, exclusions):
     for current, dirs, names in os.walk(root, followlinks=False, onerror=walk_error):
         for name in sorted(dirs.copy()):
             p = Path(current)/name
-            if p.is_symlink() or rejected(p.relative_to(root)):
+            invalid = windows_name_error(p.relative_to(root)) if WINDOWS else None
+            if invalid:
+                dirs.remove(name)
+                errors.append({'path':p.relative_to(root).as_posix(),'state':'failed','error':invalid})
+            elif p.is_symlink() or rejected(p.relative_to(root)):
                 dirs.remove(name)
                 skipped.append({'path':p.relative_to(root).as_posix(),'reason':'excluded_or_symlink'})
         dirs.sort()
         for name in sorted(names):
             p = Path(current)/name
             rel = p.relative_to(root)
+            invalid = windows_name_error(rel) if WINDOWS else None
+            if invalid:
+                errors.append({'path':rel.as_posix(),'state':'failed','error':invalid})
+                continue
             if p.is_symlink() or rejected(rel):
                 skipped.append({'path':rel.as_posix(),'reason':'excluded_or_symlink'})
                 continue
@@ -49,7 +70,7 @@ def inventory(root, exclusions):
                 files.append({'relative_path':rel.as_posix(),'sha256':sha,'bytes':after.st_size,
                               'format':p.suffix.lower() or 'unknown','role':'unknown','read_state':'unread'})
             except OSError as e:
-                errors.append({'path':rel.as_posix(),'error':str(e)})
+                errors.append({'path':rel.as_posix(),'state':'failed','error':str(e)})
     return files, skipped, errors
 
 def main():

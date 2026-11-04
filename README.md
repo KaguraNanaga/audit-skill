@@ -27,7 +27,7 @@ Modes can be combined. Supplemental materials use a separate `update` command to
 
 This package is installable Skill source for local use. It does **not** include a hosted service or model API keys. You need an agent host that can read files, run commands, and actually view images; policy lookup also needs a working browser tool. Word editing/layout, complex tables, and image viewing require host-provided tools—this package does not install those capabilities for you.
 
-Use **Python 3.11 or newer** and a virtual environment. The scripts' minimum language/stdlib surface is Python 3.9; 3.9/3.10 were only assessed statically and are not a support commitment. Ledger writes rely on POSIX `fcntl` file locking and directory sync: this release was checked on macOS; Linux/WSL must be verified by the user; **native Windows ledger writes are not supported**.
+Use **Python 3.11 or newer** and a venv outside the package. Stage 1 implements POSIX/native Windows locks, persistence adaptations and relative links. Actual Windows/Linux CI verification is pending; implemented paths are not yet a verified support claim. See [VALIDATION.md](VALIDATION.md) for actual environments, dependencies, passes and skips. The former “native Windows ledger writes are not supported” limitation is only removed after native CI succeeds.
 
 From the package root, create the venv **outside** the package so release files stay separate from local dependencies:
 
@@ -53,6 +53,26 @@ A starter request can look like:
 
 > Use evidence-reviewer to check the report and attachments in the given materials directory. The audit objective is contract-performance review; cutoff date and applicable rules follow the materials; mark uncertainties. For each item give "report location | original wording | review conclusion | actual evidence | minimal edit". Actually view critical scanned pages; list unread and unconfirmed parts separately. Keep results outside the materials directory.
 
+
+Stage-1 platform details:
+
+- DOC tries optional macOS textutil, then LibreOffice; XLS uses LibreOffice. Set `EVIDENCE_REVIEWER_SOFFICE` to an executable or let `shutil.which` locate it (`soffice.com` is preferred on Windows). Every invocation, including version probes, uses a temporary isolated profile. Timed-out processes are terminated; failed/tool_unavailable attempts are retained, profiles cleaned, and other materials continue.
+- `.writer.lock` holds only the kernel lock; `.writer.lock.json` contains diagnostics. Only acquiring the kernel lock determines occupancy. The shared timeout is 5 seconds; residual metadata is a warning, never proof of occupancy.
+- Files are flushed/fsynced before atomic replacement. Windows sharing/access errors get at most 6 attempts with 0.05–0.8s delays. POSIX also fsyncs the directory; Windows skips directory sync, with weaker directory durability after power loss.
+- Windows reserved names, illegal characters and trailing dots/spaces are recorded as failed before opening; other files continue. Long paths require OS long-path support; external converters have their own limits.
+- Updates match original SHA-256, never converted hashes. Changing converters does not make identical original bytes a material change. Explicit reparse still creates a new derived reading version.
+
+Windows PowerShell (direct venv interpreter; no execution-policy change):
+
+```powershell
+py -3.12 -m venv ../evidence-reviewer-venv
+& ../evidence-reviewer-venv/Scripts/python.exe -m pip install -r requirements.txt
+& ../evidence-reviewer-venv/Scripts/python.exe -B evidence-reviewer/scripts/review.py --help
+$env:EVIDENCE_REVIEWER_SOFFICE = 'C:/Program Files/LibreOffice/program/soffice.com'
+```
+
+Explicit portable export: `python -B evidence-reviewer/scripts/review.py export --project PROJECT --portable`. Each invocation creates `outputs/portable-<id>/<run_id>/` and a manifest with ledger hash, renderer, parameters and output hashes. It never changes the ledger, historical directories or current pointer. Plain validate/export does not create this view. Missing legacy exports that cannot be reconstructed after relocation produce an explicit error; recovery evidence is preserved.
+
 ## File capabilities and dependencies
 
 | File / capability | Current path and dependency | Hard limits to keep |
@@ -60,7 +80,7 @@ A starter request can look like:
 | TXT, MD, CSV, TSV, JSON, HTML | Python stdlib; line/record locators | HTML is text-parsed, pages are not executed; extraction does not prove facts |
 | SRT, VTT | Stdlib; keep time ranges and speaker labels | No auto speech-to-text; speaker identity is not verified |
 | DOCX | Stdlib XML parse of text layer and media | XML anchors are not page numbers; images are not auto-bound to body position; layout, seals, revisions, and nearby content need visual review |
-| Legacy DOC | macOS `textutil` → DOCX | Conversion may change pagination/objects; other OSes need another available converter and must keep provenance |
+| Legacy DOC | Optional macOS `textutil`, then LibreOffice → DOCX | Conversion may change pagination/objects; other OSes need another available converter and must keep provenance |
 | XLSX | `openpyxl`; cells, formulas, cached values | Does not recalculate formulas; does not auto-check colors, partial rich text, images, charts, or voucher continuation |
 | Legacy XLS | `soffice` (LibreOffice) then XLSX path | Converted caches and complex objects still need review |
 | Text or mixed PDF | `pypdf` by physical page | Text present ≠ images read; textless pages stay pending visual review; no built-in OCR |
@@ -107,7 +127,7 @@ Then have the host continue verification using `tests/cases/financial/request.md
 
 When a ledger is needed, prepare the request per [workflow.md](evidence-reviewer/references/workflow.md) and run `begin`, `inspect`; fill the assessment from this round's actual reading, then `check-assessment`, `finalize`, and `validate`. `begin` only prepares snapshots and read units—it does not emit automatic audit conclusions; facts and judgments in `assessment.json` must come from actual review. Keep the project **outside** the materials directory and use a new project path.
 
-Ledger outputs include `review.md`, `handoff.md`, `changes.md`, and `history.md`; draft tasks also get `draft.md`. User deliverables can still be one verification table or replaceable paragraphs. Inside the project, original snapshots, caches, and history are sensitive audit material; moving the whole project may break old absolute export links, and there is no automatic migration tool.
+Ledger outputs include `review.md`, `handoff.md`, `changes.md`, and `history.md`; draft tasks also get `draft.md`. User deliverables can still be one verification table or replaceable paragraphs. Inside the project, original snapshots, caches, and history are sensitive audit material; renderer 7 uses relative links and supports moving the whole project. Renderers 1–6 keep their historical bytes; only explicit `export --portable` produces a portable view in a new directory.
 
 ## Testing and validation
 

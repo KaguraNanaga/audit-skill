@@ -102,3 +102,9 @@ recover先验证权威台账、结构与引用文件。台账完整时保留它�
 新轮OutputRecord.renderer_version=5；旧轮按已登记1—4渲染，保留原字节和指纹，新读取警示不追写旧报告。新报告及handoff自动汇总盘点/读取失败文件、原因、未覆盖范围；validate分别给出structure_valid、material_reading、reading_issues。盘点失败跨轮保留，成功取得同一路径后解除当前盘点警示，旧轮仍保留；损坏/未读单元按活动版本及所选主稿继续列示。结构校验与阅读充分性分别解释。
 
 上段为0.3.0规则；0.3.1新轮使用renderer 6，旧renderer 5也冻结保留。旧轮报告不追加未来提示；当前validate可按历史派生尚未完成的视觉事项，首次新update将其保存到新轮，详见原页核查跟进。
+
+## 阶段 1 兼容补充
+
+原件SourceVersion.sha256及本批盘点原件指纹用于同字节匹配，转换器或派生物指纹不同本身不触发材料变更；同原件的新路径可登记path_added/path_moved，沿用已有快照与派生读取。显式reparse才建立新的读取版本。
+
+新轮输出使用renderer 7；1–6继续按原指纹保留。读取、validate和普通export均不自动生成可移动视图。需要时显式执行 `export --portable`，新建独立目录及派生manifest，不改历史台账、旧导出或current指针。旧版台账不要求重新导出才能validate。

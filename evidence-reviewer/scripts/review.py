@@ -48,6 +48,12 @@ def check_files(project, work, check_outputs=False):
         if row['kind'] == 'SourceVersion' and row.get('raw_tool_path'):
             p = local_path(project, row['raw_tool_path'])
             L.require(p.is_file() and readers.digest(p) == row['raw_tool_sha256'], 'Raw web tool response changed or unavailable')
+    for row in work['records'].values():
+        if row['kind'] == 'SourceVersion':
+            for operation in row.get('processing', []):
+                if operation.get('state') == 'converted':
+                    p = local_path(project, operation['artifact'])
+                    L.require(p.is_file() and readers.digest(p) == operation['sha256'], 'Converted artifact missing or changed: ' + str(p))
     for artifact in work['artifacts']:
         p = local_path(project, artifact['path'])
         L.require(p.is_file() and readers.digest(p) == artifact['sha256'], 'Registered rendering/image changed or unavailable')
@@ -59,6 +65,9 @@ def check_files(project, work, check_outputs=False):
 
 
 def add_units(project, work, version_id, extracted):
+    for operation in extracted.get('processing', []):
+        if operation.get('artifact'):
+            operation['artifact'] = Path(operation['artifact']).relative_to(project).as_posix()
     units = []
     for item in extracted['units']:
         u = dict(item, id=L.uid())
@@ -106,50 +115,55 @@ def begin(args):
                     'model_version': request.get('model_version'), 'errors': [], 'unfinished_steps': ['session_review', 'validation', 'commit', 'export']},
             'records': {}, 'units': {}, 'artifacts': [], 'excluded': [], 'outcome': None}
     work['run']['scope_revision'] = work['project']['scope_revision']
-    save_work(project, work)
-    try:
-        known_paths = set()
-        for root in roots:
-            files, skipped, errors = inventory(root, excluded)
-            work['excluded'] += [dict(x, root=str(root)) for x in skipped]
-            work['run']['errors'] += [dict(x, root=str(root), stage='inventory') for x in errors]
-            for f in files:
-                original = root / f['relative_path']
-                if str(original) in known_paths: continue
-                known_paths.add(str(original))
-                source_id, version_id = L.uid(), L.uid()
-                snapshot = project / 'sources' / version_id / original.name
-                snapshot.parent.mkdir(parents=True)
-                shutil.copyfile(original, snapshot)
-                L.require(readers.digest(snapshot) == f['sha256'] == readers.digest(original), 'Source changed during snapshot copy')
-                snapshot.chmod(0o444)
-                L.add(work, 'Source', dict(actual_name=original.name, known_paths=[str(original)], urls=[], role='unknown',
-                                         role_basis='Not yet classified by reviewer', issuer=None, signature_status='unknown',
-                                         confirmation_scope=None, origin_group_id=source_id), source_id)
-                L.add(work, 'SourceVersion', dict(source_id=source_id, actual_name=original.name, sha256=f['sha256'], availability='local_snapshot',
-                          format=original.suffix.lower(), local_snapshot=snapshot.relative_to(project).as_posix(), url=None,
-                          discovered_at=L.now(), acquired_at=L.now(), formed_at=None, facts_period=None, received_at=None,
-                          derived_from_version_ids=[], processing_method=readers.VERSION, audio_version_id=None), version_id)
-                work['run']['source_version_snapshot'].append(version_id)
-                extracted = readers.read(snapshot, project / 'cache' / version_id)
-                work['records'][version_id]['processing'] = extracted['processing']
-                add_units(project, work, version_id, extracted)
-                save_work(project, work)
-        if request.get('main_document'):
-            selected = str(request['main_document'])
-            matches = [v for v in work['run']['source_version_snapshot']
-                       if selected in work['records'][work['records'][v]['source_id']]['known_paths']
-                       or selected == work['records'][work['records'][v]['source_id']]['actual_name']]
-            L.require(len(matches) == 1, 'Requested main document is absent or ambiguous; select a precise source scope')
-            work['project'].update(selected_main_version=matches[0], main_selection_reason='Explicit request main_document')
-            work['run']['selected_main_version'] = matches[0]
+    with L.lock(project):
         save_work(project, work)
-        return {'project': str(project), 'run_id': run_id, 'files': len(known_paths), 'packet': str(project / 'staging/working.json'), 'state': 'staging', 'reviewed': False}
-    except Exception as exc:
-        work['run']['state'] = 'failed'
-        work['run']['errors'].append({'stage': 'begin', 'error': str(exc)})
-        save_work(project, work)
-        raise
+        try:
+            known_paths = set()
+            for root in roots:
+                files, skipped, errors = inventory(root, excluded)
+                work['excluded'] += [dict(x, root=str(root)) for x in skipped]
+                work['run']['errors'] += [dict(x, root=str(root), stage='inventory') for x in errors]
+                for f in files:
+                    original = root / f['relative_path']
+                    if str(original) in known_paths: continue
+                    known_paths.add(str(original))
+                    source_id, version_id = L.uid(), L.uid()
+                    snapshot = project / 'sources' / version_id / original.name
+                    try:
+                        snapshot.parent.mkdir(parents=True)
+                        shutil.copyfile(original, snapshot)
+                        L.require(readers.digest(snapshot) == f['sha256'] == readers.digest(original), 'Source changed during snapshot copy')
+                        snapshot.chmod(0o444)
+                    except (OSError, ValueError) as exc:
+                        work['run']['errors'].append(dict(root=str(root), path=f['relative_path'], stage='snapshot', state='failed', error=str(exc)))
+                        continue
+                    L.add(work, 'Source', dict(actual_name=original.name, known_paths=[str(original)], urls=[], role='unknown',
+                                             role_basis='Not yet classified by reviewer', issuer=None, signature_status='unknown',
+                                             confirmation_scope=None, origin_group_id=source_id), source_id)
+                    L.add(work, 'SourceVersion', dict(source_id=source_id, actual_name=original.name, sha256=f['sha256'], availability='local_snapshot',
+                              format=original.suffix.lower(), local_snapshot=snapshot.relative_to(project).as_posix(), url=None,
+                              discovered_at=L.now(), acquired_at=L.now(), formed_at=None, facts_period=None, received_at=None,
+                              derived_from_version_ids=[], processing_method=readers.VERSION, audio_version_id=None), version_id)
+                    work['run']['source_version_snapshot'].append(version_id)
+                    extracted = readers.read(snapshot, project / 'cache' / version_id)
+                    work['records'][version_id]['processing'] = extracted['processing']
+                    add_units(project, work, version_id, extracted)
+                    save_work(project, work)
+            if request.get('main_document'):
+                selected = str(request['main_document'])
+                matches = [v for v in work['run']['source_version_snapshot']
+                           if selected in work['records'][work['records'][v]['source_id']]['known_paths']
+                           or selected == work['records'][work['records'][v]['source_id']]['actual_name']]
+                L.require(len(matches) == 1, 'Requested main document is absent or ambiguous; select a precise source scope')
+                work['project'].update(selected_main_version=matches[0], main_selection_reason='Explicit request main_document')
+                work['run']['selected_main_version'] = matches[0]
+            save_work(project, work)
+            return {'project': str(project), 'run_id': run_id, 'files': len(known_paths), 'packet': str(project / 'staging/working.json'), 'state': 'staging', 'reviewed': False}
+        except Exception as exc:
+            work['run']['state'] = 'failed'
+            work['run']['errors'].append({'stage': 'begin', 'error': str(exc)})
+            save_work(project, work)
+            raise
 
 
 def inspect(args):
@@ -279,7 +293,7 @@ def import_web(args):
             L.require(raw.is_file(), 'Raw tool output not found')
             # Content must occur in the supplied tool response, not merely a session paraphrase.
             if record['text']:
-                raw_content = raw.read_text()
+                raw_content = raw.read_text(encoding='utf-8')
                 try:
                     decoded = json.loads(raw_content)
                     raw_content += '\n' + json.dumps(decoded, ensure_ascii=False)
@@ -304,7 +318,7 @@ def import_web(args):
         if record['text']:
             snapshot = project / 'sources' / version_id / 'web-tool-excerpt.txt'
             snapshot.parent.mkdir(parents=True)
-            snapshot.write_text(record['text'])
+            snapshot.write_text(record['text'], encoding='utf-8', newline='')
             snapshot.chmod(0o444)
         if not existing:
             L.add(work, 'Source', dict(actual_name=record['title'], known_paths=[], urls=[record['url']] if record['url'] else [], role='unknown',
@@ -374,7 +388,7 @@ def assess(args, commit=False):
         for name, content in exports.items():
             path = f"outputs/{work['run']['id']}/{name}"
             L.add(work, 'OutputRecord', dict(run_id=work['run']['id'], output_kind=name.split('.')[0], path=path,
-                       renderer_version=6,
+                       renderer_version=7,
                        sha256=__import__('hashlib').sha256(content.encode()).hexdigest(), source_role='workpaper_or_draft',
                        actual_confirmation_status='unconfirmed', evidence_ids=[e['id'] for e in work['records'].values() if e['kind'] == 'Evidence']))
         L.validate_records(work)
@@ -392,28 +406,8 @@ def assess(args, commit=False):
 
 
 def write_exports(project, ledger):
-    if ledger.get('schema_version') == 'evidence-ledger-2.0':
-        import history
-        return history.write_exports(project, ledger, sys.modules[__name__])
-    work = L.thaw(ledger)
-    check_files(project, work)
-    exports = L.render(work, project)
-    for name, content in exports.items():
-        rel = f"outputs/{work['run']['id']}/{name}"
-        record = next(r for r in work['records'].values() if r['kind'] == 'OutputRecord' and r['path'] == rel)
-        L.require(__import__('hashlib').sha256(content.encode()).hexdigest() == record['sha256'], 'Renderer differs from committed output fingerprint')
-        path = project / rel
-        path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_name(path.name + '.tmp-' + L.uid())
-        with tmp.open('xb') as f:
-            f.write(content.encode())
-            f.flush()
-            os.fsync(f.fileno())
-        os.replace(tmp, path)
-    # Update export pointer only after all files match the authoritative ledger.
-    check_files(project, work, check_outputs=True)
-    L.atomic_json(project / 'outputs/current.json', {'run_id': work['run']['id'], 'ledger_sha256': ledger['integrity_sha256'],
-                  'files': [r['path'] for r in work['records'].values() if r['kind'] == 'OutputRecord']})
+    import history
+    return history.write_exports(project, ledger, sys.modules[__name__])
 
 
 def validate(args, export=False):
@@ -423,21 +417,32 @@ def validate(args, export=False):
         work = L.thaw(ledger)
         result = L.validate_records(work)
         check_files(project, work)
-        if export: write_exports(project, ledger)
+        if export and getattr(args, 'portable', False):
+            from reporting_v7 import export_portable
+            # Validate the existing authority before creating an optional view.
+            portable_requested = True
+        else:
+            portable_requested = False
+            if export: write_exports(project, ledger)
         check_files(project, work, check_outputs=True)
         pointer = load(project / 'outputs/current.json')
         L.require(pointer['run_id'] == work['run']['id'] and pointer['ledger_sha256'] == ledger['integrity_sha256'], 'Output pointer does not match ledger')
         expected = [r['path'] for r in work['records'].values() if r['kind'] == 'OutputRecord' and r['run_id'] == work['run']['id']]
         L.require(pointer['files'] == expected, 'Output pointer file list does not match current run')
+        if portable_requested:
+            return export_portable(project, ledger, sys.modules[__name__])
         return dict(result, state='completed', run_id=work['run']['id'], outputs='verified')
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'): stream.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
     for name in ['begin', 'update', 'annotate-sources', 'inspect', 'search', 'select-main', 'render', 'import-web', 'check-assessment', 'finalize', 'validate', 'export', 'recover']:
         p = sub.add_parser(name)
         p.add_argument('--project', type=Path, required=True)
+        if name == 'export': p.add_argument('--portable', action='store_true', help='Create renderer-7 views in a new directory; preserve ledger and all historical outputs')
         if name == 'annotate-sources': p.add_argument('--annotations', type=Path, required=True)
         if name in {'begin', 'update'}: p.add_argument('--request', type=Path, required=True)
         if name in {'inspect', 'search'}: p.add_argument('--version', action='append')

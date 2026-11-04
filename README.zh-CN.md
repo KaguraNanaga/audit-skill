@@ -27,7 +27,7 @@ English documentation: [README.md](README.md).
 
 本包是可本地安装的 Skill 源文件，未包含托管服务或模型密钥。需要能读取文件、运行命令和实际查看图像的智能体宿主；政策检索还需要可用的浏览工具。Word 编辑与排版、复杂表格和图像查看需宿主提供相应工具，本包不会自动安装这些能力。
 
-建议使用 **Python 3.11 或更高版本**及虚拟环境。脚本所用最低语言/标准库接口为 Python 3.9；3.9/3.10 仅做静态判断，未作支持承诺。台账写入依赖 POSIX `fcntl` 文件锁及目录同步：本次在 macOS 检查，Linux/WSL 需使用者自行验证；**原生 Windows 台账写入不支持**。
+建议使用 **Python 3.11 或更高版本**及包外虚拟环境。阶段 1 已实现 POSIX/原生 Windows 系统锁、持久化适配与相对链接；Windows/Linux 真实 CI 验证尚待完成，当前不宣称已验证支持。实际平台、依赖版本及测试/跳过数量见 [VALIDATION.md](VALIDATION.md)。原先“原生 Windows 台账写入不支持”的限制待原生 CI 通过后才撤除。
 
 在本包根目录执行，将虚拟环境建在包外，保持发布文件与本地依赖分开：
 
@@ -53,6 +53,26 @@ cp -R evidence-reviewer "$HOME/.agents/skills/evidence-reviewer"
 
 > 使用 evidence-reviewer，核对指定材料目录中的报告和附件。审计目标为合同履行复核，截止日及适用制度以材料为准；不确定处标明。逐项给出“报告位置｜原表述｜核查结论｜实际证据｜最小修改”。关键扫描页要实际查看，未读和无法确认的部分单独列出。结果保存在材料目录之外。
 
+
+阶段 1 转换与持久化说明：
+
+- DOC 的转换链为 macOS 可选 textutil → LibreOffice；XLS 使用 LibreOffice。`EVIDENCE_REVIEWER_SOFFICE` 可指定可执行文件，否则通过 `shutil.which` 查找；Windows 优先 console 入口 `soffice.com`。每次调用（含版本探测）使用独立临时配置目录，转换超时终止进程并记 failed，随后清理配置。工具缺失记 tool_unavailable，失败与降级尝试均保留。
+- 锁文件 `.writer.lock` 与诊断 `.writer.lock.json` 分开；占用只由系统锁判断。默认最多等待 5 秒；残留元数据仅提示，不阻止取得已释放的系统锁。
+- 文件写入均 flush/fsync，再原子替换；Windows 因占用最多尝试 6 次，间隔 0.05–0.8 秒。POSIX 另同步目录；Windows 跳过目录 fsync，因此不承诺相同的断电后目录持久性。
+- Windows 保留名、非法字符和尾随点/空格在打开文件前记录 failed，继续其他材料。长路径依赖系统启用 Win32 长路径支持；外部转换器的路径限制另行验证。
+- update 按原件 SHA-256 匹配，不按转换产物匹配。同一原件跨平台不自动重转换或产生材料变更；显式 reparse 仍建立新的派生读取版本。
+
+Windows PowerShell（直接调用虚拟环境解释器，无需改执行策略）：
+
+```powershell
+py -3.12 -m venv ../evidence-reviewer-venv
+& ../evidence-reviewer-venv/Scripts/python.exe -m pip install -r requirements.txt
+& ../evidence-reviewer-venv/Scripts/python.exe -B evidence-reviewer/scripts/review.py --help
+$env:EVIDENCE_REVIEWER_SOFFICE = 'C:/Program Files/LibreOffice/program/soffice.com'
+```
+
+显式生成可移动视图：`python -B evidence-reviewer/scripts/review.py export --project PROJECT --portable`。每次新建 `outputs/portable-<id>/<run_id>/`，附来源台账指纹、renderer、参数和输出指纹；不改台账、历史目录及 current 指针。普通 validate/export 不自动生成该视图。旧历史导出缺失且移址后无法按原指纹重建时明确报错，保留恢复材料。
+
 ## 文件能力与依赖
 
 | 文件或能力 | 当前路径及依赖 | 必须保留的限制 |
@@ -60,7 +80,7 @@ cp -R evidence-reviewer "$HOME/.agents/skills/evidence-reviewer"
 | TXT、MD、CSV、TSV、JSON、HTML | Python 标准库，按行/记录建立位置 | HTML 为文本解析，不执行页面；文本提取不证明事实正确 |
 | SRT、VTT | 标准库，保留时间段与原说话人标签 | 不自动转录音频，不核实说话人身份 |
 | DOCX | 标准库解析 XML、文字层及媒体文件 | XML 锚点不是页码；图片未自动绑定正文位置；需要回看版式、签章、修订和邻近内容 |
-| 旧版 DOC | macOS `textutil` 转为 DOCX | 转换可能改变分页或对象；其他系统须另用可用工具转换并保留来源 |
+| 旧版 DOC | macOS 可选 `textutil`，失败或缺失后尝试 LibreOffice → DOCX | 转换可能改变分页或对象；其他系统须另用可用工具转换并保留来源 |
 | XLSX | `openpyxl`，读取单元格、公式与缓存值 | 不重算公式，不自动检查颜色、局部富文本、图片、图表或凭证续行关系 |
 | 旧版 XLS | `soffice`（LibreOffice）转换后按 XLSX 读取 | 转换后的缓存与复杂对象仍需核查 |
 | 文本或混合 PDF | `pypdf` 按物理页提取 | 有文字不代表图片内容已读；无文字页登记为待目视，不内置 OCR |
@@ -107,7 +127,7 @@ DEMO_PY
 
 需要台账时，按 [workflow.md](evidence-reviewer/references/workflow.md) 准备请求并执行 `begin`、`inspect`；依据本轮实际阅读填写评估，再执行 `check-assessment`、`finalize` 和 `validate`。`begin` 仅准备快照与读取单元，不输出自动审计结论；`assessment.json` 的事实和判断必须由实际核查形成。项目必须位于材料目录之外，并使用新的项目路径。
 
-台账输出包括 `review.md`、`handoff.md`、`changes.md`、`history.md`，编制任务另有 `draft.md`。用户交付仍可集中为一张核查表或可替换段落。项目内部保留原件快照、缓存和历史，均按敏感审计材料管理；整个项目移址可能使旧导出绝对链接失效，当前没有自动迁移工具。
+台账输出包括 `review.md`、`handoff.md`、`changes.md`、`history.md`，编制任务另有 `draft.md`。用户交付仍可集中为一张核查表或可替换段落。项目内部保留原件快照、缓存和历史，均按敏感审计材料管理；新轮 renderer 7 使用相对链接，整个项目可移动。旧 renderer 1–6 导出保留原字节；只有显式 `export --portable` 才在新目录生成可移动视图。
 
 ## 验证与反馈
 

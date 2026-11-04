@@ -4,15 +4,12 @@ import hashlib
 import io
 import json
 import re
-import shutil
-import subprocess
-import tempfile
 import xml.etree.ElementTree as ET
 import zipfile
 from html.parser import HTMLParser
 from pathlib import Path
 
-VERSION = 'readers-1.0'
+VERSION = 'readers-1.1'
 W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
 
 
@@ -193,24 +190,13 @@ def read(path, cache):
     provenance = []
     try:
         suffix = path.suffix.lower()
-        if suffix == '.doc':
-            out = cache / 'converted.docx'
-            subprocess.run(['textutil', '-convert', 'docx', '-output', str(out), str(path)], check=True, capture_output=True, timeout=60)
-            provenance.append({'method': 'textutil doc-to-docx', 'artifact': str(out), 'sha256': digest(out), 'parent_sha256': digest(path)})
-            rows = docx(out, cache)
+        if suffix in {'.doc', '.xls'}:
+            from converters import convert
+            target = 'docx' if suffix == '.doc' else 'xlsx'
+            out = convert(path, cache, target, provenance)
+            rows = docx(out, cache) if target == 'docx' else xlsx(out, cache)
             for row in rows:
-                row['limitations'].append('Locator belongs to converted DOCX; legacy pagination/objects may be lost')
-        elif suffix == '.xls':
-            with tempfile.TemporaryDirectory(prefix='evidence-xls-') as tmp:
-                profile = Path(tmp) / 'profile'
-                subprocess.run(['soffice', '-env:UserInstallation=' + profile.as_uri(), '--headless', '--convert-to', 'xlsx', '--outdir', tmp, str(path)], check=True, capture_output=True, timeout=60)
-                converted = Path(tmp) / (path.stem + '.xlsx')
-                out = cache / 'converted.xlsx'
-                shutil.copyfile(converted, out)
-            provenance.append({'method': 'LibreOffice xls-to-xlsx', 'artifact': str(out), 'sha256': digest(out), 'parent_sha256': digest(path)})
-            rows = xlsx(out, cache)
-            for row in rows:
-                row['limitations'].append('Converted legacy workbook; original cached values and complex objects not preserved by guarantee')
+                row['limitations'].append('Locator belongs to converted content; pagination, objects and cached values require review')
         elif suffix == '.docx':
             rows = docx(path, cache)
         elif suffix == '.xlsx':

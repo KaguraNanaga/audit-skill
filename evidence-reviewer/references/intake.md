@@ -5,7 +5,7 @@
 | 输入 | 可选路径 | 必须保留的限制与位置 |
 |---|---|---|
 | DOCX | OOXML 抽取段落、表格；渲染回看 | 版本内段落/表格/单元格锚点不是页码。图片、隐藏文字、修订、批注分别检查；页码绑定渲染版本 |
-| DOC | textutil 或 LibreOffice 转换到缓存 | 保留原件指纹及转换关系；不得假设表格、签章和分页无损 |
+| DOC | macOS 可选 textutil，失败/缺失后尝试 LibreOffice 转换到缓存 | 保留原件指纹及转换关系；不得假设表格、签章和分页无损 |
 | PDF | pypdf/pdfplumber/Poppler 按物理页抽取与渲染 | 有文字页与扫描页分开记录。加密/损坏明确失败；有印刷页码时另存 |
 | XLSX | 电子表格工具；只读解析公式与缓存值 | 工作表+单元格；区分公式、缓存/显示值和独立复算。缓存可能过期或为空，读取器不等于计算引擎 |
 | XLS | 可用旧格式解析器，或 LibreOffice 转换 | 转换只是派生版本，未验证复杂公式、宏、外链、图形保真 |
@@ -35,7 +35,7 @@ DOCX中word/media媒体会被提取登记，但脚本不自动确定其正文位
 
 取数前先看工作表名称及实际表头区域（不固定前3行），检查合并单元格、多层表头、左右双栏、隐藏行列、单位、借贷方向、期初/期末和本期累计。期末贷方后可能还有“报表数”“重分类差异”，不能见到一个金额列就停止。
 
-公式与缓存分别读取（`data_only=False/True`），缓存为空或过期时不可当作零或实时计算值。独立Decimal复算与工作簿重算分别说明。XLS用当前可用的xlrd或转换工具，保持原件和转换关系；内置读取器的实际能力以脚本结果为准。
+公式与缓存分别读取（`data_only=False/True`），缓存为空或过期时不可当作零或实时计算值。独立Decimal复算与工作簿重算分别说明。XLS用LibreOffice转换工具，保持原件和转换关系；内置读取器的实际能力以脚本结果为准。
 
 凭证号只在首行显示时，可在确认同一凭证块内将号承接至续行；同时保留源sheet、行号与原始空值。跨工作表、年度、月份、凭证边界或合计行要重置/复核，不能把全文空白单元格一律向下填充。组合键至少能区分年度、月份、凭证类型/编号；同号不等于同张凭证。看全部借贷行、红字和对方科目，不能只搜索命中行后就断定资金流。
 
@@ -64,3 +64,11 @@ python3 scripts/prepare.py --root /材料目录 --goal '核对2025年付款与�
 ```
 
 无本地材料的制度查询可省略 `--root`，选 `--mode rules`。该命令只登记查询目标，不伪称已经联网检索。输出中的角色、读页状态及 Findings 不自动填充。
+
+## 阶段 1：转换及路径记录
+
+内置 DOC 转换链为 macOS 可选 textutil → LibreOffice，XLS 只走 LibreOffice；工具通过 `shutil.which` 查找，也可用 `EVIDENCE_REVIEWER_SOFFICE` 指定 LibreOffice 可执行文件。Windows 优先 `soffice.com`。每次 LibreOffice 调用使用独立临时 UserInstallation 目录并设超时，超时后终止进程树、登记 failed 并清理目录。
+
+SourceVersion.processing 保存原件 parent_sha256、converter、version、parameters、state 及成功产物的相对路径/指纹。每次不可用或失败尝试也保留；缺工具记 tool_unavailable，读取单元记 failed，继续其他材料。转换后的 locator 属于派生文档，原件视觉事实仍需实际回看。派生物不会替代 SourceVersion.sha256，update 同字节匹配只使用原件指纹。
+
+Windows 文件名预检查在 stat/open 前执行。保留名（包括带扩展名）、尾随点/空格及非法字符在 run.errors 逐文件记 state=failed，读取覆盖汇总继续披露；无法取得的文件不伪造快照或原件指纹。长路径受系统配置与外部工具限制，中文、空格及内部相对路径使用明确编码和 pathlib。

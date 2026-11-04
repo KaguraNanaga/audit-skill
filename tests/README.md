@@ -37,10 +37,18 @@ python3 -B tests/test_public.py
 python3 tests/generate_fixtures.py
 ```
 
-重新生成会覆盖本目录内合成输入及 `expected.json`，随后应重新核对图像、PDF 原页与输入指纹。该命令不读取实际业务资料。XLSX 有意不提供计算缓存；独立 Decimal 复算不能宣称是 Excel 的实时重算结果。
+本版现有输入已冻结，不得重跑该生成器覆盖它们或改写 `input-sha256.json`。新增fixture使用独立生成器、目录和冻结清单。该命令不读取实际业务资料。XLSX 有意不提供计算缓存；独立 Decimal 复算不能宣称是 Excel 的实时重算结果。
 
 首版合成合同 PDF 在本次准备中曾出现文字层可提取但第 1 页渲染空白的问题。生成器已通过显式使用嵌入字体修复，并用 Poppler 渲染后实际查看第 1 页确认文字可见，再提交独立会话评测。这个修复涉及样例的可见性，不改变预期审计结论。
 
 ## 字体许可
 
 `cases/contract/sources/合同及补充页.pdf` 嵌入 ReportLab 随附的 Bitstream Vera 字体子集。该字体依据原字体许可使用，不因项目其他许可而改为 Apache 2.0；完整版权与许可见 [FONT_LICENSE.txt](FONT_LICENSE.txt)。公开包不单独分发 TTF 字体文件。
+
+## 阶段 1 冻结及跨平台测试
+
+新增 `platform-fixtures/legacy.json` 由固定旧提交51149fb的实际脚本从零构造合成台账，覆盖旧renderer 1–6及schema 1/2；2026-11-04冻结，指纹在 `input-sha256-stage1.json`。显式运行 `python3 -B tests/generate_platform_fixtures.py` 可重建这一组新增夹具，需要本地Git保留该提交，不访问网络；常规测试不运行生成器。原 `input-sha256.json` 及其16份现有输入保持冻结。
+
+`test_public.py` 包含 `test_platform.py`，同时执行锁竞争/异常释放、sidecar可读、有限替换重试、转换来源与超时、原件跨转换器匹配、保留名failed后继续、中文空格长路径、项目移址、旧台账不重导出即可validate、显式portable不改历史、故障恢复及指针重建。自动测试的观察记录不冒充模型实际看图。
+
+真实LibreOffice/Poppler测试按工具存在情况显式skip，分别报告通过与跳过数量；工具存在但运行失败则测试失败，不静默skip。模拟工具失败测试和真实转换测试分别记录。macOS沙箱内LibreOffice可能退出1且无输出；需在允许启动该系统程序的执行环境验证，不能据此写成功。CI覆盖macOS/Ubuntu/Windows×Python3.11/3.12，Ubuntu另测3.14。二进制fixture由`.gitattributes`显式标binary。
