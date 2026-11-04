@@ -154,9 +154,14 @@ def begin(args):
                 matches = [v for v in work['run']['source_version_snapshot']
                            if selected in work['records'][work['records'][v]['source_id']]['known_paths']
                            or selected == work['records'][work['records'][v]['source_id']]['actual_name']]
-                L.require(len(matches) == 1, 'Requested main document is absent or ambiguous; select a precise source scope')
-                work['project'].update(selected_main_version=matches[0], main_selection_reason='Explicit request main_document')
-                work['run']['selected_main_version'] = matches[0]
+                failed_main = any(selected in {str(Path(e.get('root', '')) / e.get('path', '')),
+                                               Path(e.get('path', '')).name} for e in work['run']['errors'])
+                if not matches and failed_main:
+                    work['project']['main_selection_reason'] = 'Requested main failed acquisition; see per-file errors; no main version selected'
+                else:
+                    L.require(len(matches) == 1, 'Requested main document is absent or ambiguous; select a precise source scope')
+                    work['project'].update(selected_main_version=matches[0], main_selection_reason='Explicit request main_document')
+                    work['run']['selected_main_version'] = matches[0]
             save_work(project, work)
             return {'project': str(project), 'run_id': run_id, 'files': len(known_paths), 'packet': str(project / 'staging/working.json'), 'state': 'staging', 'reviewed': False}
         except Exception as exc:

@@ -27,7 +27,7 @@ English documentation: [README.md](README.md).
 
 本包是可本地安装的 Skill 源文件，未包含托管服务或模型密钥。需要能读取文件、运行命令和实际查看图像的智能体宿主；政策检索还需要可用的浏览工具。Word 编辑与排版、复杂表格和图像查看需宿主提供相应工具，本包不会自动安装这些能力。
 
-建议使用 **Python 3.11 或更高版本**及包外虚拟环境。阶段 1 已实现 POSIX/原生 Windows 系统锁、持久化适配与相对链接；Windows/Linux 真实 CI 验证尚待完成，当前不宣称已验证支持。实际平台、依赖版本及测试/跳过数量见 [VALIDATION.md](VALIDATION.md)。原先“原生 Windows 台账写入不支持”的限制待原生 CI 通过后才撤除。
+建议使用 **Python 3.11 或更高版本**及包外虚拟环境。阶段 1 的核心命令链已在 macOS/Ubuntu/原生 Windows × Python 3.11/3.12，以及 Ubuntu/Python 3.14 的真实 CI 跑通。可选 LibreOffice/Poppler 在 CI 中不可用，相关真实工具测试明确跳过；本机 macOS 已实际验证转换和渲染。实际环境、版本及通过/跳过数量见 [VALIDATION.md](VALIDATION.md)。
 
 在本包根目录执行，将虚拟环境建在包外，保持发布文件与本地依赖分开：
 

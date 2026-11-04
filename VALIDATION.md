@@ -67,7 +67,25 @@ python3 -B tools/check_release.py
 - 已执行第一轮 `python3 -B tests/test_public.py`：22项通过、0项跳过；覆盖旧renderer 1–6/schema1/2的原字节校验、显式portable、真实DOC/XLS转换和Poppler页图生成、原件匹配、锁/持久化/恢复与文件名边界。随后增加Windows真实占用测试并再次执行完整测试：23项中22项通过、1项跳过（Windows真实文件占用测试在POSIX不适用），0失败、0错误。
 - macOS沙箱内LibreOffice真实转换返回1且无输出，此次为失败尝试；相同转换在沙箱外已实际通过，不将沙箱内失败计为成功。textutil没有独立工具版本输出，记录macOS系统版本及可执行文件SHA256，不把帮助文字伪装成版本号。
 - `python3 -B tools/check_release.py --write-manifest`已实际执行并通过（66份文件）；普通校验也已执行并通过，未写清单。
-- Windows/Linux与七组GitHub Actions：待执行。CI日志须分别记录pass/skip及原因；缺系统工具的skip不算已验证其转换或渲染能力。
-- 未验证：本机原生Windows、Linux；NFS/SMB共享盘锁与断电恢复；全部第三方转换器、宏、签章或格式保真。本阶段自动测试不证明语义复核正确或真实业务准确率。
+- Windows/Linux与七组GitHub Actions已实际执行，结果及日志链接见下表；缺系统工具的skip不算已验证其转换或渲染能力。
+- 未验证：Windows/Linux上的真实LibreOffice转换及Poppler渲染；NFS/SMB共享盘锁与断电恢复；全部第三方转换器、宏、签章或格式保真。本阶段自动测试不证明语义复核正确或真实业务准确率。
 
-阶段1首轮CI已实际执行：[运行41768979956](https://github.com/KaguraNanaga/audit-skill/actions/runs/41768979956)，代码1a82164f。macOS3.11/3.12及Ubuntu3.11/3.12共4组成功；Windows3.11/3.12和Ubuntu3.14共3组失败。失败分别来自测试持锁时读取Windows锁区，以及测试修改全局sys.platform导致Linux/Python3.14尝试导入macOS的_scproxy。修正为持锁时只读诊断sidecar、释放后才检查锁文件内容，并仅模拟转换器PLATFORM常量。修正后的CI结果待执行，不把失败轮记为通过。首轮七组发布清单校验均通过。
+阶段1首轮CI已实际执行：[运行41768979956](https://github.com/KaguraNanaga/audit-skill/actions/runs/41768979956)，代码1a82164f。macOS3.11/3.12及Ubuntu3.11/3.12共4组成功；Windows3.11/3.12和Ubuntu3.14共3组失败。失败分别来自测试持锁时读取Windows锁区，以及测试修改全局sys.platform导致Linux/Python3.14尝试导入macOS的_scproxy。修正为持锁时只读诊断sidecar、释放后才检查锁文件内容，并仅模拟转换器PLATFORM常量。修正后的第二轮CI已实际执行，结果如下，不把失败轮记为通过。首轮七组发布清单校验均通过。
+
+第二轮：[运行41769277314](https://github.com/KaguraNanaga/audit-skill/actions/runs/41769277314)，代码261a1c85，七组均成功。实际日志中，全部环境使用pypdf 6.21.4、openpyxl 3.1.5；全部七组的普通发布清单校验通过（66份文件）。
+
+| 实际系统 | Python | 通过 | 跳过 | 失败/错误 | 日志 |
+|---|---|---:|---:|---:|---|
+| macOS 26.6.2 arm64 | 3.11.9 | 20 | 3 | 0/0 | [job126374903261](https://github.com/KaguraNanaga/audit-skill/actions/runs/41769277314/job/126374903261) |
+| macOS 26.6.2 arm64 | 3.12.10 | 20 | 3 | 0/0 | [job126374903128](https://github.com/KaguraNanaga/audit-skill/actions/runs/41769277314/job/126374903128) |
+| Ubuntu runner（Linux 7.0.0/glibc2.43） | 3.11.17 | 20 | 3 | 0/0 | [job126374903535](https://github.com/KaguraNanaga/audit-skill/actions/runs/41769277314/job/126374903535) |
+| Ubuntu runner（Linux 7.0.0/glibc2.43） | 3.12.15 | 20 | 3 | 0/0 | [job126374903251](https://github.com/KaguraNanaga/audit-skill/actions/runs/41769277314/job/126374903251) |
+| Ubuntu runner（Linux 7.0.0/glibc2.43） | 3.14.9 | 20 | 3 | 0/0 | [job126374903187](https://github.com/KaguraNanaga/audit-skill/actions/runs/41769277314/job/126374903187) |
+| Windows 10.0.26100 | 3.11.9 | 21 | 2 | 0/0 | [job126374903276](https://github.com/KaguraNanaga/audit-skill/actions/runs/41769277314/job/126374903276) |
+| Windows Server 2025 10.0.26100 | 3.12.10 | 21 | 2 | 0/0 | [job126374903253](https://github.com/KaguraNanaga/audit-skill/actions/runs/41769277314/job/126374903253) |
+
+全部CI缺少LibreOffice与Poppler，两项真实工具测试因工具不可用而跳过；POSIX另跳过原生Windows共享占用测试。Windows的真实系统锁、sidecar读取、超时、进程异常释放、目标文件真实占用后重试、设备保留名及尾随点/空格逐文件failed、中文空格长路径、完整两轮提交/校验/导出均已执行通过。测试并未通过静默skip来隐藏工具已存在却运行失败的情况。
+
+本地最终完整测试另已实际执行：macOS/Python3.14.3为22通过、1跳过（仅Windows专属测试），0失败/0错误；两项真实工具测试通过。技能quick_validate及git diff --check也已实际通过。阶段1未新增Python依赖，无新增网络、遥测或上传接口；CLI import-web仍只导入用户实际取得的本地工具响应。
+
+收尾复核还将“请求主稿本身为Windows非法文件名”的分支纳入既有文件名测试：应逐文件failed、主稿未选定并说明原因，其余材料照常处理。此分支通过本地定向测试；新增分支所在最终提交另由CI复验。

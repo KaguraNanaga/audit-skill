@@ -27,7 +27,7 @@ Modes can be combined. Supplemental materials use a separate `update` command to
 
 This package is installable Skill source for local use. It does **not** include a hosted service or model API keys. You need an agent host that can read files, run commands, and actually view images; policy lookup also needs a working browser tool. Word editing/layout, complex tables, and image viewing require host-provided tools—this package does not install those capabilities for you.
 
-Use **Python 3.11 or newer** and a venv outside the package. Stage 1 implements POSIX/native Windows locks, persistence adaptations and relative links. Actual Windows/Linux CI verification is pending; implemented paths are not yet a verified support claim. See [VALIDATION.md](VALIDATION.md) for actual environments, dependencies, passes and skips. The former “native Windows ledger writes are not supported” limitation is only removed after native CI succeeds.
+Use **Python 3.11 or newer** and a venv outside the package. The core command chain passed actual CI on macOS/Ubuntu/native Windows × Python 3.11/3.12, plus Ubuntu/Python 3.14. Optional LibreOffice/Poppler were unavailable on the CI runners, so their real-tool tests explicitly skipped; actual conversion and rendering were verified on local macOS. See [VALIDATION.md](VALIDATION.md) for environments, versions, passes and skips.
 
 From the package root, create the venv **outside** the package so release files stay separate from local dependencies:
 
