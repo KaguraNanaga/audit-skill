@@ -104,4 +104,18 @@ python3 -B tools/check_release.py
 - `python3 -B tools/check_links.py`：77个本地链接通过，0错误；负向用例能拒绝缺失文件、越界路径、缺失锚点和未定义参考。外部URL不联网验证。
 - `python3 -B tools/check_release.py --write-manifest`及不带写参数的普通校验均通过：73份文件。quick_validate、git diff --check通过。原冻结输入、既有stage1夹具及固定旧提交的生成器未改写。
 
-阶段1.5 CI尚待执行；上列结果只对应实际本地检查，不推断其他环境结果。schema、引擎、读取器和renderer版本保持，不新增Python依赖或运行脚本联网路径；维护者指南不随skill子目录分发。
+阶段1.5 CI已实际执行，结果如下；上列本地结果不与CI计数混合。schema、引擎、读取器和renderer版本保持，不新增Python依赖或运行脚本联网路径；维护者指南不随skill子目录分发。
+
+阶段1.5实际CI：[运行41787553785](https://github.com/KaguraNanaga/audit-skill/actions/runs/41787553785)，提交17d5f247，七组全部成功。全部使用pypdf6.21.4/openpyxl3.1.5，31项完整测试中的实际通过/跳过如下：
+
+| 系统 | Python | 通过 | 跳过 | 失败/错误 | 日志 |
+|---|---|---:|---:|---:|---|
+| macOS26.6.2 arm64 | 3.11.9 | 28 | 3 | 0/0 | [job126433069331](https://github.com/KaguraNanaga/audit-skill/actions/runs/41787553785/job/126433069331) |
+| macOS26.6.2 arm64 | 3.12.10 | 28 | 3 | 0/0 | [job126433069386](https://github.com/KaguraNanaga/audit-skill/actions/runs/41787553785/job/126433069386) |
+| Ubuntu/Linux7.0.0/glibc2.43 | 3.11.18 | 28 | 3 | 0/0 | [job126433069313](https://github.com/KaguraNanaga/audit-skill/actions/runs/41787553785/job/126433069313) |
+| Ubuntu/Linux7.0.0/glibc2.43 | 3.12.15 | 28 | 3 | 0/0 | [job126433069432](https://github.com/KaguraNanaga/audit-skill/actions/runs/41787553785/job/126433069432) |
+| Ubuntu/Linux7.0.0/glibc2.43 | 3.14.9 | 28 | 3 | 0/0 | [job126433069225](https://github.com/KaguraNanaga/audit-skill/actions/runs/41787553785/job/126433069225) |
+| Windows10.0.26100 | 3.11.9 | 29 | 2 | 0/0 | [job126433069299](https://github.com/KaguraNanaga/audit-skill/actions/runs/41787553785/job/126433069299) |
+| Windows Server2025 10.0.26100 | 3.12.10 | 29 | 2 | 0/0 | [job126433069809](https://github.com/KaguraNanaga/audit-skill/actions/runs/41787553785/job/126433069809) |
+
+七组均实际单独执行test_platform.py（Windows13通过/2跳过，POSIX12通过/3跳过）、test_structure.py（每组8通过/0跳过）、四组合成输入前后begin/inspect对照、77个本地链接检查及73份发布清单校验。不存在因缺基线而跳过结构对照的情况。CI缺LibreOffice/Poppler，两项真实工具测试明确skip；POSIX另跳过Windows专属共享占用。此限制延续阶段1，不推断跨平台转换/渲染保真。
