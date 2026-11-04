@@ -10,9 +10,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-import ledger as L
-import readers
-from prepare import inventory
+from core import ledger as L
+from core import readers
+from core.prepare import inventory
 
 
 def load(path):
@@ -176,7 +176,7 @@ def inspect(args):
     ledger_path = project / 'ledger/ledger.json'
     work = L.thaw(load(ledger_path)) if ledger_path.exists() else load(project / 'staging/working.json')
     if getattr(args, 'run', None):
-        import history
+        from core import history
         work = history.as_of(load(ledger_path), args.run)
     elif not getattr(args, 'committed', False) and (project / 'staging/working.json').exists():
         staged = load(project / 'staging/working.json')
@@ -230,7 +230,7 @@ def select_main(args):
         work['project'].update(selected_main_version=args.version, main_selection_reason=args.reason)
         work['run']['selected_main_version'] = args.version
         if work.get('update_context') and previous != args.version:
-            import updates
+            from core import updates
             updates.add_change(work, 'main_changed', args.reason, old_version_id=previous, new_version_id=args.version)
             updates.mark_candidates(work)
         save_work(project, work)
@@ -317,7 +317,7 @@ def import_web(args):
         L.require(not record.get('source_id') or (work.get('update_context') and existing and work['records'][source_id]['kind'] == 'Source'), 'Web source binding requires an existing source in a staged update')
         previous_version = None
         if existing:
-            import updates
+            from core import updates
             previous_version = next((v for v in updates.active_versions(work) if work['records'][v]['source_id'] == source_id), None)
         snapshot = None
         if record['text']:
@@ -349,7 +349,7 @@ def import_web(args):
                              acquisition_state=state, institution=record.get('institution'), candidate_urls=record.get('candidate_urls', []),
                              errors=record['errors'], task_ids=[], claim_ids=[]))
         if work.get('update_context'):
-            import updates
+            from core import updates
             updates.register_external(work, source_id, version_id, previous_version, state)
         save_work(project, work)
         return {'source_version_id': version_id, 'search_record_id': search_id, 'acquisition_state': state}
@@ -372,7 +372,7 @@ def assess(args, commit=False):
                     return dict(validation, state='validated_candidate', persisted=False,
                                 pending_ids=work['run']['update_summary']['pending_ids'],
                                 calculations=[{'id': r['id'], 'purpose': r['purpose'], 'result': r['result']} for r in work['records'].values() if r['kind'] == 'Calculation'])
-                import history
+                from core import history
                 return history.finalize(project, work, sys.modules[__name__])
             work = L.thaw(ledger)
             L.require(work['assessment_sha256'] == L.checksum(assessment), 'Committed assessment differs; stage a new update instead of overwriting it')
@@ -411,7 +411,7 @@ def assess(args, commit=False):
 
 
 def write_exports(project, ledger):
-    import history
+    from core import history
     return history.write_exports(project, ledger, sys.modules[__name__])
 
 
@@ -423,7 +423,7 @@ def validate(args, export=False):
         result = L.validate_records(work)
         check_files(project, work)
         if export and getattr(args, 'portable', False):
-            from reporting_v7 import export_portable
+            from core.reporting_v7 import export_portable
             # Validate the existing authority before creating an optional view.
             portable_requested = True
         else:
@@ -470,8 +470,8 @@ def main():
         if name in {'check-assessment', 'finalize'}: p.add_argument('--assessment', type=Path, required=True)
     args = parser.parse_args()
     try:
-        import updates
-        import history
+        from core import updates
+        from core import history
         commands = {'begin': begin, 'inspect': inspect, 'search': search, 'select-main': select_main,
                     'render': render_source, 'import-web': import_web,
                     'check-assessment': assess, 'finalize': lambda a: assess(a, True),

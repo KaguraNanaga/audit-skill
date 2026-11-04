@@ -9,7 +9,7 @@ import sys
 import time
 import warnings
 
-from persistence import atomic_bytes
+from .persistence import atomic_bytes
 
 
 def stamp():

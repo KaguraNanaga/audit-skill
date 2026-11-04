@@ -52,3 +52,11 @@ python3 tests/generate_fixtures.py
 `test_public.py` 包含 `test_platform.py`，同时执行锁竞争/异常释放、sidecar可读、有限替换重试、转换来源与超时、原件跨转换器匹配、保留名failed后继续、中文空格长路径、项目移址、旧台账不重导出即可validate、显式portable不改历史、故障恢复及指针重建。自动测试的观察记录不冒充模型实际看图。
 
 真实LibreOffice/Poppler测试按工具存在情况显式skip，分别报告通过与跳过数量；工具存在但运行失败则测试失败，不静默skip。模拟工具失败测试和真实转换测试分别记录。macOS沙箱内LibreOffice可能退出1且无输出；需在允许启动该系统程序的执行环境验证，不能据此写成功。CI覆盖macOS/Ubuntu/Windows×Python3.11/3.12，Ubuntu另测3.14。二进制fixture由`.gitattributes`显式标binary。
+
+## 阶段 1.5：结构及行为对照
+
+`test_structure.py` 检查离线相对链接、锚点、参考式链接、旧schema 1/2项目的inspect/validate/update/export。提供 `EVIDENCE_REVIEWER_BASELINE` 指向经清单验证的阶段1包外副本后，另比较迁移前后Python AST（只排除import节点）、保留的规则原文、prepare兼容入口help、renderer7原字节重建及四组合成材料的begin/inspect。缺基线时这些对照明确skip，不能记为通过；正式验收必须实际提供基线。
+
+单独运行 `python3 -B tests/test_platform.py` 和 `python3 -B tests/test_structure.py`；`test_public.py` 也纳入两组测试。`tools/check_links.py` 校验仓库本地Markdown链接；`tools/compare_structure.py --baseline BASELINE_DIRECTORY` 单独输出对照记录。两者均不联网，不重写冻结夹具。对照无字段被删除：UUID与时钟在隔离进程中固定，项目绝对根前缀规范化，正文/定位/指纹/状态/版本仍完整比较。
+
+CI沿用七组矩阵，从本地Git对象导出固定阶段1提交至RUNNER_TEMP，设置基线环境变量后执行上述命令。旧夹具生成器仍固定到旧提交51149fb和旧脚本路径；这是历史基线，不随本阶段目录迁移改写。

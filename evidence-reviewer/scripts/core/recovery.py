@@ -2,7 +2,7 @@
 import copy
 import shutil
 from pathlib import Path
-import ledger as L
+from . import ledger as L
 
 
 def order(value): return value.get('run_order', [value['latest_run_id']])
@@ -16,7 +16,7 @@ def contains(descendant, ancestor):
     if any(descendant['runs'].get(k) != v for k, v in ancestor['runs'].items()): return False
     if any(descendant['revisions'].get(k) != v for k, v in ancestor['revisions'].items()): return False
     if any(descendant['units'].get(k) != v for k, v in ancestor['units'].items()): return False
-    import history as H
+    from . import history as H
     for rid in a:
         aw, dw = H.as_of(ancestor, rid), H.as_of(descendant, rid)
         if any(aw[k] != dw[k] for k in ('project', 'records', 'outcome', 'artifacts', 'assessment_sha256')): return False
@@ -25,7 +25,7 @@ def contains(descendant, ancestor):
 
 def reconstruct_base(candidate, wanted_hash):
     """Accept an archived prefix only when its exact hash matches the receipt."""
-    import history as H
+    from . import history as H
     rid = candidate['runs'][candidate['latest_run_id']]['previous_run_id']
     if not rid or candidate.get('schema_version') != H.SCHEMA: return None
     known = order(candidate)[:order(candidate).index(rid)+1]
@@ -50,7 +50,7 @@ def reconstruct_base(candidate, wanted_hash):
 
 
 def recover(args, api):
-    import history as H
+    from . import history as H
     project = args.project.resolve()
     with L.lock(project):
         ledger_path = project / 'ledger/ledger.json'; wp = project / 'staging/working.json'; tx_path = project / 'staging/transaction.json'

@@ -5,10 +5,10 @@ import json
 import shutil
 from pathlib import Path
 
-import history as H
-import ledger as L
-import readers
-from prepare import inventory
+from . import history as H
+from . import ledger as L
+from . import readers
+from .prepare import inventory
 
 
 def active_versions(work):
@@ -106,7 +106,7 @@ def start(args, api):
         work['update_context'] = dict(base_sha256=base['integrity_sha256'], base_run_id=base['latest_run_id'],
                                       input_fingerprint=fingerprint, request=request)
         work['_known_run_ids'] = list(base.get('run_order', [base['latest_run_id']]))
-        from visual_checks import current_checks
+        from .visual_checks import current_checks
         visual_checks = copy.deepcopy(current_checks(original))
         run_id = L.uid(); work['_known_run_ids'].append(run_id)
         work['run'] = dict(id=run_id, previous_run_id=base['latest_run_id'], event_id=request['event_id'],
@@ -269,7 +269,7 @@ def materialize(work, assessment):
     basic = {k: v for k, v in assessment.items() if k not in extra}
     work = copy.deepcopy(work); work['_applying_update'] = True
     work = L.materialize(work, basic)
-    from adoptions import retire_links
+    from .adoptions import retire_links
     retire_links(work, assessment.get('link_retirements', []))
     aliases = work.pop('_assessment_aliases')
     def resolve(value):
@@ -333,7 +333,7 @@ def materialize(work, assessment):
     work['run'].update(screening=screening, impact_review=decisions,
                        update_summary=dict(pending_ids=pending, reviewed_ids=[d['target_id'] for d in decisions if d['decision'] == 'review'],
                                            unaffected_ids=[d['target_id'] for d in decisions if d['decision'] == 'unaffected']))
-    from visual_checks import reconcile
+    from .visual_checks import reconcile
     reconcile(work, screening, assessment.get('visual_resolutions', []))
     if pending: work['outcome']['limitations'].append('本轮仍有' + str(len(pending)) + '个对象待复核；旧判断未按全部新信息验证。')
     work['assessment_sha256'] = L.checksum(original_assessment)

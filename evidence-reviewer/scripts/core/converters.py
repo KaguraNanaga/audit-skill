@@ -52,7 +52,7 @@ def soffice_path():
 
 
 def convert(path, cache, target, provenance, timeout=60):
-    from readers import digest
+    from .readers import digest
     path, cache = Path(path), Path(cache)
     output = cache / ('converted.' + target)
     tools = []

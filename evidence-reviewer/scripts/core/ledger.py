@@ -47,7 +47,7 @@ def nonempty(value):
 
 
 def atomic_json(path, value):
-    from persistence import atomic_bytes
+    from .persistence import atomic_bytes
     def before_replace():
         if Path(path).name == 'ledger.json' and os.environ.get('EVIDENCE_REVIEWER_FAILPOINT') == 'before_replace':
             os._exit(86)
@@ -55,7 +55,7 @@ def atomic_json(path, value):
 
 
 # Preserve the existing call interface; the platform implementations live separately.
-from locking import lock
+from .locking import lock
 
 
 def add(work, kind, body, entity_id=None):
@@ -108,7 +108,7 @@ def decimal_calc(expression, values, places, rounding):
 def materialize(work, assessment):
     """Resolve session-authored aliases; no business answers or case-name routing."""
     if work.get('update_context') and not work.get('_applying_update'):
-        import updates
+        from . import updates
         return updates.materialize(work, assessment)
     work = copy.deepcopy(work)
     allowed = {'source_annotations', 'observations', 'tasks', 'claims', 'evidence', 'links', 'gaps',
@@ -425,9 +425,9 @@ def validate_records(work):
     main = work['project'].get('selected_main_version')
     if main: ref(main, 'SourceVersion', 'selected_main_version')
     require(not errors, '\n'.join(errors))
-    from visual_checks import validate as validate_visual_checks
+    from .visual_checks import validate as validate_visual_checks
     validate_visual_checks(work)
-    from reporting import reading_coverage
+    from .reporting import reading_coverage
     coverage = reading_coverage(work)
     return {'entities': len(records), 'calculations': sum(r['kind'] == 'Calculation' for r in records.values()), 'errors': [],
             'structure_valid': True, 'material_reading': coverage['state'], 'reading_issues': coverage['issues']}
@@ -451,7 +451,7 @@ def freeze(work):
 
 def thaw(ledger):
     if ledger.get('schema_version') == 'evidence-ledger-2.0':
-        import history
+        from . import history
         return history.thaw(ledger)
     require(ledger.get('schema_version') == SCHEMA, 'Unknown ledger schema')
     unsigned = {k: v for k, v in ledger.items() if k != 'integrity_sha256'}
@@ -487,16 +487,16 @@ def render(work, project_path):
     old_outputs = [x for x in r.values() if x['kind'] == 'OutputRecord' and x.get('run_id') == run['id']]
     renderer_version = work.get('_renderer_version', old_outputs[0].get('renderer_version', 1) if old_outputs else 7)
     if renderer_version >= 7:
-        import reporting_v7
+        from . import reporting_v7
         return reporting_v7.render(work, project_path)
     if renderer_version >= 6:
-        import reporting
+        from . import reporting
         return reporting.render(work, project_path)
     if renderer_version >= 5:
-        import reporting_v5
+        from . import reporting_v5
         return reporting_v5.render(work, project_path)
     if renderer_version >= 4:
-        import history
+        from . import history
         return history.render(work, project_path)
     full = bool(set(work['project']['modes']) & {'verify', 'coverage', 'review', 'draft'})
 

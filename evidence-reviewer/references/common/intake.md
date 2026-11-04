@@ -27,7 +27,7 @@
 
 macOS可用`textutil -convert txt -stdout "文件.doc"`快速检索DOC，转换保存在缓存；DOCX优先用当前OOXML读取器保留段落、单元格及修订层。`unzip -p`查看XML可定位线索，但不能用正则拼接所有`w:t`代替结构读取：可能误并表格、插入/删除文字，遗漏文本框、图片、页眉页脚及批注。纯文本相同也不代表两个版本相同。
 
-修订稿要分清最终显示正文、删除、插入、隐藏、批注和用户要求保留的颜色。原页视觉确认与文本抽取分别记录；编辑与渲染交付见[cross-file-consistency.md](cross-file-consistency.md)。
+修订稿要分清最终显示正文、删除、插入、隐藏、批注和用户要求保留的颜色。原页视觉确认与文本抽取分别记录；编辑与渲染交付见[../evidence-review/cross-file-consistency.md](../evidence-review/cross-file-consistency.md)。
 
 DOCX中word/media媒体会被提取登记，但脚本不自动确定其正文位置；采用图片内容前结合所在页、图注/标题及相邻文字确认归属。遇到图像工具无法显示的媒体格式，尝试整页渲染等可用路径，无法查看则明确范围，不称已读完。
 

@@ -191,7 +191,7 @@ def read(path, cache):
     try:
         suffix = path.suffix.lower()
         if suffix in {'.doc', '.xls'}:
-            from converters import convert
+            from .converters import convert
             target = 'docx' if suffix == '.doc' else 'xlsx'
             out = convert(path, cache, target, provenance)
             rows = docx(out, cache) if target == 'docx' else xlsx(out, cache)

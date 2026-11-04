@@ -1,6 +1,6 @@
 """Version/range-bound visual work, carried forward until observed or explicitly released."""
 import copy
-import ledger as L
+from . import ledger as L
 
 
 def scopes_for(work, change, visual):

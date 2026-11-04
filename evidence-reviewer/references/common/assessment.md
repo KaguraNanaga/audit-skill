@@ -4,7 +4,7 @@ assessment.json是完成实际阅读后的结构化结果，不是要求脚本�
 
 ## 结果与任务
 
-用户报告的“基本相符/确认有误/需要解释/证据不足”属于呈现层，不是下列枚举的新值。须按每条Claim/Finding的命题方向、实际证据及未获证范围映射，见[报告核验结论等级](report-verification.md)。业务口径和最小修改可写入现有basis、summary、limitations、recommended_action等字段；不自行增加强制字段或改写已提交台账。
+用户报告的“基本相符/确认有误/需要解释/证据不足”属于呈现层，不是下列枚举的新值。须按每条Claim/Finding的命题方向、实际证据及未获证范围映射，见[报告核验结论等级](../evidence-review/report-verification.md)。业务口径和最小修改可写入现有basis、summary、limitations、recommended_action等字段；不自行增加强制字段或改写已提交台账。
 
 重要判断提交前按[准确性核查与交付检查](accuracy-and-context.md)完成上下文、视觉证据、数值/推断及反证检查。将实际检查范围与具体结果写入现有任务、证据和review_checks；受相关未读上下文或不可辨图像影响的命题不得标supported。保留可单独证明的子命题，未完成与证据不足分别说明；不要为满足检查伪造阅读、计算或引用。
 

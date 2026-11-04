@@ -225,8 +225,10 @@ class PublicCLI(unittest.TestCase):
 
 if __name__ == "__main__":
     import test_platform
+    import test_structure
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(PublicCLI)
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_platform))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_structure))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     print(json.dumps({"tests_run": result.testsRun,
                       "passed": result.testsRun - len(result.skipped) - len(result.failures) - len(result.errors),

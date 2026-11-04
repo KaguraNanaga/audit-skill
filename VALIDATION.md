@@ -89,3 +89,19 @@ python3 -B tools/check_release.py
 本地最终完整测试另已实际执行：macOS/Python3.14.3为22通过、1跳过（仅Windows专属测试），0失败/0错误；两项真实工具测试通过。技能quick_validate及git diff --check也已实际通过。阶段1未新增Python依赖，无新增网络、遥测或上传接口；CLI import-web仍只导入用户实际取得的本地工具响应。
 
 收尾复核还将“请求主稿本身为Windows非法文件名”的分支纳入既有文件名测试：应逐文件failed、主稿未选定并说明原因，其余材料照常处理。此分支通过本地定向测试；新增分支所在最终提交另由CI复验。
+
+## 7. 阶段 1.5：目录迁移实测（2026-11-04）
+
+调整前基线：阶段1验收提交a0cb3714fa7a9d543eb1af0b9b436c38204a73b9对应的工作区，修改前按原66份发布清单逐文件验证并复制到包外临时目录。本地HEAD仍为旧发布，未将其误用为本阶段基线。
+
+实际环境沿用本机macOS26.6.2 arm64/Python3.14.3，pypdf6.12.1、openpyxl3.1.5、LibreOffice26.8.0.3。已执行：
+
+- 提供EVIDENCE_REVIEWER_BASELINE后运行 `python3 -B tests/test_public.py`：31项中30通过、1跳过（仅Windows专属共享占用测试），0失败/错误。包含真实LibreOffice转换和Poppler渲染，执行环境为沙箱外。
+- 单独运行 `python3 -B tests/test_platform.py`：15项中14通过、1跳过（Windows专属测试），0失败/错误。
+- `python3 -B tests/test_structure.py`：8项通过，0跳过、0失败/错误。实际核对了import以外的AST不变、迁移参考原文及SKILL旧章节保留、prepare入口help不变、旧schema1/2项目继续inspect/validate/update/export，以及已提交renderer7导出删除后的原字节重建。
+- `python3 -B tools/compare_structure.py --baseline BASELINE_DIRECTORY`：实际运行调整前后的begin/inspect，财务3文件33单元、合同4文件11单元、内控3文件12单元、任期2文件9单元，共12份输入65单元，全部字段比较一致。
+- 对照没有删除任何字段；在隔离测试进程固定L.uid序列和L.now时钟，仍比较所有ID引用及时间字段；仅规范化各自项目绝对根前缀。原件指纹、正文、locator、公式、缓存、状态、限制、工具/引擎版本均未屏蔽。
+- `python3 -B tools/check_links.py`：77个本地链接通过，0错误；负向用例能拒绝缺失文件、越界路径、缺失锚点和未定义参考。外部URL不联网验证。
+- `python3 -B tools/check_release.py --write-manifest`及不带写参数的普通校验均通过：73份文件。quick_validate、git diff --check通过。原冻结输入、既有stage1夹具及固定旧提交的生成器未改写。
+
+阶段1.5 CI尚待执行；上列结果只对应实际本地检查，不推断其他环境结果。schema、引擎、读取器和renderer版本保持，不新增Python依赖或运行脚本联网路径；维护者指南不随skill子目录分发。

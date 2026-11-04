@@ -4,14 +4,14 @@ import hashlib
 import re
 from urllib.parse import quote
 
-import ledger as L
-from persistence import atomic_bytes
+from . import ledger as L
+from .persistence import atomic_bytes
 
 ROOT_TOKEN = '__EVIDENCE_PROJECT_ROOT__'
 
 
 def render(work, project=None, relative_root='../..', output_directory='outputs'):
-    from reporting import render as previous
+    from .reporting import render as previous
     result = previous(work, ROOT_TOKEN)
     def link(match):
         suffix = match.group(1).replace('\\', '/').lstrip('/')
@@ -24,7 +24,7 @@ def render(work, project=None, relative_root='../..', output_directory='outputs'
 
 def export_portable(project, ledger, api):
     """Explicit export only. No ledger/history/pointer changes, new directory each time."""
-    import history as H
+    from . import history as H
     work = L.thaw(ledger)
     api.check_files(project, work, check_outputs=True)
     directory = project / 'outputs' / ('portable-' + L.uid())

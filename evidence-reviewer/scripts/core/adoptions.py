@@ -1,6 +1,6 @@
 """Keep historical evidence links immutable while explicitly stopping current adoption."""
 import copy
-import ledger as L
+from . import ledger as L
 
 
 def retire_links(work, requested):

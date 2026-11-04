@@ -20,15 +20,15 @@ import test_public as public
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / 'evidence-reviewer/scripts'
 sys.path.insert(0, str(SCRIPTS))
-import converters
-import history
-import ledger as L
-import locking
-import persistence
-import prepare
-import readers
+from core import converters
+from core import history
+from core import ledger as L
+from core import locking
+from core import persistence
+from core import prepare
+from core import readers
 import review
-import updates
+from core import updates
 
 
 class PlatformCLI(unittest.TestCase):
@@ -172,7 +172,7 @@ class LocalMechanics(unittest.TestCase):
     def tearDown(self): self.tmp.cleanup()
 
     def test_kernel_lock_contention_timeout_and_crash_release(self):
-        code="import sys,time;sys.path.insert(0,sys.argv[1]);from locking import lock;from pathlib import Path\nwith lock(Path(sys.argv[2])):\n print('locked',flush=True)\n time.sleep(30)\n"
+        code="import sys,time;sys.path.insert(0,sys.argv[1]);from core.locking import lock;from pathlib import Path\nwith lock(Path(sys.argv[2])):\n print('locked',flush=True)\n time.sleep(30)\n"
         p=subprocess.Popen([sys.executable,'-B','-c',code,str(SCRIPTS),str(self.base)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,encoding='utf-8')
         try:
             self.assertEqual(p.stdout.readline().strip(),'locked')

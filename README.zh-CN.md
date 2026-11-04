@@ -125,7 +125,7 @@ DEMO_PY
 
 再让宿主按 `tests/cases/financial/request.md` 和已取得的实际单元继续核查。演练目录由命令新建，使用结束后可自行清理。
 
-需要台账时，按 [workflow.md](evidence-reviewer/references/workflow.md) 准备请求并执行 `begin`、`inspect`；依据本轮实际阅读填写评估，再执行 `check-assessment`、`finalize` 和 `validate`。`begin` 仅准备快照与读取单元，不输出自动审计结论；`assessment.json` 的事实和判断必须由实际核查形成。项目必须位于材料目录之外，并使用新的项目路径。
+需要台账时，按 [workflow.md](evidence-reviewer/references/common/workflow.md) 准备请求并执行 `begin`、`inspect`；依据本轮实际阅读填写评估，再执行 `check-assessment`、`finalize` 和 `validate`。`begin` 仅准备快照与读取单元，不输出自动审计结论；`assessment.json` 的事实和判断必须由实际核查形成。项目必须位于材料目录之外，并使用新的项目路径。
 
 台账输出包括 `review.md`、`handoff.md`、`changes.md`、`history.md`，编制任务另有 `draft.md`。用户交付仍可集中为一张核查表或可替换段落。项目内部保留原件快照、缓存和历史，均按敏感审计材料管理；新轮 renderer 7 使用相对链接，整个项目可移动。旧 renderer 1–6 导出保留原字节；只有显式 `export --portable` 才在新目录生成可移动视图。
 
@@ -147,3 +147,9 @@ python3 -B tools/check_release.py
 本包 Python 脚本没有内置联网、遥测或上传接口；它会在指定项目目录写入材料副本、摘录、计算和历史。模型宿主、浏览工具、外部渲染器或连接器各有自己的数据处理方式与权限。**使用本地文件不等于模型推理全程离线，也不构成“数据不出本机”的承诺。** 使用前按单位要求选择宿主与数据权限；对外查询使用必要的公开关键词，不把未授权的审计原文、个人信息或商业秘密发送到搜索服务、连接器或公开仓库。
 
 本包原创代码、方法文档和合成案例采用 [Apache License 2.0](LICENSE)。PDF 样例内嵌的字体子集另按 [Bitstream Vera 字体许可](tests/FONT_LICENSE.txt) 使用；第三方依赖按各自许可使用。用户材料、官方标准及外部来源不因被核查或链接而获得 Apache 2.0 授权。发布者应有权发布其提供的内容；此授权不代表对具体材料的保密或版权状态作出认定。公开包只包含选定的代码、说明与合成测试资料，真实业务项目应放在包外。
+
+## 单 skill 与内部模块
+
+名称仍为 evidence-reviewer；唯一 SKILL.md 保留共同原则并路由到 evidence-review 模块。共享文档在 references/common/，专用方法在 references/evidence-review/；通用 Python 实现在 scripts/core/。CLI 仍为 scripts/review.py，既有命令、参数和输出不变，原 scripts/prepare.py 也保留兼容入口。当前没有独立的证据复核专用算法，不创建空的 evidence_review 代码包。
+
+升级已安装版本时，先备份旧 evidence-reviewer 目录，再用新的整个同名目录完整替换；不要把新旧文件合并为混合安装。原业务项目及台账保留，不执行迁移或重写。frontmatter 名称与 agents 元数据不变。模块接入见[维护者说明](docs/internals.md)，文档只随仓库分发，不随安装的 skill 子目录分发。

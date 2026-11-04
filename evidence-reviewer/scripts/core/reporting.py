@@ -1,4 +1,4 @@
-"""Renderer 5: disclose acquisition limitations without rewriting renderer 1–4 exports."""
+"""Renderer 6: unresolved visual scopes persist; renderer 5 is frozen separately."""
 from pathlib import Path
 
 
@@ -23,17 +23,25 @@ def reading_coverage(work):
             if u['state'] in {'unread', 'failed', 'manual_check'} and (vid, u['id']) not in viewed:
                 issues.append(dict(file=name, source_version_id=vid, locator=u['locator'], stage='read',
                                    reason='；'.join(u.get('errors', []) + u.get('limitations', [])) or u['state'], uncovered_scope='该单元未完成读取或原页核查'))
-    for screening in run.get('screening', []):
-        visual = screening.get('visual_check', {})
-        if visual.get('state') == 'unavailable':
-            change = next(c for c in run['changes'] if c['id'] == screening['change_id'])
-            issues.append(dict(file=change['description'], stage='visual', reason=visual['basis'], uncovered_scope='关键视觉变化未核，相关业务含义不能视为已确认'))
+    from .visual_checks import current_checks, observations
+    for item in current_checks(work):
+        if item['state'] == 'pending':
+            coverage = observations(work, item['scopes'])
+            scope_text = []
+            for s in item['scopes']:
+                v = work['records'][s['source_version_id']]
+                from .ledger import locator_text
+                units = [locator_text(u['locator']) for u in work['units'][v['id']] if u['id'] in s['unit_ids']]
+                scope_text.append((v.get('actual_name') or work['records'][v['source_id']]['actual_name']) + '（版本' + v['id'] + '；' + '、'.join(units) + '）')
+            issues.append(dict(file=item['description'], stage='visual', visual_check_id=item['id'],
+                reason=item['history'][-1]['reason'], scopes=item['scopes'], missing_scope=coverage['missing'],
+                uncovered_scope='关键视觉变化未核，相关业务含义不能视为已确认；需核范围：' + '；'.join(scope_text)))
     return dict(state='partial' if issues else 'complete', issues=issues,
                 meaning='材料读取状态，不等于业务审查充分性或原件真实性')
 
 
 def render(work, project):
-    from history import render as old_render
+    from .history import render as old_render
     result = old_render(work, project)
     coverage = reading_coverage(work)
     lines = ['## 自动汇总的材料读取覆盖', '', '结构校验通过不等于材料读取充分。读取状态：' + ('部分完成' if coverage['issues'] else '未登记读取失败；不代表已核查全部业务事实') + '。', '']
@@ -64,4 +72,17 @@ def render(work, project):
             gap_section += '- ' + gap['expected_fact'] + '：' + status + '；' + str(gap.get('resolution_reason') or '未取得解决理由') + '\n'
         result['review.md'] += gap_section
         result['handoff.md'] += gap_section
+    from .visual_checks import current_checks
+    checks = current_checks(work)
+    if checks:
+        history_section = '\n## 原页视觉核查沿革\n\n'
+        for item in checks:
+            history_section += '- ' + item['id'] + '；' + item['description'] + '；状态：' + item['state'] + '\n'
+            for e in item['history']:
+                history_section += '  - 轮次：' + e['run_id'] + '；' + e['state'] + '；' + e['reason'] + '；观察：' + '、'.join(e['observation_ids']) + '\n'
+            if item['state'] != 'pending':
+                label = '对应范围已完成查看' if item['state']=='viewed' else '已退出相关核查范围，不表示已经查看'
+                line = '\n原页核查处理：' + item['description'] + '；' + label + '；理由：' + item['history'][-1]['reason'] + '。\n'
+                result['review.md'] += line; result['handoff.md'] += line
+        result['history.md'] += history_section
     return result

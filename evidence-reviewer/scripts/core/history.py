@@ -6,7 +6,7 @@ import os
 import shutil
 from pathlib import Path
 
-import ledger as L
+from . import ledger as L
 
 SCHEMA = 'evidence-ledger-2.0'
 BUSINESS = {'ReviewTask', 'Claim', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding'}
@@ -99,7 +99,7 @@ def as_of(ledger, run_id):
                           if ledger['runs'][run_id]['previous_run_id'] is not None and r['run_id'] in known and r['after']['kind'] in BUSINESS],
                 _run_order=known)
     if not work['run'].get('visual_checks_version'):
-        from visual_checks import legacy_checks
+        from .visual_checks import legacy_checks
         work['_legacy_visual_checks'] = legacy_checks(ledger, run_id)
     return work
 
@@ -134,7 +134,7 @@ def thaw(ledger):
             L.require(set(prev['current']) <= set(snap['current']), 'Historical entity disappeared')
         aswork = as_of(ledger, rid)
         L.validate_records(aswork)
-        from visual_checks import validate as validate_visual, current_checks
+        from .visual_checks import validate as validate_visual, current_checks
         if i: validate_visual(aswork, current_checks(as_of(ledger, order[i-1])))
         if i and ledger['runs'][order[i-1]].get('visual_checks_version'):
             L.require(run.get('visual_checks_version') == 1, 'Visual check persistence cannot be disabled')
@@ -260,7 +260,7 @@ def write_exports(project, ledger, api):
             L.require(hashlib.sha256(content.encode()).hexdigest() == record['sha256'], 'Renderer differs from committed output fingerprint: ' + rel)
             path = project / rel
             path.parent.mkdir(parents=True, exist_ok=True)
-            from persistence import atomic_bytes
+            from .persistence import atomic_bytes
             atomic_bytes(path, content.encode('utf-8'))
             if rid == ledger['latest_run_id'] and number == 0: fault('after_first_export')
     work = L.thaw(ledger)
@@ -313,5 +313,5 @@ def finalize(project, work, api):
 
 
 def recover(args, api):
-    from recovery import recover as restore
+    from .recovery import recover as restore
     return restore(args, api)

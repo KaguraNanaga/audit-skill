@@ -26,6 +26,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
@@ -33,8 +34,39 @@ jobs:
         run: python -m pip install -r requirements.txt
       - name: Record actual environment and optional tools
         run: python -c "import sys,platform,shutil,importlib.metadata as m; print(platform.platform(),sys.version); print({p:m.version(p) for p in ('pypdf','openpyxl')}); print({p:shutil.which(p) for p in ('pdftoppm','soffice','textutil')})"
+      - name: Prepare verified stage-1 baseline from local Git objects
+        shell: python
+        run: |
+          import io, os, pathlib, shutil, subprocess, tarfile, tempfile
+          baseline = pathlib.Path(tempfile.mkdtemp(prefix='stage1-baseline-', dir=os.environ['RUNNER_TEMP'])).resolve()
+          archive = subprocess.check_output(['git', 'archive', 'a0cb3714fa7a9d543eb1af0b9b436c38204a73b9'])
+          with tarfile.open(fileobj=io.BytesIO(archive)) as source:
+              for member in source.getmembers():
+                  relative = pathlib.PurePosixPath(member.name)
+                  if relative.is_absolute() or '..' in relative.parts or member.issym() or member.islnk():
+                      raise ValueError('Unexpected archive member')
+                  target = baseline.joinpath(*relative.parts)
+                  if member.isdir():
+                      target.mkdir(parents=True, exist_ok=True)
+                  elif member.isfile():
+                      target.parent.mkdir(parents=True, exist_ok=True)
+                      with source.extractfile(member) as original, target.open('wb') as output:
+                          shutil.copyfileobj(original, output)
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as output:
+              output.write('EVIDENCE_REVIEWER_BASELINE=' + str(baseline) + '\n')
       - name: CLI and platform tests (skips reported separately)
         run: python -B tests/test_public.py
+      - name: Standalone platform tests
+        run: python -B tests/test_platform.py
+      - name: Standalone structure tests
+        run: python -B tests/test_structure.py
+      - name: Before and after comparison
+        shell: python
+        run: |
+          import os, subprocess, sys
+          subprocess.run([sys.executable, '-B', 'tools/compare_structure.py', '--baseline', os.environ['EVIDENCE_REVIEWER_BASELINE']], check=True)
+      - name: Local documentation links
+        run: python -B tools/check_links.py
       - name: Release integrity
         if: always()
         run: python -B tools/check_release.py

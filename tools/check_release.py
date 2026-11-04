@@ -9,6 +9,8 @@ import re
 import sys
 import zipfile
 
+from check_links import check_links
+
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "RELEASE_MANIFEST.json"
 ROOT_FILES = {
@@ -47,7 +49,9 @@ def release_files():
             or s == "evidence-reviewer/LICENSE"
             or s == "evidence-reviewer/agents/openai.yaml"
             or (rel.parent.as_posix() == "evidence-reviewer/scripts" and p.suffix == ".py")
-            or (rel.parent.as_posix() == "evidence-reviewer/references" and p.suffix == ".md")
+            or (len(rel.parts) == 4 and rel.parts[:3] == ("evidence-reviewer", "scripts", "core") and p.suffix == ".py")
+            or (len(rel.parts) == 4 and rel.parts[:2] == ("evidence-reviewer", "references") and rel.parts[2] in {"common", "evidence-review"} and p.suffix == ".md")
+            or s == "docs/internals.md"
             or (rel.parent.as_posix() == "tools" and p.suffix == ".py")
             or (rel.parts[0] == "tests" and p.suffix in TEXT_SUFFIXES | {".pdf", ".png", ".xlsx", ".docx"})
         )
@@ -76,16 +80,7 @@ def check_files(files):
         for member, text in inspected_texts(p):
             if PRIVATE_PATH.search(text) or KEY_PATTERN.search(text):
                 errors.append(f"review possible private path/key: {rel} {member}")
-        if p.suffix != ".md":
-            continue
-        for target in re.findall(r"\]\(([^\n)]+)\)", p.read_text(encoding="utf-8")):
-            target = target.strip().strip("<>")
-            if re.match(r"[a-zA-Z][a-zA-Z0-9+.-]*:", target) or target.startswith("#"):
-                continue
-            target = target.split("#", 1)[0]
-            dest = (p.parent / target).resolve()
-            if not dest.is_relative_to(ROOT) or not dest.exists():
-                errors.append(f"broken or nonportable local link: {rel} -> {target}")
+    errors.extend(check_links(ROOT, files)["errors"])
     return errors
 
 

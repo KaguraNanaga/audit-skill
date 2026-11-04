@@ -32,3 +32,13 @@
 本阶段不增加Python依赖、网络/遥测/上传接口，不改变schema 1/2或引擎0.3.1。包版本暂保留0.4.0-beta.1，六阶段全部完成再统一切换目标版本。
 
 阶段1验收：本机22通过/1跳过；七组真实CI全部成功，Windows每组21通过/2跳过，macOS/Ubuntu每组20通过/3跳过。CI缺少的LibreOffice/Poppler未计入通过；本机实际转换与渲染通过。已按真实原生Windows结果更新安装支持声明。CI首轮失败、修复及实际环境详见VALIDATION.md。
+
+## 0.5.0-beta.1 开发中 · 阶段 1.5（2026-11-04）
+
+- 保留evidence-reviewer名称、frontmatter描述与agents元数据；单一SKILL入口路由到evidence-review，现有规则按完整章节搬迁，不重写措辞。
+- 14份通用脚本迁至scripts/core，显式包导入并保留原有延迟import；review.py及prepare.py既有入口保留，未添加运行命令。
+- 参考文档分为common和evidence-review，新增模块入口及仓库维护者指南，说明后续模块目录、路由、命令注册和测试要求。
+- 增加离线链接检查、结构/原文对照、调整前后同一合成案例的真实begin/inspect，以及旧台账和导出字节兼容回归。更新CI和发布白名单。
+- 已安装旧版请先备份整个evidence-reviewer目录，再用新同名目录完整替换；避免混合两种布局。业务台账及项目不迁移、不静默改写。
+
+schema 1/2、引擎0.3.1、readers-1.1及renderer版本保持，运行输出内容不变。包版本仍保留0.4.0-beta.1，目标版本待全部阶段完成后统一切换。实际验收记录见VALIDATION.md。
