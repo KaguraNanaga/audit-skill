@@ -46,10 +46,11 @@ class StructureBaseline(unittest.TestCase):
         if not value: raise unittest.SkipTest('Provide verified stage-1 directory with EVIDENCE_REVIEWER_BASELINE; baseline comparisons not executed')
         cls.baseline=Path(value).resolve()
         cls.candidate=Path(os.environ.get('EVIDENCE_REVIEWER_STRUCTURE_CANDIDATE', str(ROOT))).resolve()
-        manifest=json.loads((cls.baseline/'RELEASE_MANIFEST.json').read_text(encoding='utf-8'))
-        for rel,sha in manifest['files'].items():
-            if hashlib.sha256((cls.baseline/rel).read_bytes()).hexdigest()!=sha:
-                raise ValueError('Baseline differs from stage-1 manifest: '+rel)
+        for baseline in (cls.baseline, cls.candidate):
+            manifest=json.loads((baseline/'RELEASE_MANIFEST.json').read_text(encoding='utf-8'))
+            for rel,sha in manifest['files'].items():
+                if hashlib.sha256((baseline/rel).read_bytes()).hexdigest()!=sha:
+                    raise ValueError('Baseline differs from its release manifest: '+rel)
 
     def test_before_after_begin_inspect(self):
         result=compare(self.baseline,self.candidate)

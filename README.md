@@ -4,7 +4,7 @@ A skill that helps auditors for internal audit, financial-statement audit, and o
 
 中文说明见 [README.zh-CN.md](README.zh-CN.md)。
 
-Public package version: **0.4.0-beta.1**. The ledger engine remains **0.3.1**; the two numbers identify the release package and the runtime engine separately. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for changes and [VALIDATION.md](VALIDATION.md) for what was actually tested and what was not.
+Public package version: **0.4.0-beta.1**. The ledger engine is **0.4.0**; the two numbers identify the release package and the runtime engine separately. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for changes and [VALIDATION.md](VALIDATION.md) for what was actually tested and what was not.
 
 ## Scope
 
@@ -127,7 +127,7 @@ Then have the host continue verification using `tests/cases/financial/request.md
 
 When a ledger is needed, prepare the request per [workflow.md](evidence-reviewer/references/common/workflow.md) and run `begin`, `inspect`; fill the assessment from this round's actual reading, then `check-assessment`, `finalize`, and `validate`. `begin` only prepares snapshots and read units—it does not emit automatic audit conclusions; facts and judgments in `assessment.json` must come from actual review. Keep the project **outside** the materials directory and use a new project path.
 
-Ledger outputs include `review.md`, `handoff.md`, `changes.md`, and `history.md`; draft tasks also get `draft.md`. User deliverables can still be one verification table or replaceable paragraphs. Inside the project, original snapshots, caches, and history are sensitive audit material; renderer 7 uses relative links and supports moving the whole project. Renderers 1–6 keep their historical bytes; only explicit `export --portable` produces a portable view in a new directory.
+Ledger outputs include `review.md`, `handoff.md`, `changes.md`, and `history.md`; draft tasks also get `draft.md`. User deliverables can still be one verification table or replaceable paragraphs. Inside the project, original snapshots, caches, and history are sensitive audit material; renderer 8 inherits relative links and supports moving the whole project. Renderers 1–7 keep their historical bytes; only explicit `export --portable` produces a portable view in a new directory.
 
 ## Testing and validation
 

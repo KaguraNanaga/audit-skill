@@ -68,6 +68,8 @@ def append_revision(ledger, body, run, reason, triggers):
 def build(base, work):
     out = upgrade(base)
     run = work['run']
+    for version, units in base['units'].items():
+        L.require(work['units'].get(version, [])[:len(units)] == units, 'Historical units cannot be changed or removed; append new derived units only')
     L.require(run['previous_run_id'] == base['latest_run_id'], 'Update base is not the latest completed run')
     L.require(run['id'] not in out['runs'], 'Run already committed')
     out['runs'][run['id']] = copy.deepcopy(run)
@@ -119,6 +121,8 @@ def thaw(ledger):
     positions = {r: i for i, r in enumerate(order)}
     for i, rid in enumerate(order):
         run = ledger['runs'][rid]
+        if run.get('derived_units_version'):
+            L.require(ledger['schema_version'] == DERIVED_SCHEMA and run['derived_units_version'] == 1, 'Derived-unit runs require schema 3/version 1')
         L.require(run['id'] == rid and run['state'] == 'completed', 'Uncommitted run in authoritative ledger')
         L.require(run['previous_run_id'] == (order[i-1] if i else None), 'Broken run chain')
         if run.get('event_id'):

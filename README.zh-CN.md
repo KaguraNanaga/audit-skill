@@ -4,7 +4,7 @@
 
 English documentation: [README.md](README.md).
 
-公开包版本：**0.4.0-beta.1**。台账引擎沿用 **0.3.1**；两者分别表示发布包和运行引擎版本。变更见 [RELEASE_NOTES.md](RELEASE_NOTES.md)，实际测试及未验证范围见 [VALIDATION.md](VALIDATION.md)。
+公开包版本：**0.4.0-beta.1**。台账引擎为 **0.4.0**；两者分别表示发布包和运行引擎版本。变更见 [RELEASE_NOTES.md](RELEASE_NOTES.md)，实际测试及未验证范围见 [VALIDATION.md](VALIDATION.md)。
 
 ## 适用范围
 
@@ -127,7 +127,7 @@ DEMO_PY
 
 需要台账时，按 [workflow.md](evidence-reviewer/references/common/workflow.md) 准备请求并执行 `begin`、`inspect`；依据本轮实际阅读填写评估，再执行 `check-assessment`、`finalize` 和 `validate`。`begin` 仅准备快照与读取单元，不输出自动审计结论；`assessment.json` 的事实和判断必须由实际核查形成。项目必须位于材料目录之外，并使用新的项目路径。
 
-台账输出包括 `review.md`、`handoff.md`、`changes.md`、`history.md`，编制任务另有 `draft.md`。用户交付仍可集中为一张核查表或可替换段落。项目内部保留原件快照、缓存和历史，均按敏感审计材料管理；新轮 renderer 7 使用相对链接，整个项目可移动。旧 renderer 1–6 导出保留原字节；只有显式 `export --portable` 才在新目录生成可移动视图。
+台账输出包括 `review.md`、`handoff.md`、`changes.md`、`history.md`，编制任务另有 `draft.md`。用户交付仍可集中为一张核查表或可替换段落。项目内部保留原件快照、缓存和历史，均按敏感审计材料管理；新轮 renderer 8 继承相对链接，整个项目可移动。旧 renderer 1–7 导出保留原字节；只有显式 `export --portable` 才在新目录生成可移动视图。
 
 ## 验证与反馈
 

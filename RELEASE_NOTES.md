@@ -53,3 +53,5 @@ schema 1/2、引擎0.3.1、readers-1.1及renderer版本保持，运行输出内�
 - requirements-ocr.txt独立可选；固定RapidOCR包仅支持Python<3.13，其他解释器使用本地Tesseract。运行脚本不增加网络/遥测/上传或自动下载模型。包版本暂不升至最终目标。
 
 实际验证结果完成后记录在VALIDATION.md，不把模拟输出计为实际OCR识别。
+
+阶段3实际验收：本机完整测试38通过/3跳过；第二轮七组平台CI及独立双后端OCR任务全部成功。旧账、历史字节、按轮单元范围、恢复与OCR采用门槛通过。首轮Tesseract金额识别错误及失败测试保留于VALIDATION.md；实际OCR能力仅验证合成定位流程。收尾保留新portable视图OCR警示，增加原单元不可改写、schema降级及图片签名检查。

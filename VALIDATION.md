@@ -136,3 +136,22 @@ python3 -B tools/check_release.py
 阶段3首轮CI已实际执行：[41936507008](https://github.com/KaguraNanaga/audit-skill/actions/runs/41936507008)，提交aefed414。可选OCR任务中RapidOCR实际识别通过；Tesseract实际识别得到“SYNTHETIC AMOUNT 125,45”，与合成原图123.45不一致，使原来要求数字123正确的测试失败。原图及冻结指纹保持，改为验证AMOUNT定位标识、bbox/来源链、search警示和仅OCR不可提交的实际流程；金额识别错误作为能力限制保留，不把测试调整宣称为数值准确率提高。实际环境为Ubuntu26.04.1/Python3.12.15，Tesseract5.5.0（chi_sim+eng）、RapidOCR1.4.4、onnxruntime1.31.1、opencv-python5.0.0.93、numpy2.5.4。两后端的bbox/置信度结构实际返回；本轮没有中文识别准确率评测。
 
 收尾另实际测试新schema显式portable视图：选择renderer8保留OCR警示，旧轮仍用renderer7；原台账/历史导出字节不改写。再次完整测试结果及最终CI在实际执行后追加。
+
+第二轮CI实际完成：[41936738706](https://github.com/KaguraNanaga/audit-skill/actions/runs/41936738706)，提交0cca05d2，八组均成功。基础七组完整测试各41项；独立可选OCR任务真实执行两个后端的识别、登记、search标注和OCR-only拒绝流程，2通过、0跳过、0失败/错误。
+
+| 实际环境 | Python | 完整测试通过/跳过 | 日志 |
+|---|---|---|---|
+| macOS arm64 | 3.11.9 | 36 / 5 | [126946981151](https://github.com/KaguraNanaga/audit-skill/actions/runs/41936738706/job/126946981151) |
+| macOS arm64 | 3.12.10 | 36 / 5 | [126946981062](https://github.com/KaguraNanaga/audit-skill/actions/runs/41936738706/job/126946981062) |
+| Ubuntu | 3.11.18 | 36 / 5 | [126946981227](https://github.com/KaguraNanaga/audit-skill/actions/runs/41936738706/job/126946981227) |
+| Ubuntu | 3.12.16 | 36 / 5 | [126946981184](https://github.com/KaguraNanaga/audit-skill/actions/runs/41936738706/job/126946981184) |
+| Ubuntu | 3.14.9 | 36 / 5 | [126946981262](https://github.com/KaguraNanaga/audit-skill/actions/runs/41936738706/job/126946981262) |
+| Windows | 3.11.9 | 37 / 4 | [126946981026](https://github.com/KaguraNanaga/audit-skill/actions/runs/41936738706/job/126946981026) |
+| Windows | 3.12.10 | 37 / 4 | [126946980851](https://github.com/KaguraNanaga/audit-skill/actions/runs/41936738706/job/126946980851) |
+| Ubuntu可选OCR | 3.12.16 | 实际双后端 2 / 0 | [126946981161](https://github.com/KaguraNanaga/audit-skill/actions/runs/41936738706/job/126946981161) |
+
+基础矩阵缺LibreOffice、Poppler及两个OCR后端；POSIX另跳过Windows专属测试，未计作通过。各基础任务单独平台测试Windows13/2、POSIX12/3，结构测试均8/0；固定阶段1→1.5的实际begin/inspect对照、本地链接及84份发布清单均通过。首轮失败及错误识别限制仍保留。真实OCR仅验证本合成英语字形的定位流程，不推断中文/金额准确率或其他系统后端支持。当前不保证多帧图片、未知页图绑定、全部图像格式或复杂版式。
+
+最终收尾另加入原单元不可改写、schema降级拒绝、仅接收本地图像签名（拒绝文件列表/URL）和两份历史基线清单验证；本机重复完整回归记录在最终验收中，未改冻结输入。普通发布校验、离线链接检查（86个）、技能quick_validate及git diff --check已实际通过。
+
+最终本机完整测试已实际再次执行（包含上述收尾校验）：41项，38通过、3跳过、0失败/错误；同样提供两份经过清单校验的固定历史基线。普通发布检查84份通过、86个链接通过、quick_validate及git diff --check通过。跳过范围未变，不把缺后端记作实际识别。

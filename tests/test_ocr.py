@@ -71,6 +71,11 @@ class OCRContract(unittest.TestCase):
 
     def test_unavailable_failure_and_timeout_keep_remaining_work(self):
         source=self.image()
+        invalid=self.base/'not-an-image.png';invalid.write_text('https://example.invalid/image.png')
+        with patch.object(ocr_backends,'run_tool') as process:
+            with self.assertRaisesRegex(ValueError,'local image'):
+                ocr_backends.recognize(invalid,self.base/'out.json',dict(engine='tesseract'),1)
+            process.assert_not_called()
         for failure in (FileNotFoundError('synthetic backend unavailable'),TimeoutError('synthetic timeout')):
             with patch.object(ocr_backends,'describe',side_effect=failure):result=ocr.run(self.args(source),review)
             self.assertEqual(result['state'],'partial')
@@ -96,11 +101,20 @@ class OCRContract(unittest.TestCase):
         proc=subprocess.run([sys.executable,'-B',str(public.CLI),'finalize','--project',str(self.project),'--assessment',str(path)],env=dict(os.environ,EVIDENCE_REVIEWER_FAILPOINT='after_replace'),capture_output=True)
         self.assertEqual(proc.returncode,86,proc.stderr)
         current=json.loads((self.project/'ledger/ledger.json').read_text());self.assertTrue(recovery.contains(current,base))
+        downgraded=copy.deepcopy(current);downgraded['schema_version']='evidence-ledger-2.0'
+        with self.assertRaisesRegex(ValueError,'schema 3'):
+            L.thaw(history.signed(downgraded))
         self.assertEqual(recovery.reconstruct_base(current,base['integrity_sha256']),base)
         self.call('recover');self.call('validate')
         old=self.call('inspect','--run',rid);self.assertEqual(len(old['sources'][0]['units']),1)
         self.assertEqual(len(self.call('inspect')['sources'][0]['units']),2)
         for p,content in exports.items():self.assertEqual(p.read_bytes(),content)
+        self.call('update','--request',self.json_file('tamper-update.json',dict(event_id='tamper-original',reason='Synthetic immutable-unit guard')))
+        work=review.get_work(self.project)
+        work['units'][source['version']['id']][0]['limitations'].append('synthetic forbidden historical mutation')
+        # The build guard is independent of business assertions or OCR backend availability.
+        with self.assertRaisesRegex(ValueError,'Historical units'):
+            history.build(current,work)
 
     def test_existing_schema1_and2_update_adds_ocr_without_rewriting_history(self):
         fixtures=json.loads((ROOT/'tests/platform-fixtures/legacy.json').read_text())

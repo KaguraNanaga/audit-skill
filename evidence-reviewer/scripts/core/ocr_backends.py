@@ -58,6 +58,11 @@ def recognize(image, output, metadata, timeout):
     image, output = Path(image).resolve(), Path(output).resolve()
     if not image.is_file():
         raise FileNotFoundError('Registered page image missing')
+    with image.open('rb') as stream:
+        header = stream.read(16)
+    if not (header.startswith((b'\x89PNG\r\n\x1a\n', b'\xff\xd8\xff', b'II*\0', b'MM\0*', b'II+\0', b'MM\0+', b'BM')) or
+            (header.startswith(b'RIFF') and header[8:12] == b'WEBP')):
+        raise ValueError('OCR input must be a supported local image, never a filename list or URL')
     if metadata['engine'] == 'tesseract':
         text, _ = run_tool([metadata['executable'], str(image), 'stdout', '-l', 'chi_sim+eng', '--psm', '3', '--oem', '1', 'tsv'], timeout)
         blocks = []

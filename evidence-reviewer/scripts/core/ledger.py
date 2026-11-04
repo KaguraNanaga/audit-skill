@@ -461,6 +461,7 @@ def thaw(ledger):
         from . import history
         return history.thaw(ledger)
     require(ledger.get('schema_version') == SCHEMA, 'Unknown ledger schema')
+    require(not any(r.get('derived_units_version') for r in ledger['runs'].values()), 'Derived-unit runs require schema 3')
     unsigned = {k: v for k, v in ledger.items() if k != 'integrity_sha256'}
     require(ledger.get('integrity_sha256') == checksum(unsigned), 'Ledger integrity mismatch; preserve damaged file and inspect validated-candidate/backup, never reset to empty')
     require(set(ledger['entities']) == set(ledger['current']), 'Entity/current mismatch')
