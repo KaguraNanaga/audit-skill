@@ -81,10 +81,12 @@ schema 1/2、引擎0.3.1、readers-1.1及renderer版本保持，运行输出内�
 
 ## 0.5.0-beta.1 开发中 · 阶段 5：文档改写（2026-11-05）
 
-以阶段2验收提交8cd924eb478bc670f82ad0f93e8f59cfee1d3162作为规则基线。保留evidence-reviewer及单skill内部模块结构；SKILL收敛为共同原则、模块路由和七步通用流程，加入材料指令边界、人的责任和当前OFD/WPS/XML、OCR、table-query、scaffold能力入口。正文52行，description154字符，常见错误表9行。通用重复规则指向唯一位置，事务/锁/持久化和历史实现移至仓库docs/internals.md；使用执行会话/宿主模型表述。
+以阶段2验收提交8cd924eb478bc670f82ad0f93e8f59cfee1d3162作为规则基线。保留evidence-reviewer及单skill内部模块结构；SKILL收敛为共同原则、模块路由和七步通用流程，加入材料指令边界、人的责任和当前OFD/WPS/XML、OCR、table-query、scaffold能力入口。SKILL共52行，description154字符，常见错误表9行。通用重复规则指向唯一位置，事务/锁/持久化和历史实现移至仓库docs/internals.md；使用执行会话/宿主模型表述。
 
 逐条对照1425项，合并128项、删除0项；SKILL与16份references合计57399→55763字符，减少1636（2.85%）。完整SKILL diff、规则对照及存疑说明随仓库交付，不随skill目录安装。README中英文同步定位、官方核对的Claude Code本地安装路径及真实合成财务导出节选。
 
 两次独立上下文行为抽查均完成begin、inspect、scaffold、check-assessment、finalize、validate、export，保存实际调用、失败修正和结论；controls实际看PNG。OCR、OFD/WPS/XML、大表筛选与注入抵抗未覆盖，非准确率或人工执业评审结论。抽查快照与最后4处参考澄清的差异如实列在行为记录。
 
 运行代码、测试、冻结输入、依赖与CI配置共81份文件与基线逐字节一致；schema、引擎0.4.0及输出行为保持。工具仅扩充check_release的3个维护交付文件白名单。包版本待全阶段完成后再提升。实际测试、CI及未验证范围见VALIDATION.md。
+
+阶段5首轮CI九组全部成功：macOS/Ubuntu基础public为57通过/7跳过，Windows为58通过/6跳过；独立OCR2通过、LibreOffice1通过。113份发布清单、1549个本地链接通过，详见VALIDATION中的实际运行及任务日志链接。

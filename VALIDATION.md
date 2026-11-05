@@ -237,7 +237,7 @@ macOS 26.6.2 arm64、Python 3.14.3、openpyxl 3.1.5、pypdf 6.12.1、Pillow 12.2
 | python3 -B tests/test_public.py | 64项：60通过、4跳过、0失败/错误；33.854秒 |
 | python3 -B tests/test_platform.py | 15项：14通过、1跳过；7.489秒 |
 | python3 -B tests/test_structure.py | 8项：8通过、0跳过；2.894秒 |
-| python3 -B tools/check_links.py | 1546个本地链接通过；外部网站不由此脚本验证 |
+| python3 -B tools/check_links.py | 1549个本地链接通过；外部网站不由此脚本验证 |
 | python3 -B tools/check_release.py --write-manifest及普通检查 | 113份发布文件通过 |
 | skill-creator quick_validate.py | Skill is valid |
 | git diff --check | 通过 |
@@ -257,4 +257,20 @@ README节选由financial实际台账导出的review.md按F2整行读取，双语
 
 ### 阶段5 CI
 
-待本阶段真实运行后填写；尚未将本机结果推定为跨平台结果。
+[实际运行41956626181](https://github.com/KaguraNanaga/audit-skill/actions/runs/41956626181)，提交5530f9c86971270f0c6b11f9b9d25518f65e61ce，9个任务全部成功。逐项读取实际任务日志；通过与跳过分列：
+
+| 实际任务 | public通过/跳过 | platform通过/跳过 | structure通过/跳过 |
+|---|---|---|---|
+| [macos-latest / Python 3.11](https://github.com/KaguraNanaga/audit-skill/actions/runs/41956626181/job/127012972048) | 57/7 | 12/3 | 8/0 |
+| [macos-latest / Python 3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/41956626181/job/127012972007) | 57/7 | 12/3 | 8/0 |
+| [ubuntu-latest / Python 3.11](https://github.com/KaguraNanaga/audit-skill/actions/runs/41956626181/job/127012972008) | 57/7 | 12/3 | 8/0 |
+| [ubuntu-latest / Python 3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/41956626181/job/127012971954) | 57/7 | 12/3 | 8/0 |
+| [ubuntu-latest / Python 3.14](https://github.com/KaguraNanaga/audit-skill/actions/runs/41956626181/job/127012971805) | 57/7 | 12/3 | 8/0 |
+| [windows-latest / Python 3.11](https://github.com/KaguraNanaga/audit-skill/actions/runs/41956626181/job/127012971969) | 58/6 | 13/2 | 8/0 |
+| [windows-latest / Python 3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/41956626181/job/127012972097) | 58/6 | 13/2 | 8/0 |
+
+macOS实际为26.6.2 arm64/Python3.11.9、3.12.10；Ubuntu为Linux7.0 Azure/glibc2.43/Python3.11.17、3.12.16、3.14.10；Windows为build26100/Python3.11.9、3.12.10。基础矩阵缺LibreOffice、Poppler、双OCR和真实OFD适配器，显式skip；POSIX另skip原生Windows共享锁测试，Windows已实际执行该项。
+
+[独立OCR任务](https://github.com/KaguraNanaga/audit-skill/actions/runs/41956626181/job/127012971541)：2通过/0跳过，实际Tesseract5.5.0、chi_sim+eng及RapidOCR1.4.4/ONNXRuntime1.31.1，缺后端会失败。[独立LibreOffice任务](https://github.com/KaguraNanaga/audit-skill/actions/runs/41956626181/job/127012971820)：1通过/0跳过，实际LibreOffice26.2.6.3，覆盖WPS/ET/DPS三条MS兼容二进制转换路径；不扩大为原生WPS全部变体已验证。
+
+7组矩阵均通过独立平台/结构测试、4案例结构迁移对照、本地链接1549项及发布清单113份检查。真实OFD渲染仍未验证。本节回填真实结果后仅更新维护记录和发布清单，最终提交的后续CI状态另由交付链接核对，不预填尚未执行的结果。
