@@ -170,3 +170,20 @@ python3 -B tools/check_release.py
 首轮实际CI：[41947078668](https://github.com/KaguraNanaga/audit-skill/actions/runs/41947078668)，提交a36f00f8。macOS/Ubuntu五组及可选双OCR任务成功，Windows3.11/3.12失败。Windows失败为临时重建的预期JSON使用CRLF，冻结文件为LF；改为生成器显式UTF-8/LF，并明确ZIP平台元数据，冻结输入和指纹不改。修正后本机生成器确定性定向测试通过，跨平台重验待实际执行，不把失败轮记为通过。
 
 收尾记录工具实际版本：TableQuery保存当前Python版本，XLSX保存实际openpyxl版本；新update记录当前读取器及Python版本，原SourceVersion及历史run版本不改。结果指纹只包含保存文件的内容哈希，不含随机查询目录，同项目同规格重跑结果指纹一致。上述代码的本机完整回归已实际执行：51项，48通过/3跳过、0失败/错误（25.927秒）；之后仅生成器LF修正另有定向测试通过。普通发布校验98份、105个链接、quick_validate、git diff --check均通过。
+
+第二轮CI已实际完成：[41947520805](https://github.com/KaguraNanaga/audit-skill/actions/runs/41947520805)，提交233082d9，八组均成功；Windows的LF/ZIP确定性重建修正通过，未修改原冻结输入。基础矩阵每组51项，实际结果如下：
+
+| 环境 | Python | 通过/跳过 | 日志 |
+|---|---|---|---|
+| macOS | 3.11.9 | 46 / 5 | [126983298553](https://github.com/KaguraNanaga/audit-skill/actions/runs/41947520805/job/126983298553) |
+| macOS | 3.12.10 | 46 / 5 | [126983298681](https://github.com/KaguraNanaga/audit-skill/actions/runs/41947520805/job/126983298681) |
+| Ubuntu | 3.11.18 | 46 / 5 | [126983298633](https://github.com/KaguraNanaga/audit-skill/actions/runs/41947520805/job/126983298633) |
+| Ubuntu | 3.12.15 | 46 / 5 | [126983298698](https://github.com/KaguraNanaga/audit-skill/actions/runs/41947520805/job/126983298698) |
+| Ubuntu | 3.14.10 | 46 / 5 | [126983298768](https://github.com/KaguraNanaga/audit-skill/actions/runs/41947520805/job/126983298768) |
+| Windows | 3.11.9 | 47 / 4 | [126983298625](https://github.com/KaguraNanaga/audit-skill/actions/runs/41947520805/job/126983298625) |
+| Windows | 3.12.10 | 47 / 4 | [126983298557](https://github.com/KaguraNanaga/audit-skill/actions/runs/41947520805/job/126983298557) |
+| Ubuntu可选OCR | 3.12.16 | 实际双后端 2 / 0 | [126983298300](https://github.com/KaguraNanaga/audit-skill/actions/runs/41947520805/job/126983298300) |
+
+全部0失败/错误。基础任务仍缺LibreOffice/Poppler及两OCR后端，POSIX另跳过Windows专属测试；缺工具不计通过，实际双OCR在独立任务执行。七组单独平台测试Windows13/2、POSIX12/3，结构测试均8/0；固定结构前后对照、本地链接及98份发布清单校验均通过。
+
+最终本机完整测试亦已执行：51项，48通过/3跳过、0失败/错误（23.773秒），包含最终来源版本校验与生成器修正。普通发布校验98份、105个链接及git diff --check通过。另实际逐文件比较原冻结输入、阶段1/3夹具与清单，共22份保持原字节；新阶段4夹具按独立冻结清单校验。新能力未新增依赖或运行联网路径。
