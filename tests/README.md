@@ -68,3 +68,13 @@ ocr-fixtures由generate_ocr_fixtures.py用标准库和代码定义的字形从�
 ## 阶段4：表查询与骨架
 
 table-fixtures及tests/expected/table-query.json由独立generate_table_fixtures.py从零生成，2026-11-05冻结于input-sha256-stage4.json；原有输入不改。50,000行序时账的预期计数/金额由整数分独立累计，未向执行skill提供预期。生成器确定性测试只在临时目录重建。test_table_query.py覆盖全部筛选、分组、金额精度、缺缓存失败、限定输出、引用/防篡改及旧schema3/renderer8兼容。test_scaffold.py确认真实ID、空判断拒绝、截断披露及不覆盖。CI提供经清单验证的阶段3基线；依赖或基线缺失明确skip，正式验收提供全部基线。
+
+## 阶段2：OFD/WPS/XML
+
+generate_format_fixtures.py以标准库从零构造mixed.ofd（文本对象页+纯图像页）、invoice.xml及声明顺序与文件名排序不同的slides.pptx；2026-11-05单独冻结于input-sha256-stage2.json，预期在expected/formats.json。生成器只在新目录运行，测试在临时根重建并比对确定性，原冻结材料不改。
+
+test_formats.py纳入test_public.py，也可单独运行。覆盖物理页/对象定位、文本层限制、XML命名空间/属性/实体拒绝、坏页/坏文件隔离、安全包内引用、PPTX顺序、WPS三种分派及转换来源、同原件跨转换器不造变更、OFD渲染失败/清理、逐对象观察和OCR来源链。模拟适配器复制已有合成位图，仅测接口与引用规则，不声称实际渲染OFD。
+
+真实LibreOffice测试先把合成材料导出为MS兼容DOC/XLS/PPT二进制，再用.wps/.et/.dps扩展名走实际转换；不把这组测试当作原生WPS所有变体已验证。工具缺失skip，EVIDENCE_REVIEWER_REQUIRE_OFFICE=1时缺工具失败。真实OFD测试仅在提供EVIDENCE_REVIEWER_OFD_RENDERER本地适配器时运行，否则明确skip。CI的独立Office任务实际安装LibreOffice并要求转换测试执行。
+
+EVIDENCE_REVIEWER_STAGE4_BASELINE指向按清单验证的阶段4包，测试旧项目保留unsupported/unread、只读validate、显式reparse、跨轮单元范围及renderer9字节重建。正式验收提供阶段1、1.5、3、4全部基线；缺基线的对照skip不能计通过。

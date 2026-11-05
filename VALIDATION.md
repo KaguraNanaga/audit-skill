@@ -187,3 +187,38 @@ python3 -B tools/check_release.py
 全部0失败/错误。基础任务仍缺LibreOffice/Poppler及两OCR后端，POSIX另跳过Windows专属测试；缺工具不计通过，实际双OCR在独立任务执行。七组单独平台测试Windows13/2、POSIX12/3，结构测试均8/0；固定结构前后对照、本地链接及98份发布清单校验均通过。
 
 最终本机完整测试亦已执行：51项，48通过/3跳过、0失败/错误（23.773秒），包含最终来源版本校验与生成器修正。普通发布校验98份、105个链接及git diff --check通过。另实际逐文件比较原冻结输入、阶段1/3夹具与清单，共22份保持原字节；新阶段4夹具按独立冻结清单校验。新能力未新增依赖或运行联网路径。
+
+## 10. 补齐阶段 2：OFD/WPS/XML（2026-11-05）
+
+修改前核对阶段4验收提交56095f85541e269d97259d76dddbe3b195a555fa的98份包外基线文件，全部匹配清单。阶段5尚未改写；其规则基线将在阶段2验收后改用阶段2最终提交。schema1/2/3、引擎0.4.0及renderer9保持，读取器升至readers-1.3。
+
+实际环境：macOS26.6.2 arm64/Python3.14.3、pypdf6.12.1、openpyxl3.1.5；本机LibreOffice沿用26.8.0.3。提供阶段1、1.5、3、4四份固定历史基线后，在允许启动本机系统工具的沙箱外运行：
+
+- `python3 -B tests/test_public.py`：64项，60通过、4跳过、0失败/错误（33.175秒）。跳过为Windows专属共享占用、缺少RapidOCR、缺少Tesseract、缺少真实OFD渲染适配器。跳过不计通过。
+- `python3 -B tests/test_platform.py`：15项，14通过、1跳过、0失败/错误（7.248秒）。真实LibreOffice DOC/XLS与Poppler执行通过，Windows专属测试跳过。
+- `python3 -B tests/test_structure.py`：8项，8通过、0跳过、0失败/错误（2.632秒）。阶段1→1.5固定结构对照和旧schema1/2命令/历史字节检查实际执行。
+- 新增13项格式测试已包含在完整64项中：12通过、真实OFD渲染1项跳过。实际LibreOffice先从合成源导出MS兼容DOC/XLS/PPT二进制，再分别用.wps/.et/.dps路径转换成功；模拟转换/适配器测试不计作真实工具结果。
+- 旧阶段4未支持的OFD项目在不重新导出时validate通过，inspect保留旧未读单元；显式reparse后保留同原件哈希、新版本、旧轮单元与renderer9原字节重建。原件跨转换器测试确认不会重新调用读取器或制造材料变更。
+- 离线链接检查117项通过；逐字节比较24份旧冻结输入及其4份清单，全部与阶段4验收包一致。新OFD/XML/PPTX输入2026-11-05独立冻结，临时根重建一致。
+
+开发定向运行中，本机沙箱内LibreOffice退出1；沙箱外已实际通过，未将沙箱失败记作不可用或成功。真实OFD渲染、原生WPS生产器各变体、签名/发票真实性及真实业务判断准确性均未验证。OFD适配器模拟只验证文件/引用契约，不证明图像确实渲染自OFD；无适配器时不生成或声称有页图。
+
+本机`tools/check_release.py --write-manifest`及普通`tools/check_release.py`均通过110份文件；117个本地链接、技能quick_validate及git diff --check实际通过。阶段2未新增运行联网、遥测或上传路径，未改变schema或历史renderer实现。
+
+首轮实际CI：[41952200613](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613)，提交b377f0e01dbfe4b02bfe93131aa0a00ce7c8f263，九组任务全部成功。各基础矩阵均完整执行64项，结果如下：
+
+| 环境 | Python | 通过/跳过 | 实际日志 |
+|---|---|---|---|
+| macOS arm64 | 3.11.9 | 57 / 7 | [126998537929](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998537929) |
+| macOS arm64 | 3.12.10 | 57 / 7 | [126998538044](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998538044) |
+| Ubuntu | 3.11.18 | 57 / 7 | [126998537986](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998537986) |
+| Ubuntu | 3.12.15 | 57 / 7 | [126998537898](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998537898) |
+| Ubuntu | 3.14.9 | 57 / 7 | [126998537937](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998537937) |
+| Windows | 3.11.9 | 58 / 6 | [126998538033](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998538033) |
+| Windows Server | 3.12.10 | 58 / 6 | [126998538034](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998538034) |
+| Ubuntu双OCR | 3.12.15 | 2 / 0 | [126998537524](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998537524) |
+| Ubuntu LibreOffice | 3.12.15 | 1 / 0（含三条路径） | [126998537895](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998537895) |
+
+全部0失败/错误。基础矩阵的缺工具跳过为旧DOC/XLS实际转换、Poppler、RapidOCR、Tesseract、WPS实际转换、实际OFD渲染；POSIX另跳过Windows专属共享测试。Windows的保留名failed后继续、独立锁sidecar和新增夹具确定性均实际通过。独立平台测试Windows13通过/2跳过、POSIX12通过/3跳过；结构测试各8通过/0跳过。固定历史对照、117个链接及110份发布清单七组均通过。
+
+Office任务实际使用LibreOffice26.2.6.3（620 Build:3），1项测试包含.wps/.et/.dps三条MS兼容二进制转换路径，未跳过；不是原生WPS生产器兼容性评测。独立OCR任务实际Tesseract5.5.0（chi_sim+eng）、RapidOCR1.4.4/onnxruntime1.31.1，两项真实识别和来源/拒绝流程通过；未扩大为OCR准确率结论。OFD文本与适配器契约测试通过，真实OFD图像渲染仍未验证。

@@ -10,6 +10,7 @@ import tempfile
 
 
 PLATFORM = sys.platform
+TARGETS = {'.doc': 'docx', '.xls': 'xlsx', '.wps': 'docx', '.et': 'xlsx', '.dps': 'pptx'}
 
 
 def run_tool(argv, timeout=60):

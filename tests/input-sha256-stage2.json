@@ -1,0 +1,9 @@
+{
+  "frozen_on": "2026-11-05",
+  "synthetic": true,
+  "files": {
+    "tests/format-fixtures/invoice.xml": "004e6e850b3b72c3714af3f7208ad2f20cccb7dcca5570a59f786d071fad12bc",
+    "tests/format-fixtures/mixed.ofd": "a8f382462e58a99f8331fc31d5e499ca6f11c3f5ebd15902c972e0cc983de4aa",
+    "tests/format-fixtures/slides.pptx": "d89e169ca9cd23712736f4208005fd72a8f2dbb34bdbb064a37383f4e7c26eb4"
+  }
+}

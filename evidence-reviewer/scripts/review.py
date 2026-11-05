@@ -260,7 +260,12 @@ def render_source(args):
         folder = project / 'cache' / args.version / ('render-' + L.uid())
         folder.mkdir(parents=True)
         artifacts = []
-        if version['format'] == '.pdf':
+        if version['format'] == '.ofd':
+            from core import ofd_render
+            result = ofd_render.render(args, project, work, folder)
+            save_work(project, work)
+            return result
+        elif version['format'] == '.pdf':
             pages = args.pages or [u['locator']['physical_page'] for u in work['units'][args.version] if u['locator'].get('physical_page')]
             L.require(bool(pages), 'PDF has no readable page index; encrypted/damaged file needs remediation')
             for page in pages:
@@ -270,9 +275,9 @@ def render_source(args):
                 subprocess.run(['pdftoppm', '-f', str(page), '-l', str(page), '-singlefile', '-scale-to', '1600', '-png', str(src), str(prefix)], check=True, capture_output=True, timeout=60)
                 artifacts.append((prefix.with_suffix('.png'), u['locator']))
             method = 'Poppler pdftoppm page render'
-        elif version['format'] in {'.docx', '.doc'}:
+        elif version['format'] in {'.docx', '.doc', '.wps'}:
             L.require(args.docx_renderer and Path(args.docx_renderer).is_file(), 'Pass actual available document skill render_docx.py path')
-            if version['format'] == '.doc': src = project / 'cache' / args.version / 'converted.docx'
+            if version['format'] in {'.doc', '.wps'}: src = project / 'cache' / args.version / 'converted.docx'
             env = os.environ.copy()
             if args.fontconfig: env['FONTCONFIG_FILE'] = str(Path(args.fontconfig).resolve())
             subprocess.run([sys.executable, args.docx_renderer, str(src), '--output_dir', str(folder)], check=True, capture_output=True, timeout=120, env=env)
@@ -280,7 +285,7 @@ def render_source(args):
             L.require(bool(artifacts), 'DOCX render returned no pages')
             method = 'Document skill renderer; page binding requires visual anchor matching'
         else:
-            raise ValueError('Core render supports PDF/DOCX/DOC; embedded images already registered; use available spreadsheet tool for workbook views')
+            raise ValueError('Core render supports PDF/OFD/DOCX/DOC/WPS; embedded images already registered; use available spreadsheet tool for workbook views')
         for path, locator in artifacts:
             work['artifacts'].append(dict(id=L.uid(), source_version_id=args.version, locator=locator,
                                          path=path.relative_to(project).as_posix(), sha256=readers.digest(path), method=method))
@@ -484,6 +489,7 @@ def main():
             p.add_argument('--version', required=True)
             p.add_argument('--pages', type=int, nargs='+')
             p.add_argument('--docx-renderer')
+            p.add_argument('--ofd-renderer')
             p.add_argument('--fontconfig')
         if name == 'table-query':
             p.add_argument('--version', required=True)

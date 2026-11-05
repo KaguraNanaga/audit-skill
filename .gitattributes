@@ -15,3 +15,6 @@
 *.pptx binary
 *.ppt binary
 *.zip binary
+*.wps binary
+*.et binary
+*.dps binary

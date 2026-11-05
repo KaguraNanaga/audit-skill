@@ -27,7 +27,7 @@ English documentation: [README.md](README.md).
 
 本包是可本地安装的 Skill 源文件，未包含托管服务或模型密钥。需要能读取文件、运行命令和实际查看图像的智能体宿主；政策检索还需要可用的浏览工具。Word 编辑与排版、复杂表格和图像查看需宿主提供相应工具，本包不会自动安装这些能力。
 
-建议使用 **Python 3.11 或更高版本**及包外虚拟环境。阶段 1 的核心命令链已在 macOS/Ubuntu/原生 Windows × Python 3.11/3.12，以及 Ubuntu/Python 3.14 的真实 CI 跑通。可选 LibreOffice/Poppler 在 CI 中不可用，相关真实工具测试明确跳过；本机 macOS 已实际验证转换和渲染。实际环境、版本及通过/跳过数量见 [VALIDATION.md](VALIDATION.md)。
+建议使用 **Python 3.11 或更高版本**及包外虚拟环境。核心命令链已在 macOS/Ubuntu/原生 Windows × Python 3.11/3.12，以及 Ubuntu/Python 3.14 的真实 CI 跑通。基础矩阵对缺少的 LibreOffice/Poppler 明确跳过；独立 Ubuntu 任务已实际验证 LibreOffice 的三条 WPS 兼容转换路径，本机 macOS 也实际验证了转换和 PDF 渲染。实际环境、版本及通过/跳过数量见 [VALIDATION.md](VALIDATION.md)。
 
 在本包根目录执行，将虚拟环境建在包外，保持发布文件与本地依赖分开：
 
@@ -83,6 +83,10 @@ $env:EVIDENCE_REVIEWER_SOFFICE = 'C:/Program Files/LibreOffice/program/soffice.c
 | 旧版 DOC | macOS 可选 `textutil`，失败或缺失后尝试 LibreOffice → DOCX | 转换可能改变分页或对象；其他系统须另用可用工具转换并保留来源 |
 | XLSX | `openpyxl`，读取单元格、公式与缓存值 | 不重算公式，不自动检查颜色、局部富文本、图片、图表或凭证续行关系 |
 | 旧版 XLS | `soffice`（LibreOffice）转换后按 XLSX 读取 | 转换后的缓存与复杂对象仍需核查 |
+| OFD | 标准库 ZIP/XML 文本层，可选 `--ofd-renderer` | 物理页+对象位置；各页待视觉核对，无真实渲染器不生成页图 |
+| 通用/电子发票 XML | 标准库，带命名空间及序号的元素路径 | 只提取文本和属性，不鉴定发票/签名真实性，不解析外部实体 |
+| WPS / ET / DPS | 可选 LibreOffice → DOCX / XLSX / PPTX | 原件与派生物指纹分别保留，原生WPS变体须用实际样本验证 |
+| PPTX | 标准库按声明幻灯片顺序提取文本 | 幻灯片/对象锚点；版式、图片、备注、母版和动画未核 |
 | 文本或混合 PDF | `pypdf` 按物理页提取 | 有文字不代表图片内容已读；无文字页登记为待目视，不内置 OCR |
 | PDF 页图 | Poppler 的 `pdftoppm` | `render` 只生成图片；必须再用图像工具实际查看，需要时提高分辨率 |
 | PNG、JPG、JPEG、TIFF、WebP | 登记原图与指纹，由宿主图像工具查看 | 不自动 OCR；多页 TIFF 需确认所有相关帧，其他图片格式需转换并留痕 |
@@ -90,6 +94,8 @@ $env:EVIDENCE_REVIEWER_SOFFICE = 'C:/Program Files/LibreOffice/program/soffice.c
 | 外部规则检索 | 宿主实际调用公开搜索/打开工具，脚本导入记录 | 无正文、无附件或未查效力时明确限制；不能用搜索摘要替代原文 |
 
 缺依赖或无法读取时保留失败记录，继续可验证部分，不把读取失败解释为事项不存在。加密 PDF 无可用密码时无法完成读取；本包不绕过密码。必要的系统工具请通过本机认可的软件渠道安装，它们不包含在 `requirements.txt` 中。
+
+OFD/WPS/XML的命令、定位和可选渲染见[格式说明](evidence-reviewer/references/common/formats.md)，不增加Python依赖。OFD渲染需要本地Python适配器，支持 `--version` 及 `输入 --output_dir 目录 --pages 页码...`；本包不附渲染器。旧项目保留原未读单元，显式 `update` 并指定 `relation=reparse` 才重新解析；schema及renderer9保持。table-query继续接受CSV/TSV/XLSX原件版本。
 
 ## 流程与最小示例
 
