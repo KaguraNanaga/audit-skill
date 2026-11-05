@@ -29,7 +29,7 @@ class Tables(unittest.TestCase):
         original=generator.ROOT
         try:
             generator.ROOT=self.base;generator.main()
-            for rel,sha in m['files'].items():self.assertEqual(hashlib.sha256((self.base/rel).read_bytes()).hexdigest(),sha)
+            for rel,sha in m['files'].items():self.assertEqual(hashlib.sha256((self.base/rel).read_bytes()).hexdigest(),sha,rel)
         finally:generator.ROOT=original
 
     def test_filter_group_sum_count_and_tsv_parity(self):
@@ -138,6 +138,7 @@ class Tables(unittest.TestCase):
         self.call('validate');self.call('export');self.assertEqual(authority,(self.project/'ledger/ledger.json').read_bytes())
         self.call('update','--request',self.json_file('update.json',dict(event_id='new-query',reason='Explicit query addition')))
         result=self.query(source,dict(filters=[dict(column='date',op='date_range',max='2031-01-04')],aggregates=[dict(op='sum',column='amount',**{'as':'total'})]))
+        self.assertEqual(self.call('inspect')['run']['tool_versions']['reader'],readers.VERSION)
         a=self.assessment(result);a.update(screening=[],impact_review=[]);self.finalize(a);self.call('validate')
         historical=self.call('inspect','--run',first['run_id']);self.assertFalse(any(u['locator'].get('unit')=='table_query_derived' for u in historical['sources'][0]['units']))
         for path,data in before.items():self.assertEqual(path.read_bytes(),data)

@@ -166,3 +166,7 @@ python3 -B tools/check_release.py
 - 新夹具于2026-11-05单独冻结；生成器在临时目录重建与冻结指纹逐项一致，原冻结输入不修改。开发首轮发现生成器没有自动创建临时目录父级，导致确定性重建测试失败；修正父级创建后通过，未改夹具字节。首轮未提供阶段3基线的两项对照skip，正式验收已提供基线并实际执行。
 - `tools/check_release.py --write-manifest`通过98份文件，离线链接检查105项通过，quick_validate及git diff --check通过。普通发布校验与CI结果在实际执行后追加。
 - 未验证：真实业务准确率、业务总体完整性、全部复杂/合并表头、任意Excel格式和超大规模内存上界。查询使用声明的表头与单位，不执行公式重算、不自动识别异常或形成审计结论。
+
+首轮实际CI：[41947078668](https://github.com/KaguraNanaga/audit-skill/actions/runs/41947078668)，提交a36f00f8。macOS/Ubuntu五组及可选双OCR任务成功，Windows3.11/3.12失败。Windows失败为临时重建的预期JSON使用CRLF，冻结文件为LF；改为生成器显式UTF-8/LF，并明确ZIP平台元数据，冻结输入和指纹不改。修正后本机生成器确定性定向测试通过，跨平台重验待实际执行，不把失败轮记为通过。
+
+收尾记录工具实际版本：TableQuery保存当前Python版本，XLSX保存实际openpyxl版本；新update记录当前读取器及Python版本，原SourceVersion及历史run版本不改。结果指纹只包含保存文件的内容哈希，不含随机查询目录，同项目同规格重跑结果指纹一致。上述代码的本机完整回归已实际执行：51项，48通过/3跳过、0失败/错误（25.927秒）；之后仅生成器LF修正另有定向测试通过。普通发布校验98份、105个链接、quick_validate、git diff --check均通过。

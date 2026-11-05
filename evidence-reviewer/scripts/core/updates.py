@@ -3,6 +3,7 @@ import copy
 import difflib
 import json
 import shutil
+import sys
 from pathlib import Path
 
 from . import history as H
@@ -114,7 +115,7 @@ def start(args, api):
                            state='staging', table_queries_version=1, derived_units_version=1, validation_version=2, visual_checks_version=1, visual_checks=visual_checks, evidence_link_retirements=copy.deepcopy(original['run'].get('evidence_link_retirements', [])),
                            intake_issues=copy.deepcopy(original['run'].get('intake_issues', original['run'].get('errors', []))), source_version_snapshot=list(original['units']), active_source_version_ids=active_versions(original),
                            selected_main_version=original['project'].get('selected_main_version'), scope_revision=original['project']['scope_revision'],
-                           skill_version=L.VERSION, tool_versions=copy.deepcopy(original['run']['tool_versions']), model_version=None,
+                           skill_version=L.VERSION, tool_versions=dict(original['run']['tool_versions'], reader=readers.VERSION, python=sys.version), model_version=None,
                            errors=scan_errors, unfinished_steps=['topic_screening', 'impact_review', 'validation', 'commit', 'export'],
                            changes=[], changed_version_ids=[])
         work['run']['intake_issues'].extend(copy.deepcopy(scan_errors))

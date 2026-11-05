@@ -22,7 +22,7 @@ filters采用AND，eq为字符串精确相等，contains为区分大小写的子
 
 ## 保存内容与引用
 
-每次追加不可变TableQuery，登记源版本/原件哈希、规格与指纹、工具版本、创建轮次、扫描数、命中数和结果指纹。项目queries/<query_id>/保存spec.json、summary.json、rows.jsonl、groups.jsonl及各自SHA256。每个命中行保留原始locator和已抽取unit_ids，分组关系保留group_key。结果文件可以很大，终端只显示摘要及前N行；这不表示只扫描N行。
+每次追加不可变TableQuery，登记源版本/原件哈希、规格与指纹、工具/Python版本（XLSX另记录openpyxl版本）、创建轮次、扫描数、命中数和结果指纹。项目queries/<query_id>/保存spec.json、summary.json、rows.jsonl、groups.jsonl及各自SHA256。每个命中行保留原始locator和已抽取unit_ids，分组关系保留group_key。结果文件可以很大，终端只显示摘要及前N行；这不表示只扫描N行。
 
 处理失败仍登记state=failed、原因和空files，不允许作为依据；继续其他查询或材料。缺openpyxl时XLSX查询明确失败，不改用其他解释器或静默丢弃工作表。
 

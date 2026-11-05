@@ -42,7 +42,7 @@ def main():
         for name,content in sorted(parts.items()):
             info=zipfile.ZipInfo(name,date_time=(2026,11,5,0,0,0));info.create_system=3;info.external_attr=0o600 << 16;info.compress_type=zipfile.ZIP_STORED;archive.writestr(info,content.encode())
     expected=ROOT/'tests/expected/table-query.json';expected.parent.mkdir(exist_ok=True)
-    expected.write_text(json.dumps(dict(large_matched=count,large_sum_cents=total),indent=2)+'\n')
+    expected.write_text(json.dumps(dict(large_matched=count,large_sum_cents=total),indent=2)+'\n',encoding='utf-8',newline='\n')
     files=[*folder.iterdir(),expected]
-    (ROOT/'tests/input-sha256-stage4.json').write_text(json.dumps(dict(frozen_on='2026-11-05',synthetic=True,files={p.relative_to(ROOT).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(files)}),indent=2)+'\n')
+    (ROOT/'tests/input-sha256-stage4.json').write_text(json.dumps(dict(frozen_on='2026-11-05',synthetic=True,files={p.relative_to(ROOT).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(files)}),indent=2)+'\n',encoding='utf-8',newline='\n')
 if __name__=='__main__':main()

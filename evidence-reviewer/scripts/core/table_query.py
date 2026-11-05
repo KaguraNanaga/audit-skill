@@ -2,7 +2,8 @@
 import copy
 from datetime import date, datetime
 from decimal import Decimal, localcontext
-import itertools
+import importlib.metadata
+import sys
 import json
 from pathlib import Path, PurePosixPath
 import posixpath
@@ -195,9 +196,10 @@ def run(args,api):
         L.require(version['format'] in {'.csv','.tsv','.xlsx'},'table-query supports extracted CSV/TSV/XLSX only')
         qid=L.uid();folder=project/'queries'/qid;folder.mkdir(parents=True)
         record=dict(source_version_id=args.version,source_sha256=version['sha256'],spec=spec,spec_sha256=L.checksum(spec),
-                    tool=VERSION,created_run_id=work['run']['id'],created_at=L.now(),state='failed',errors=[],files={},limitations=[WARNING])
+                    tool=VERSION,tool_versions={'python':sys.version.split()[0]},created_run_id=work['run']['id'],created_at=L.now(),state='failed',errors=[],files={},limitations=[WARNING])
         work['run']['table_queries_version']=1
         try:
+            if version['format']=='.xlsx': record['tool_versions']['openpyxl']=importlib.metadata.version('openpyxl')
             summary,files,preview,groups=execute(project,work,args.version,spec,folder,args.limit)
             record.update(state='completed',summary=summary,files=files,result_fingerprint=L.checksum({name:info["sha256"] for name,info in files.items()}))
         except Exception as exc:
@@ -254,10 +256,12 @@ def validate(work,project=None):
         L.require(work['run'].get('table_queries_version')==1,'TableQuery requires versioned query schema')
         version=work['records'].get(query.get('source_version_id'),{})
         L.require(version.get('kind')=='SourceVersion' and query.get('source_sha256')==version.get('sha256'),'Query source fingerprint mismatch')
+        L.require(version.get('format') in {'.csv','.tsv','.xlsx'} and L.nonempty(query.get('tool_versions',{}).get('python')), 'Query format/Python version missing')
         L.require(query.get('tool')==VERSION and query.get('spec_sha256')==L.checksum(specification(query.get('spec'))),'Query specification/version mismatch')
         L.require(query.get('state') in {'completed','failed'},'Invalid query state')
         if query['state']=='failed':L.require(bool(query.get('errors')) and not query.get('files'),'Failed query cannot claim result files')
         else:
+            if version['format']=='.xlsx':L.require(L.nonempty(query['tool_versions'].get('openpyxl')), 'XLSX query library version missing')
             L.require(set(query.get('files',{}))=={'spec.json','rows.jsonl','groups.jsonl','summary.json'} and query.get('result_fingerprint')==L.checksum({name:info['sha256'] for name,info in query['files'].items()}),'Query result fingerprint mismatch')
             if project is not None:
                 for info in query['files'].values():

@@ -127,7 +127,7 @@ Then have the host continue verification using `tests/cases/financial/request.md
 
 When a ledger is needed, prepare the request per [workflow.md](evidence-reviewer/references/common/workflow.md) and run `begin`, `inspect`; fill the assessment from this round's actual reading, then `check-assessment`, `finalize`, and `validate`. `begin` only prepares snapshots and read units—it does not emit automatic audit conclusions; facts and judgments in `assessment.json` must come from actual review. Keep the project **outside** the materials directory and use a new project path.
 
-Ledger outputs include `review.md`, `handoff.md`, `changes.md`, and `history.md`; draft tasks also get `draft.md`. User deliverables can still be one verification table or replaceable paragraphs. Inside the project, original snapshots, caches, and history are sensitive audit material; renderer 8 inherits relative links and supports moving the whole project. Renderers 1–7 keep their historical bytes; only explicit `export --portable` produces a portable view in a new directory.
+Ledger outputs include `review.md`, `handoff.md`, `changes.md`, and `history.md`; draft tasks also get `draft.md`. User deliverables can still be one verification table or replaceable paragraphs. Inside the project, original snapshots, caches, and history are sensitive audit material; renderer 9 inherits relative links and supports moving the whole project. Renderers 1–8 keep their historical bytes; only explicit `export --portable` produces a portable view in a new directory.
 
 ## Testing and validation
 
