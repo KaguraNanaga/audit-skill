@@ -203,4 +203,22 @@ python3 -B tools/check_release.py
 
 开发定向运行中，本机沙箱内LibreOffice退出1；沙箱外已实际通过，未将沙箱失败记作不可用或成功。真实OFD渲染、原生WPS生产器各变体、签名/发票真实性及真实业务判断准确性均未验证。OFD适配器模拟只验证文件/引用契约，不证明图像确实渲染自OFD；无适配器时不生成或声称有页图。
 
-阶段2发布校验与CI结果将在实际执行后追加。
+本机`tools/check_release.py --write-manifest`及普通`tools/check_release.py`均通过110份文件；117个本地链接、技能quick_validate及git diff --check实际通过。阶段2未新增运行联网、遥测或上传路径，未改变schema或历史renderer实现。
+
+首轮实际CI：[41952200613](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613)，提交b377f0e01dbfe4b02bfe93131aa0a00ce7c8f263，九组任务全部成功。各基础矩阵均完整执行64项，结果如下：
+
+| 环境 | Python | 通过/跳过 | 实际日志 |
+|---|---|---|---|
+| macOS arm64 | 3.11.9 | 57 / 7 | [126998537929](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998537929) |
+| macOS arm64 | 3.12.10 | 57 / 7 | [126998538044](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998538044) |
+| Ubuntu | 3.11.18 | 57 / 7 | [126998537986](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998537986) |
+| Ubuntu | 3.12.15 | 57 / 7 | [126998537898](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998537898) |
+| Ubuntu | 3.14.9 | 57 / 7 | [126998537937](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998537937) |
+| Windows | 3.11.9 | 58 / 6 | [126998538033](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998538033) |
+| Windows Server | 3.12.10 | 58 / 6 | [126998538034](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998538034) |
+| Ubuntu双OCR | 3.12.15 | 2 / 0 | [126998537524](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998537524) |
+| Ubuntu LibreOffice | 3.12.15 | 1 / 0（含三条路径） | [126998537895](https://github.com/KaguraNanaga/audit-skill/actions/runs/41952200613/job/126998537895) |
+
+全部0失败/错误。基础矩阵的缺工具跳过为旧DOC/XLS实际转换、Poppler、RapidOCR、Tesseract、WPS实际转换、实际OFD渲染；POSIX另跳过Windows专属共享测试。Windows的保留名failed后继续、独立锁sidecar和新增夹具确定性均实际通过。独立平台测试Windows13通过/2跳过、POSIX12通过/3跳过；结构测试各8通过/0跳过。固定历史对照、117个链接及110份发布清单七组均通过。
+
+Office任务实际使用LibreOffice26.2.6.3（620 Build:3），1项测试包含.wps/.et/.dps三条MS兼容二进制转换路径，未跳过；不是原生WPS生产器兼容性评测。独立OCR任务实际Tesseract5.5.0（chi_sim+eng）、RapidOCR1.4.4/onnxruntime1.31.1，两项真实识别和来源/拒绝流程通过；未扩大为OCR准确率结论。OFD文本与适配器契约测试通过，真实OFD图像渲染仍未验证。

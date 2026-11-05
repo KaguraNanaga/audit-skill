@@ -27,7 +27,7 @@ Modes can be combined. Supplemental materials use a separate `update` command to
 
 This package is installable Skill source for local use. It does **not** include a hosted service or model API keys. You need an agent host that can read files, run commands, and actually view images; policy lookup also needs a working browser tool. Word editing/layout, complex tables, and image viewing require host-provided tools—this package does not install those capabilities for you.
 
-Use **Python 3.11 or newer** and a venv outside the package. The core command chain passed actual CI on macOS/Ubuntu/native Windows × Python 3.11/3.12, plus Ubuntu/Python 3.14. Optional LibreOffice/Poppler were unavailable on the CI runners, so their real-tool tests explicitly skipped; actual conversion and rendering were verified on local macOS. See [VALIDATION.md](VALIDATION.md) for environments, versions, passes and skips.
+Use **Python 3.11 or newer** and a venv outside the package. The core command chain passed actual CI on macOS/Ubuntu/native Windows × Python 3.11/3.12, plus Ubuntu/Python 3.14. Base runners explicitly skip unavailable LibreOffice/Poppler tests; a separate Ubuntu job verifies three WPS-compatible conversion routes with actual LibreOffice. Actual conversion and PDF rendering were also verified on local macOS. See [VALIDATION.md](VALIDATION.md) for environments, versions, passes and skips.
 
 From the package root, create the venv **outside** the package so release files stay separate from local dependencies:
 
