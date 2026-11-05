@@ -318,3 +318,23 @@ macOS实际为26.6.2 arm64/Python3.11.9、3.12.10；Ubuntu为Linux7.0 Azure/glib
 | 对照阶段5验收包 | 全部旧冻结清单及其中27个输入条目原字节一致；原有文件只有双语README、RELEASE_NOTES、VALIDATION、SKILL版本、入口版本、tests/README、public测试装载及release白名单/版本发生变化 |
 
 本机public的4个跳过为原生Windows共享锁、实际RapidOCR、实际Tesseract、实际OFD渲染器；独立platform只跳过同一Windows测试。新增9项均实际执行。字体核验先查看fc-match候选，再用pdffonts -subst确认真正的GB W3替代字体；在交付冻结前更正新像素来源的字体标签和对应新清单哈希，PDF和像素内容未变，旧冻结清单未动。
+
+### 阶段6实际CI
+
+[运行41961673829](https://github.com/KaguraNanaga/audit-skill/actions/runs/41961673829)，提交e4ded9cb9337207d22004158beaa75b9e5382832，9个任务全部成功。以下计数逐项读取实际日志，skip与通过分列；每组基础矩阵都实际执行新增9项测试。
+
+| 实际任务 | public通过/跳过 | platform通过/跳过 | structure通过/跳过 |
+|---|---|---|---|
+| [macOS / Python3.11](https://github.com/KaguraNanaga/audit-skill/actions/runs/41961673829/job/127029225976) | 66/7 | 12/3 | 8/0 |
+| [macOS / Python3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/41961673829/job/127029225979) | 66/7 | 12/3 | 8/0 |
+| [Ubuntu / Python3.11](https://github.com/KaguraNanaga/audit-skill/actions/runs/41961673829/job/127029225808) | 66/7 | 12/3 | 8/0 |
+| [Ubuntu / Python3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/41961673829/job/127029225920) | 66/7 | 12/3 | 8/0 |
+| [Ubuntu / Python3.14](https://github.com/KaguraNanaga/audit-skill/actions/runs/41961673829/job/127029225895) | 66/7 | 12/3 | 8/0 |
+| [Windows / Python3.11](https://github.com/KaguraNanaga/audit-skill/actions/runs/41961673829/job/127029225782) | 67/6 | 13/2 | 8/0 |
+| [Windows / Python3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/41961673829/job/127029225757) | 67/6 | 13/2 | 8/0 |
+
+实际环境：macOS26.6.2 arm64/Python3.11.9、3.12.10；Ubuntu Linux7.0/glibc2.43/Python3.11.18、3.12.16、3.14.9；Windows build26100/Python3.11.9、3.12.10。七组均为pypdf6.21.4、openpyxl3.1.5，链接1571项、发布文件213份及历史结构对照通过。缺失LibreOffice、Poppler、双OCR和实际OFD渲染器的基础测试明确skip；POSIX额外跳过原生Windows共享锁，Windows实际执行。
+
+[独立OCR任务](https://github.com/KaguraNanaga/audit-skill/actions/runs/41961673829/job/127029225771)：2通过/0跳过，Tesseract5.5.0/chi_sim+eng及RapidOCR1.4.4/ONNXRuntime1.31.1实际执行既有后端测试。[独立LibreOffice任务](https://github.com/KaguraNanaga/audit-skill/actions/runs/41961673829/job/127029225506)：1通过/0跳过，LibreOffice26.2.6.3实际覆盖三条WPS兼容二进制转换路径。它们不证明新增扫描页的实际OCR识别、新OFD发票的页图渲染或模型判断已验证。
+
+字体来源标签修正后，本机单独重跑新增9项测试：9通过、0跳过，1.870秒；本节所列CI也使用了修正后的标签和冻结哈希。回填此CI记录后只修改维护文档和发布清单，最终提交后续CI由交付链接核对，不预填尚未执行的结果。18次正式独立评测、盲评和人工评审仍全部待执行。
