@@ -15,7 +15,7 @@ SCHEMA = 'evidence-ledger-1.0'
 VERSION = '0.4.0'
 MODES = {'query', 'verify', 'coverage', 'draft', 'review', 'rules'}
 KINDS = {'Source', 'SourceVersion', 'ReadRecord', 'ReviewTask', 'Claim', 'Evidence', 'EvidenceLink',
-         'SearchRecord', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding', 'HumanDecision', 'OutputRecord', 'OCRAttempt'}
+         'SearchRecord', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding', 'HumanDecision', 'OutputRecord', 'OCRAttempt', 'TableQuery'}
 ASSESSMENTS = {'unassessed', 'insufficient', 'partial', 'supported', 'refuted'}
 ROLES = {'business', 'signed', 'draft', 'department_statement', 'transcript', 'template', 'ai_analysis',
          'workpaper', 'external_rule', 'policy_explanation', 'unknown'}
@@ -105,11 +105,11 @@ def decimal_calc(expression, values, places, rounding):
         return str(result.quantize(Decimal(1).scaleb(-places), rounding=rounding))
 
 
-def materialize(work, assessment):
+def materialize(work, assessment, project=None):
     """Resolve session-authored aliases; no business answers or case-name routing."""
     if work.get('update_context') and not work.get('_applying_update'):
         from . import updates
-        return updates.materialize(work, assessment)
+        return updates.materialize(work, assessment, project=project)
     work = copy.deepcopy(work)
     allowed = {'source_annotations', 'observations', 'tasks', 'claims', 'evidence', 'links', 'gaps',
                'calculations', 'rules', 'findings', 'human_decisions', 'answers', 'draft', 'review_checks', 'limitations', 'link_retirements'}
@@ -155,7 +155,7 @@ def materialize(work, assessment):
         require(read and read['kind'] == 'ReadRecord', 'Observation read_id missing')
         require(nonempty(observation.get('observation')), 'Visual observation required')
         from .derived import unit_at, is_ocr
-        require(not is_ocr(unit_at(work, read['source_version_id'], read['unit_id']) or {}), 'Observe the original page, not an OCR-derived unit')
+        require((unit_at(work, read['source_version_id'], read['unit_id']) or {}).get('locator',{}).get('unit') not in {'ocr_derived','table_query_derived'}, 'Observe the original page, not a derived unit')
         artifact_id = observation.get('artifact_id')
         artifact = next((a for a in work['artifacts'] if a['id'] == artifact_id), None)
         require(artifact and artifact['source_version_id'] == read['source_version_id'], 'Observation must link a registered rendering/image')
@@ -175,6 +175,10 @@ def materialize(work, assessment):
                 body = dict(work['records'][existing], **body)
                 if kind == 'Calculation' and 'result' not in raw: body.pop('result', None)
             body.pop('revision_reason', None)
+            from .table_query import bind
+            if kind == 'Evidence': bind(work, body, project)
+            if kind == 'Calculation':
+                for inp in body.get('inputs', []): bind(work, inp, project)
             if kind == 'EvidenceGap': body['validation_version'] = 2
             if kind == 'Calculation':
                 values = {}
@@ -225,9 +229,10 @@ def validate_records(work):
         for field in fields:
             check(field in row, row['kind'] + ' missing ' + field)
 
+    unit_index = {(v,u['id']):u for v, units in work['units'].items() for u in units}
     def source_unit(version_id, unit_id, where):
         version = ref(version_id, 'SourceVersion', where)
-        u = next((u for u in work['units'].get(version_id, []) if u['id'] == unit_id), None)
+        u = unit_index.get((version_id,unit_id))
         check(u is not None, where + ': unknown source unit')
         return version, u or {}
 
@@ -429,6 +434,8 @@ def validate_records(work):
     require(not errors, '\n'.join(errors))
     from .derived import validate as validate_derived
     validate_derived(work)
+    from .table_query import validate as validate_queries
+    validate_queries(work)
     from .visual_checks import validate as validate_visual_checks
     validate_visual_checks(work)
     from .reporting import reading_coverage
@@ -461,7 +468,7 @@ def thaw(ledger):
         from . import history
         return history.thaw(ledger)
     require(ledger.get('schema_version') == SCHEMA, 'Unknown ledger schema')
-    require(not any(r.get('derived_units_version') for r in ledger['runs'].values()), 'Derived-unit runs require schema 3')
+    require(not any(r.get('derived_units_version') or r.get('table_queries_version') for r in ledger['runs'].values()), 'Derived-unit runs require schema 3')
     unsigned = {k: v for k, v in ledger.items() if k != 'integrity_sha256'}
     require(ledger.get('integrity_sha256') == checksum(unsigned), 'Ledger integrity mismatch; preserve damaged file and inspect validated-candidate/backup, never reset to empty')
     require(set(ledger['entities']) == set(ledger['current']), 'Entity/current mismatch')
@@ -493,7 +500,10 @@ def render(work, project_path):
     work = normalized
     r, outcome, run = work['records'], work['outcome'], work['run']
     old_outputs = [x for x in r.values() if x['kind'] == 'OutputRecord' and x.get('run_id') == run['id']]
-    renderer_version = work.get('_renderer_version', old_outputs[0].get('renderer_version', 1) if old_outputs else (8 if work['run'].get('derived_units_version') else 7))
+    renderer_version = work.get('_renderer_version', old_outputs[0].get('renderer_version', 1) if old_outputs else (9 if work['run'].get('table_queries_version') else 8 if work['run'].get('derived_units_version') else 7))
+    if renderer_version >= 9:
+        from . import reporting_v9
+        return reporting_v9.render(work, project_path)
     if renderer_version >= 8:
         from . import reporting_v8
         return reporting_v8.render(work, project_path)

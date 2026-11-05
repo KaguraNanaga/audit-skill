@@ -2,6 +2,7 @@
 import csv
 import hashlib
 import io
+import itertools
 import json
 import re
 import xml.etree.ElementTree as ET
@@ -9,7 +10,7 @@ import zipfile
 from html.parser import HTMLParser
 from pathlib import Path
 
-VERSION = 'readers-1.1'
+VERSION = 'readers-1.2'
 W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
 
 
@@ -104,13 +105,13 @@ def xlsx(path, cache):
     try:
         for sheet in formulas:
             count = 0
-            for line in sheet.iter_rows():
-                for cell in line:
+            for line, cached_line in itertools.zip_longest(sheet.iter_rows(), values[sheet.title].iter_rows(), fillvalue=()):
+                for column, cell in enumerate(line):
                     if cell.value is None:
                         continue
                     count += 1
                     formula = cell.value if cell.data_type == 'f' else None
-                    value = values[sheet.title][cell.coordinate].value
+                    value = cached_line[column].value if column < len(cached_line) else None
                     value = value.isoformat() if hasattr(value, 'isoformat') else value
                     rows.append(unit({'unit': 'cell', 'sheet': sheet.title, 'cell_range': cell.coordinate},
                                      str(value) if value is not None else '', formula=formula,

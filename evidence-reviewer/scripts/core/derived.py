@@ -35,13 +35,15 @@ def parent_viewed(work, unit):
 
 
 def validate(work):
+    index={(v,u['id']):u for v,units in work['units'].items() for u in units}
+    def lookup(w,v,u): return index.get((v,u))
     artifacts = {a['id']: a for a in work['artifacts']}
     attempts = {r['id']: r for r in work['records'].values() if r['kind'] == 'OCRAttempt'}
     for attempt in attempts.values():
         L.require(work['run'].get('derived_units_version') == 1, 'OCR records require a versioned derived-unit schema')
         L.require(attempt.get('state') in {'extracted', 'failed'}, 'Invalid OCR attempt state')
         L.require(attempt.get('source_version_id') in work['units'], 'OCR source version missing')
-        L.require(unit_at(work, attempt['source_version_id'], attempt.get('unit_id')) is not None, 'OCR parent unit missing')
+        L.require(lookup(work, attempt['source_version_id'], attempt.get('unit_id')) is not None, 'OCR parent unit missing')
         L.require(L.nonempty(attempt.get('engine')) and isinstance(attempt.get('parameters'), dict), 'OCR engine/parameters missing')
         if attempt['state'] == 'failed':
             L.require(bool(attempt.get('errors')) and not attempt.get('unit_ids'), 'Failed OCR cannot claim extracted units')
@@ -55,7 +57,7 @@ def validate(work):
                 continue
             L.require(work['run'].get('derived_units_version') == 1, 'OCR unit requires versioned schema')
             origin = unit.get('derived_from', {})
-            parent = unit_at(work, vid, origin.get('unit_id'))
+            parent = lookup(work, vid, origin.get('unit_id'))
             artifact = artifacts.get(origin.get('artifact_id'))
             L.require(origin.get('source_version_id') == vid and parent and not is_ocr(parent), 'OCR must derive from an original unit in the same source version')
             L.require(artifact and artifact['source_version_id'] == vid and artifact['sha256'] == origin.get('image_sha256') and artifact.get('locator') == parent['locator'], 'OCR page image/version/locator mismatch')
@@ -70,7 +72,7 @@ def validate(work):
     for aid, attempt in attempts.items():
         L.require(attempt.get('unit_ids', []) == seen.get(aid, []), 'OCR attempt/unit list mismatch')
     for record in work['records'].values():
-        unit = unit_at(work, record.get('source_version_id'), record.get('unit_id'))
+        unit = lookup(work, record.get('source_version_id'), record.get('unit_id'))
         if unit and is_ocr(unit):
             if record['kind'] == 'ReadRecord':
                 L.require(record.get('state') != 'viewed', 'OCR cannot be marked viewed; observe the original page')
@@ -79,10 +81,10 @@ def validate(work):
                 L.require(parent_viewed(work, unit), 'OCR-only evidence cannot be submitted: add an observation of the matching original page image/version, then cite the original page for visual facts')
         if record['kind'] == 'Claim':
             loc = record.get('source_locator') or {}
-            unit = unit_at(work, loc.get('source_version_id'), loc.get('unit_id'))
+            unit = lookup(work, loc.get('source_version_id'), loc.get('unit_id'))
             if unit and is_ocr(unit):
                 L.require(parent_viewed(work, unit), 'OCR-only claim requires a matching original-page observation')
         if record['kind'] == 'Calculation':
             for inp in record.get('inputs', []):
-                unit = unit_at(work, inp.get('source_version_id'), inp.get('unit_id'))
+                unit = lookup(work, inp.get('source_version_id'), inp.get('unit_id'))
                 L.require(not unit or not is_ocr(unit), 'OCR cannot supply factual Calculation inputs; use independently verified original-source values')

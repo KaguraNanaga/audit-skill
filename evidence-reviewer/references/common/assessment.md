@@ -53,3 +53,7 @@ calculations：`{key,purpose,inputs:[],formula,rounding:{places:2,mode:"ROUND_HA
 ## 阶段 3：OCR引用
 
 OCR派生单元的Evidence需要匹配原页版本/单元/页图指纹的observation，且不可标original_viewed；观察引用原页read_id，不引用OCR read_id。Calculation的事实输入不接受OCR单元。结构验证与实际阅读分别执行，完整契约见[OCR定位层](ocr.md)。
+
+## 阶段 4：表查询与骨架
+
+大表确定性筛选、分组Decimal求和、计数及查询来源引用见[表查询](table-query.md)；真实ID预填、空判断与更新候选说明见[评估骨架](scaffold.md)。新轮用renderer9，旧1–8保持历史字节，查询不自动生成审计结论。

@@ -157,3 +157,7 @@ To upgrade an existing install, back up the old evidence-reviewer folder and rep
 ## Optional OCR locators (stage 3)
 
 Engine 0.4.0 supports local Tesseract with chi_sim+eng and optional RapidOCR via requirements-ocr.txt. Python 3.13+ uses Tesseract. OCR adds searchable derived locators; it never marks original pages viewed. See the [OCR contract](evidence-reviewer/references/common/ocr.md). Package version remains 0.4.0-beta.1 until the complete planned release is finished.
+
+## Table queries and assessment scaffolds (stage 4)
+
+New table-query and scaffold commands provide local CSV/TSV/XLSX filters, exact Decimal sums/counts, saved result provenance and real-ID templates with blank judgments. Terminal previews are bounded. See [table queries](evidence-reviewer/references/common/table-query.md) and [scaffolds](evidence-reviewer/references/common/scaffold.md). No new dependencies; renderer9 preserves historical renderers1–8.

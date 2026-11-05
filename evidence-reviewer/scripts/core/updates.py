@@ -56,7 +56,7 @@ def mark_candidates(work):
 
 
 def diff_versions(work, old, new):
-    def text(vid): return '\n'.join(u['text'] for u in work['units'].get(vid, []) if not u['locator'].get('layer') and u['locator'].get('unit') != 'ocr_derived')
+    def text(vid): return '\n'.join(u['text'] for u in work['units'].get(vid, []) if not u['locator'].get('layer') and u['locator'].get('unit') not in {'ocr_derived','table_query_derived'})
     a, b = text(old), text(new)
     old_images = [x['sha256'] for x in work['artifacts'] if x['source_version_id'] == old and x['method'] == 'embedded/original image']
     new_images = [x['sha256'] for x in work['artifacts'] if x['source_version_id'] == new and x['method'] == 'embedded/original image']
@@ -111,7 +111,7 @@ def start(args, api):
         run_id = L.uid(); work['_known_run_ids'].append(run_id)
         work['run'] = dict(id=run_id, previous_run_id=base['latest_run_id'], event_id=request['event_id'],
                            input_fingerprint=fingerprint, reason=request['reason'], started_at=L.now(), finished_at=None,
-                           state='staging', derived_units_version=1, validation_version=2, visual_checks_version=1, visual_checks=visual_checks, evidence_link_retirements=copy.deepcopy(original['run'].get('evidence_link_retirements', [])),
+                           state='staging', table_queries_version=1, derived_units_version=1, validation_version=2, visual_checks_version=1, visual_checks=visual_checks, evidence_link_retirements=copy.deepcopy(original['run'].get('evidence_link_retirements', [])),
                            intake_issues=copy.deepcopy(original['run'].get('intake_issues', original['run'].get('errors', []))), source_version_snapshot=list(original['units']), active_source_version_ids=active_versions(original),
                            selected_main_version=original['project'].get('selected_main_version'), scope_revision=original['project']['scope_revision'],
                            skill_version=L.VERSION, tool_versions=copy.deepcopy(original['run']['tool_versions']), model_version=None,
@@ -259,7 +259,7 @@ def register_external(work, source_id, version_id, previous_version, state):
     mark_candidates(work)
 
 
-def materialize(work, assessment):
+def materialize(work, assessment, project=None):
     original_assessment = copy.deepcopy(assessment)
     extra = {'screening', 'impact_review', 'visual_resolutions'}
     for annotation in assessment.get('source_annotations', []):
@@ -268,7 +268,7 @@ def materialize(work, assessment):
             raise ValueError('Source annotations changed; stage them with annotate-sources or update.source_annotations before topic/impact review')
     basic = {k: v for k, v in assessment.items() if k not in extra}
     work = copy.deepcopy(work); work['_applying_update'] = True
-    work = L.materialize(work, basic)
+    work = L.materialize(work, basic, project=project)
     from .adoptions import retire_links
     retire_links(work, assessment.get('link_retirements', []))
     aliases = work.pop('_assessment_aliases')

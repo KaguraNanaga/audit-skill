@@ -41,3 +41,9 @@
 OCR共用能力放在core，不新增业务模块或skill。schema3新增OCRAttempt和ocr_derived单元，每轮snapshot保存unit_ids；as_of只返回该轮ID范围。历史单位内容不可变，recovery比较原单元的逐ID内容和每轮视图；旧schema前缀重建必须精确匹配事务原哈希。旧账仅在明确update/finalize时升级并备份。新导出器8追加OCR来源警示，旧1–7实现保持；旧轮portable显式视图仍用renderer7，新轮选择renderer8并保留OCR警示。
 
 阶段1.5的AST/文档原文/输出前后对照固定到阶段1提交a0cb3714和阶段1.5提交4701ac6f，两份均按发布清单验证。当前代码继续单独执行旧台账操作和字节回归，不再把新增功能错误要求为结构迁移。CI设置EVIDENCE_REVIEWER_STRUCTURE_CANDIDATE指向固定阶段1.5目录。
+
+## 阶段4查询实现
+
+TableQuery为不可变事件，table_queries_version=1显式扩展schema3，工具版本table-query-1.0。规范化规格、原件哈希和四个结果文件指纹保存在台账。materialize在副本中按query_id/result_locator生成确定ID的table_query_derived单元；只为实际引用值建立单元，不把整份查询结果复制进台账/上下文。原单元不可改写，按轮unit_ids继续隔离历史。
+
+XLSX查询通过openpyxl read_only和OOXML数值字面量并行读取；通用读取器的公式/缓存改为并行逐行流，现有单元字段有对照测试。台账校验及历史视图使用局部ID集合/索引，避免大表逐单元线性查找造成平方级扫描。renderer9增加查询结果链接与派生警示，旧1–8保持重建指纹；scaffold只在项目根创建新文件。

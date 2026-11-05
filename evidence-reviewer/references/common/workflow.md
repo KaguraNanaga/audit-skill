@@ -71,3 +71,7 @@ POSIX 使用 fcntl，Windows 使用 msvcrt 系统锁。独立 `.writer.lock` 不
 ## 阶段 3：OCR定位
 
 可选 `ocr` 命令与search警示、失败处理及回原页观察步骤见[OCR定位层](ocr.md)。OCR只处理已登记页图，原件读取状态与核查边界继续保留。
+
+## 阶段 4：表查询与骨架
+
+大表确定性筛选、分组Decimal求和、计数及查询来源引用见[表查询](table-query.md)；真实ID预填、空判断与更新候选说明见[评估骨架](scaffold.md)。新轮用renderer9，旧1–8保持历史字节，查询不自动生成审计结论。

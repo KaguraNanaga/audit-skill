@@ -57,7 +57,7 @@ class OCRContract(unittest.TestCase):
         before=(self.project/'ledger/ledger.json').read_bytes();self.call('export')
         self.assertEqual((self.project/'ledger/ledger.json').read_bytes(),before)
         portable=self.call('export','--portable')
-        self.assertEqual(portable['renderer_version'],8)
+        self.assertEqual(portable['renderer_version'],9)
         self.assertIn(derived.WARNING,next(Path(portable['portable_directory']).glob('*/review.md')).read_text())
         self.assertEqual((self.project/'ledger/ledger.json').read_bytes(),before)
 

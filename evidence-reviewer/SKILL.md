@@ -4,7 +4,7 @@ description: 为内审、财务报表及专项审计提供证据核查与复核�
 metadata:
   version: "0.4.0-beta.1"
   engine_version: "0.4.0"
-  instructions_revision: "2026-11-05-stage3"
+  instructions_revision: "2026-11-05-stage4"
 ---
 
 # 审计证据核查与复核助手
@@ -52,3 +52,5 @@ metadata:
 新增模块时，增加 references/<模块>/ 和有实际专用代码的 scripts/<模块包>/，并在本表加一行。文档和路由标识用连字符，Python 包名用下划线；例如 evidence-review 对应 evidence_review。通用能力使用 scripts/core/，当前没有独立的证据复核专用算法，因此不创建空的 evidence_review 包。维护者的接入步骤在仓库根目录 docs/internals.md；该文档不随 skill 子目录分发。
 
 扫描材料需要可搜索定位时，读[可选OCR定位层](references/common/ocr.md)；OCR命中需回到匹配原页确认。
+
+大表定位与统计需要保存可追溯筛选结果时，读[表查询](references/common/table-query.md)；生成待填写评估时，读[评估骨架](references/common/scaffold.md)。

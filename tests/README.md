@@ -64,3 +64,7 @@ CI沿用七组矩阵，从本地Git对象导出固定阶段1提交至RUNNER_TEMP
 ## 阶段3：OCR
 
 ocr-fixtures由generate_ocr_fixtures.py用标准库和代码定义的字形从零生成；2026-11-05冻结于input-sha256-stage3.json，不改旧输入。blocks.json明确是结构测试模拟结果，不冒充引擎输出。test_ocr.py区分来源/拒绝规则的合成测试和实际可选后端测试；合成观察仅测试结构引用，不代表真实模型/人工查看。实际后端缺工具、语言包或本地模型时显式skip。CI另有Python3.12可选OCR任务，安装两后端并要求实际测试不跳过；基础七组不安装OCR依赖。
+
+## 阶段4：表查询与骨架
+
+table-fixtures及tests/expected/table-query.json由独立generate_table_fixtures.py从零生成，2026-11-05冻结于input-sha256-stage4.json；原有输入不改。50,000行序时账的预期计数/金额由整数分独立累计，未向执行skill提供预期。生成器确定性测试只在临时目录重建。test_table_query.py覆盖全部筛选、分组、金额精度、缺缓存失败、限定输出、引用/防篡改及旧schema3/renderer8兼容。test_scaffold.py确认真实ID、空判断拒绝、截断披露及不覆盖。CI提供经清单验证的阶段3基线；依赖或基线缺失明确skip，正式验收提供全部基线。

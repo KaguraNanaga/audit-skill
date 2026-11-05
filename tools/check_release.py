@@ -51,6 +51,7 @@ def release_files():
             or (rel.parent.as_posix() == "evidence-reviewer/scripts" and p.suffix == ".py")
             or (len(rel.parts) == 4 and rel.parts[:3] == ("evidence-reviewer", "scripts", "core") and p.suffix == ".py")
             or (len(rel.parts) == 4 and rel.parts[:2] == ("evidence-reviewer", "references") and rel.parts[2] in {"common", "evidence-review"} and p.suffix == ".md")
+            or (rel.parent.as_posix() == "tests/table-fixtures" and p.suffix in {".csv", ".tsv"})
             or s == "docs/internals.md"
             or (rel.parent.as_posix() == "tools" and p.suffix == ".py")
             or (rel.parts[0] == "tests" and p.suffix in TEXT_SUFFIXES | {".pdf", ".png", ".xlsx", ".docx"})

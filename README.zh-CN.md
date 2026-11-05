@@ -157,3 +157,7 @@ python3 -B tools/check_release.py
 ## 可选OCR定位（阶段3）
 
 引擎0.4.0支持离线Tesseract（本地chi_sim+eng）或可选RapidOCR；依赖单独放在requirements-ocr.txt，Python3.13及以上使用Tesseract。先登记/渲染原页，再执行ocr；识别不改变原页未核状态。安装与命令见[OCR定位层](evidence-reviewer/references/common/ocr.md)。包版本仍为0.4.0-beta.1，目标0.5.0-beta.1待全部阶段完成后统一更新。
+
+## 大表查询与评估骨架（阶段4）
+
+新增table-query与scaffold，支持CSV/TSV/XLSX筛选、Decimal分组求和及计数，完整结果保存在项目内，终端仅显示摘要/前N行。骨架只预填真实ID，判断留空，不覆盖已有评估。见[表查询](evidence-reviewer/references/common/table-query.md)及[评估骨架](evidence-reviewer/references/common/scaffold.md)。不新增依赖；新轮renderer9，旧1–8保持。
