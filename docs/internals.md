@@ -20,7 +20,7 @@
 3. **登记路由。** 在 SKILL.md 的“任务到模块的路由”表增加一行，列为“当前任务｜模块｜按需读取的入口｜运行入口”。目前唯一模块是 evidence-review，query/verify/coverage/draft/review/rules 仍是其既有模式，不是新增 skill。
 4. **注册有实际用途的命令。** 当前入口在 review.py 的 `main()`。需要新 CLI 时，同时在子命令参数声明和 commands 映射中注册，处理函数放在实际模块包内并按需 import；复用 core 的能力。模块目录不会自动扫描、执行或自动增加命令。保留现有命令的名称、参数、默认值、退出码与 JSON 契约；本阶段未添加运行命令。
 5. **核对来源及兼容性。** 新派生内容记录源版本、指纹、工具版本和参数；新依赖可选且失败明确。需要 schema 变化时先提升引擎版本并补旧台账兼容测试，不静默改写旧账。
-6. **补测试并登记发布。** 在 tests 中增加确定性测试；新材料从零合成、单独冻结，预期与 sources 分开。更新 check_release.py 中已登记目录的白名单，禁止把任意开发文件或业务资料纳入分发。根目录维护文档只明确允许 docs/internals.md。
+6. **补测试并登记发布。** 在 tests 中增加确定性测试；新材料从零合成、单独冻结，预期与 sources 分开。更新 check_release.py 中已登记目录的白名单，禁止把任意开发文件或业务资料纳入分发。根目录维护文档按check_release.py逐项登记：internals.md、rewrite-rule-mapping.md、SKILL.stage5.diff和stage5-behavior-check.md；不随skill子目录安装。
 7. **执行验收后记结果。** 运行 test_public.py、test_platform.py、test_structure.py、check_links.py、check_release.py，执行三系统CI；分开报告通过和跳过。同步 RELEASE_MANIFEST、RELEASE_NOTES；VALIDATION 仅填写实际执行结果。变更运行行为前遵守用户分阶段计划与确认要求。
 
 ## 阶段 1.5 的对照方法
@@ -68,3 +68,75 @@ python adapter.py INPUT.ofd --output_dir OUTPUT --pages 1 2
 渲染provenance保存在新增artifact内，含原件SHA、源版本、适配器路径/哈希、真实版本、Python版本、参数和超时。失败诊断放run.errors；不修改已提交SourceVersion.processing。处理状态不构成新台账schema。WPS转换仍保留源原件与派生物各自哈希；实际转换测试使用从合成材料导出的MS兼容二进制，不宣称已覆盖WPS生产器所有原生变体。
 
 CI增加固定阶段4提交56095f85541e269d97259d76dddbe3b195a555fa，验证旧schema3/renderer9的未读OFD在未重新导出时仍可validate、显式reparse及历史字节重建。独立Ubuntu Office任务安装可选LibreOffice并要求真实转换测试不跳过；实际OFD渲染器缺失明确skip，不把模拟适配器测试计作真实渲染。
+
+## 文档改写移入的实现与历史契约
+
+下列段落保留基线规则；版本号按原段所属阶段理解。当前引擎0.4.0、读取器readers-1.3、新轮renderer9，schema1/2/3可读取。执行者遇到异常按skill中的恢复操作处理，维护者在此核对实现保证。
+
+### R0303 · 校验与提交
+
+同一已提交评估重放返回原run，不新增对象；不同评估拒绝覆盖，需先update建立新轮次。采用单写入者锁、完整候选暂存、fsync及原子replace；导出全部核验后才更新outputs/current.json。提交后导出中断可export重建；台账损坏保留现场，不初始化为空。staging/validated-candidate.json供检查/人工恢复，不是第二份可编辑权威台账。
+
+### R0304 · 校验与提交
+
+跨批匹配、状态传播和恢复流程见[incremental.md](../evidence-reviewer/references/common/incremental.md)。原件路径迁移可识别并保留旧快照；新轮使用renderer 7相对链接。旧renderer 1–6的导出不改字节；显式 `export --portable` 才在新目录产生带来源清单的可移动视图，普通validate/export不自动生成。旧项目无须重新导出即可validate；若旧导出丢失且新位置无法按原指纹重建，报错并保留现场。
+
+### R0309 · 阶段 1：平台与写入
+
+POSIX 使用 fcntl，Windows 使用 msvcrt 系统锁。独立 `.writer.lock` 不写诊断内容，元数据在 `.writer.lock.json`；判断占用只看系统锁。两端默认等待最多5秒，异常关闭句柄释放系统锁。持锁进程异常退出后的sidecar仅提供残留提示，不据此拒绝新写入者。锁文件保持原位，不删除重建来绕过占用。
+
+### R0310 · 阶段 1：平台与写入
+
+文件写入flush/fsync后原子replace，Windows占用/访问错误有限重试6次（等待总计1.55秒）；失败保留旧权威台账及既有恢复材料。POSIX另外fsync目录，Windows跳过该步；两者不承诺相同的断电后目录持久性。第三方文档渲染器和转换器有各自保证，不能把生成成功当作已看原页。
+
+### R0190 · 提交、重试、恢复
+
+check-assessment不提交；finalize保存旧台账备份、完整候选和事务记录，再原子替换台账，验证全部导出后更新current指针。多轮schema为evidence-ledger-2.0；原schema 1首次更新时兼容升级，旧轮次快照和旧导出不重写业务内容。
+
+### R0191 · 提交、重试、恢复
+
+recover先验证权威台账、结构与引用文件。台账完整时保留它，仅继续与其基础指纹和历史严格衔接的待提交事务；旁路候选损坏不能使其降级。台账不可用时按事务候选/备份指纹和完整祖先历史选择唯一恢复点，不按修改时间或初始候选猜测最新。备份副本损坏时可从完整候选重建历史前缀，但须精确匹配事务中的原基础指纹；多分支或无法验证则停止。回退报告rolled_back及unrecovered_run_ids，保留损坏原文件；recovery_warnings是旁路异常，errors为空不表示没有未恢复轮次。
+
+### R0193 · 提交、重试、恢复
+
+新轮次结果为review.md、changes.md、history.md及handoff.md。history按该轮时点导出，未来信息不进入旧轮次；相同输入重试不重复制造对象或Revision。代码提供EVIDENCE_REVIEWER_FAILPOINT仅供隔离测试实际退出进程，正常运行不要设置。
+
+### R0194 · 数据与导出兼容
+
+0.3.0沿用单轮schema 1、多轮schema 2；旧ledger可validate/inspect，首次update通过原升级机制追加历史，不批量修改已提交账本。新建/修订Gap按validation_version=2校验；旧Gap未修订时保留旧状态和缺项，后续报告提示“旧版关闭状态缺少解决依据”，不自动补证或认定满足。修订时须提供真实解决依据。
+
+### R0195 · 数据与导出兼容
+
+新轮OutputRecord.renderer_version=5；旧轮按已登记1—4渲染，保留原字节和指纹，新读取警示不追写旧报告。新报告及handoff自动汇总盘点/读取失败文件、原因、未覆盖范围；validate分别给出structure_valid、material_reading、reading_issues。盘点失败跨轮保留，成功取得同一路径后解除当前盘点警示，旧轮仍保留；损坏/未读单元按活动版本及所选主稿继续列示。结构校验与阅读充分性分别解释。
+
+### R0196 · 数据与导出兼容
+
+上段为0.3.0规则；0.3.1新轮使用renderer 6，旧renderer 5也冻结保留。旧轮报告不追加未来提示；当前validate可按历史派生尚未完成的视觉事项，首次新update将其保存到新轮，详见原页核查跟进。
+
+### R0198 · 阶段 1 兼容补充
+
+新轮输出使用renderer 7；1–6继续按原指纹保留。读取、validate和普通export均不自动生成可移动视图。需要时显式执行 `export --portable`，新建独立目录及派生manifest，不改历史台账、旧导出或current指针。旧版台账不要求重新导出才能validate。
+
+### R0199 · 阶段 3：派生单元与历史
+
+引擎0.4.0继续读取schema 1/2。新轮提交schema 3，按轮unit_ids固定单元范围，OCRAttempt不可改写。OCR不参与原件文本变更比对，不触发原件指纹变更，也不自动完成视觉待办。旧台账和renderer 1–7不因读取/校验改写；新增能力见[OCR定位层](../evidence-reviewer/references/common/ocr.md)。
+
+### R0288 · 兼容及历史
+
+沿用ledger schema 1/2，新轮增加visual_checks_version=1。旧0.3.0的unavailable即使在后续空轮已消失，也可按各历史轮的变更、来源单元及已有观察重新承接；不凭当前一轮screening猜测。旧版未明确登记范围时，按相关版本全部单元保守承接。若后续旧轮已有完整匹配观察，承接为已查看；仍未查或仅撤去来源但无处理理由时继续未决。
+
+### R0289 · 兼容及历史
+
+当前只读validate可披露派生出的旧未核事项；新update将它们保存进新轮。旧ledger和旧输出不重写，新轮使用renderer 6，旧1—5仍按当时格式与原指纹重建。历史状态按各轮时点显示，新轮查看不会把旧轮unavailable改成viewed。
+
+### R0253 · 提交与兼容
+
+引擎0.4.0支持schema 1/2/3。新工作包使用derived_units_version=1，schema 3按轮保存unit_ids，后轮OCR不进入旧轮单元范围；原单元内容保持。读取、validate和普通export不升级旧台账；显式update/finalize提交新schema时保留旧台账备份、历史轮及原字节导出。新输出使用renderer 8，旧1–7继续按登记版本恢复。包版本描述分发的skill，引擎版本描述台账与校验行为，可运行review.py --version查看。
+
+### R0272 · 版本兼容
+
+新轮使用table_queries_version=1扩展schema3；引擎仍属于开发中的0.4.0。旧schema1/2及阶段3的schema3继续读取、validate、update、export，旧账不因读取升级。新输出用renderer9，旧1–8按原指纹重建。新结果及引用只进入本轮和之后，旧轮单元范围不追写。
+
+### R0192 · 中止事务
+
+放弃未提交评估用recover --abort --reason '实际原因'，工作包归档；只移动属于该待办轮的事务，保留已提交索引。恢复也检查旧版误移至取消目录的已提交事务。回退或存在pending_review_run_id时，不能称最新工作全部恢复。

@@ -1,8 +1,10 @@
 # 手动增量复核接口
 
-由会话实际读新材料、比较、找新问题和判断；脚本做版本识别、候选影响、保留历史与恢复。沿用workflow.md的环境要求与assessment.md字段。不要用旧AI结论、生成物或测试答案作为业务事实。
+从update取得真实变化与候选，再读材料、筛查和复核；实际结果填完后按提交步骤执行。
 
-## 新建更新轮次
+由执行会话实际读新材料、比较、找新问题和判断；脚本做版本识别、候选影响、保留历史与恢复。沿用workflow.md的环境要求与assessment.md字段。不要用旧AI结论、生成物或测试答案作为业务事实。
+
+## 1. 建立本轮更新
 
 ```json
 {
@@ -28,7 +30,7 @@ event_id在同一事件重试时保持不变；输入变了使用新事件。相
 
 默认search覆盖活动版本、本轮变化版本和显式选定的主稿（含旧稿），返回searched_version_ids。指定--version时仅检索列出的版本，不额外加入主稿；SearchRecord保存实际范围。
 
-## 来源注释更正（0.3.0）
+## 2. 更正来源分类
 
 既有Source的role/role_basis、signature_status、confirmation_scope、origin_group_id、发言人确认等字段变化，都进入source_annotation_changed及影响复核。可在update请求中带source_annotations，也可在读取后、形成assessment前执行：
 
@@ -48,7 +50,7 @@ python3 /skill/scripts/review.py annotate-sources --project /项目 --annotation
 
 返回上轮生成稿时，source_bindings可以用`{path,reviewed_output_id:"原OutputRecord ID",relation:"returned_record",reason}`替代source_id绑定。返回稿作为新来源，based_on_output_id指回原导出，不假称其就是原业务凭证；inspect --records不显示OutputRecord，需从已校验台账取得真实输出ID。
 
-## 实际筛查与评估
+## 3. 筛查变化并评估影响
 
 update产生run.changes、changed_version_ids与impact_candidates。脚本能沿引用找直接影响，但不知道新文件的全部业务含义，因此先把现有业务对象列为保守候选并标needs_review；候选含缺证及原无异常任务。根据真实主题筛查说明缩小或扩大范围。
 
@@ -65,19 +67,17 @@ update产生run.changes、changed_version_ids与impact_candidates。脚本能沿
 
 新证据证明当时已批准，可以推翻并撤回原断言；后来补批不能抹去当时未批，记录实际整改时间和依据后关闭流程。新稿修正数字时保留旧稿错误的历史，区分是否尚有业务影响。返回确认稿逐项比较改动与签署范围：未确认事项保持未知，生成draft仍为unconfirmed。可改modes为review以复核返回稿，不强制再次起草。
 
-本轮answers必须重新写，旧答案不自动继承；完整核查还需review_checks。延期对象会进入输出限制，不能在摘要中称其已验证。程序只核字段与引用，语义仍须会话最后回看。
-
-每份新增、替换或重解析PDF均要求visual_check，包括文字和矢量勾选同时变化。viewed须实际打开并登记旧/新版本关键原页；未能查看使用unavailable并说明未覆盖范围。脚本能核观察记录与版本引用，不能替代会话实际看图，也不会把文字抽取成功认定为勾选、签章已核。
+本轮answers必须重新写，旧答案不自动继承；完整核查还需review_checks。延期对象会进入输出限制，不能在摘要中称其已验证。程序只核字段与引用，语义仍须执行会话最后回看。
 
 0.3.1起，未核视觉事项进入run.visual_checks并跨轮保留。如何按范围补看、退出采用以及承接0.3.0旧事项，见[原页核查跟进](visual-followup.md)。后续轮不需要为旧变化伪造一条新的screening。
 
-## 外部规则变化
+## 4. 核对外部规则变化
 
 先实际搜索/打开并保存工具原响应，再用import-web。可在记录中加source_id绑定既有网页来源；失败保留新获取失败事件及旧正文快照，不把网页下线当作规则废止。成功新正文作为新版本，规则适用在rules列表显式修订并复核影响。仅假设或适用变化可用changed_entity_ids启动，仍需说明实际原因和取得的依据；未联网就不称已验证现行规则。
 
 full_body可更新活动正文；snippet_only/partial_body只增加本次获取版本，旧完整正文跨后续轮保持可检索。Source记录latest_acquisition_state、latest_acquisition_version_id及retained_full_body_version_ids；各SourceVersion保留取得时间。body_currentness=not_determined_by_acquisition表示获取状态不能证明现行有效，规则时效仍在RuleApplication中依据实际核查判断。新报告分别披露本次获取、旧正文可用性和时效未核范围。
 
-## 提交、重试、恢复
+## 5. 校验、提交与处理异常
 
 ```sh
 python3 /skill/scripts/review.py check-assessment --project /项目 --assessment /本轮评估.json
@@ -87,32 +87,12 @@ python3 /skill/scripts/review.py export --project /项目
 python3 /skill/scripts/review.py recover --project /项目
 ```
 
-check-assessment不提交；finalize保存旧台账备份、完整候选和事务记录，再原子替换台账，验证全部导出后更新current指针。多轮schema为evidence-ledger-2.0；原schema 1首次更新时兼容升级，旧轮次快照和旧导出不重写业务内容。
-
-recover先验证权威台账、结构与引用文件。台账完整时保留它，仅继续与其基础指纹和历史严格衔接的待提交事务；旁路候选损坏不能使其降级。台账不可用时按事务候选/备份指纹和完整祖先历史选择唯一恢复点，不按修改时间或初始候选猜测最新。备份副本损坏时可从完整候选重建历史前缀，但须精确匹配事务中的原基础指纹；多分支或无法验证则停止。回退报告rolled_back及unrecovered_run_ids，保留损坏原文件；recovery_warnings是旁路异常，errors为空不表示没有未恢复轮次。
-
-放弃未提交评估用recover --abort --reason '实际原因'，工作包归档；只移动属于该待办轮的事务，保留已提交索引。恢复也检查旧版误移至取消目录的已提交事务。回退或存在pending_review_run_id时，不能称最新工作全部恢复。
-
-新轮次结果为review.md、changes.md、history.md及handoff.md。history按该轮时点导出，未来信息不进入旧轮次；相同输入重试不重复制造对象或Revision。代码提供EVIDENCE_REVIEWER_FAILPOINT仅供隔离测试实际退出进程，正常运行不要设置。
-
-## 数据与导出兼容
-
-0.3.0沿用单轮schema 1、多轮schema 2；旧ledger可validate/inspect，首次update通过原升级机制追加历史，不批量修改已提交账本。新建/修订Gap按validation_version=2校验；旧Gap未修订时保留旧状态和缺项，后续报告提示“旧版关闭状态缺少解决依据”，不自动补证或认定满足。修订时须提供真实解决依据。
-
-新轮OutputRecord.renderer_version=5；旧轮按已登记1—4渲染，保留原字节和指纹，新读取警示不追写旧报告。新报告及handoff自动汇总盘点/读取失败文件、原因、未覆盖范围；validate分别给出structure_valid、material_reading、reading_issues。盘点失败跨轮保留，成功取得同一路径后解除当前盘点警示，旧轮仍保留；损坏/未读单元按活动版本及所选主稿继续列示。结构校验与阅读充分性分别解释。
-
-上段为0.3.0规则；0.3.1新轮使用renderer 6，旧renderer 5也冻结保留。旧轮报告不追加未来提示；当前validate可按历史派生尚未完成的视觉事项，首次新update将其保存到新轮，详见原页核查跟进。
-
-## 阶段 1 兼容补充
+## 7. 核对原件指纹
 
 原件SourceVersion.sha256及本批盘点原件指纹用于同字节匹配，转换器或派生物指纹不同本身不触发材料变更；同原件的新路径可登记path_added/path_moved，沿用已有快照与派生读取。显式reparse才建立新的读取版本。
 
-新轮输出使用renderer 7；1–6继续按原指纹保留。读取、validate和普通export均不自动生成可移动视图。需要时显式执行 `export --portable`，新建独立目录及派生manifest，不改历史台账、旧导出或current指针。旧版台账不要求重新导出才能validate。
+## 10. 处理提交异常并核对兼容性
 
-## 阶段 3：派生单元与历史
+遇到写入冲突，保存工作包和报错，确认其他写入者结束后重试。提交中断先执行recover，检查返回的rolled_back、unrecovered_run_ids、pending_review_run_id和recovery_warnings；未恢复的轮次继续列为未完成。损坏、多分支或无法验证时保留现场并交维护者处理。导出缺失用export重建；放弃未提交工作用recover --abort并填写实际原因。
 
-引擎0.4.0继续读取schema 1/2。新轮提交schema 3，按轮unit_ids固定单元范围，OCRAttempt不可改写。OCR不参与原件文本变更比对，不触发原件指纹变更，也不自动完成视觉待办。旧台账和renderer 1–7不因读取/校验改写；新增能力见[OCR定位层](ocr.md)。
-
-## 阶段 4：表查询与骨架
-
-大表确定性筛选、分组Decimal求和、计数及查询来源引用见[表查询](table-query.md)；真实ID预填、空判断与更新候选说明见[评估骨架](scaffold.md)。新轮用renderer9，旧1–8保持历史字节，查询不自动生成审计结论。
+当前引擎0.4.0读取schema1/2/3；新轮使用renderer9，历史1–8按登记指纹恢复。inspect、validate和普通export保留旧台账与旧输出。需要可移动视图时显式export --portable，写入新目录及派生manifest，保留current指针。显式update/finalize才提交新轮及必要升级；历史轮只显示当时单元和事实。旧Gap缺依据保持原记录并提示复核，实际修订时补真实关闭依据。

@@ -1,8 +1,10 @@
 # OFD、WPS 与通用 XML
 
+按实际格式选择以下步骤；定位和来源登记完成后，依任务继续原页核对与评估。
+
 这些读取路径属于通用 core，不增加业务模块。先用 begin/inspect 登记原件版本及真实单元，再按本页处理格式限制；新材料和已提交项目分别按[运行接口](workflow.md)、[增量接口](incremental.md)操作。
 
-## OFD 文本层与原页
+## 1. 定位OFD文本并核对原页
 
 1. begin 按 OFD.xml 中的 DocBody/DocRoot、Document.xml 中的 Pages 声明顺序登记页面。多个文档连续编号，physical_page 从1开始；document 和 ofd_page_id 同时保留。
 2. 每页建立 manual_check 页单元；TextObject 中的 TextCode 建立 extracted 对象单元。对象 locator 保存物理页、XML 部件、对象路径/ID及原始 Boundary，text_codes 保留各段文字及 X/Y/DeltaX 等参数。坐标是文件原值，不推断版面阅读顺序、图层可见性或经过变换的视觉位置。
@@ -19,13 +21,13 @@ python3 scripts/review.py render --project /项目 --version OFD版本ID --pages
 
 OFD XML 部件上限32 MiB，包成员上限10,000；重复或不安全成员、越出包根的引用、外部引用和DTD/实体声明明确失败。单页损坏保留失败页并继续其他声明页。未声明页、模板/附件文本和任意厂商扩展不在当前文本提取范围内。
 
-## 通用 XML 与电子发票结构
+## 2. 读取XML元素并核对业务依据
 
 begin 对 .xml 提取元素自身文本、子元素尾文本和属性。locator.element_path 使用完整命名空间和同名兄弟序号，例如 `{urn:synthetic:invoice}Line[2]`，避免不同命名空间或重复项目混淆。原值与属性分别保留，search 可查对应文字和属性值。
 
 核对电子发票时，按元素路径引用已提供字段，再核对原件、业务资料及可用的真实查验结果。此读取器不鉴定发票真伪、不校验数字签名，也不访问税务查验或其他外部地址。DTD/实体声明及损坏XML记 failed，其他材料继续处理。
 
-## WPS 转换与演示文稿
+## 3. 读取WPS转换件及幻灯片
 
 | 原件 | 可选本地转换 | 转换后定位及限制 |
 |---|---|---|
@@ -40,6 +42,6 @@ LibreOffice按内容及可用过滤器识别格式；扩展名不是成功承诺
 
 .et提供转换读取、search及单元引用；table-query当前接受CSV/TSV/XLSX原件版本。对需要查询的转换表，另登记转换来源并在明确范围内处理，不能将转换文件冒充独立原件。
 
-## 旧项目
+## 4. 显式更新旧项目
 
 旧项目中的 unsupported/unread 单元继续按原记录 inspect/validate/export。需要使用新读取器时，通过 update.source_bindings 的 relation=reparse 和实际理由显式重新解析，新增版本并保留原件相同指纹、旧单元、历史输出。OFD新解析或字节变更需要登记视觉核查结果或具体不可用原因；未完成事项按[原页核查跟进](visual-followup.md)持续交接。

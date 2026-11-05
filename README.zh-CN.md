@@ -1,6 +1,14 @@
 # Evidence Reviewer · 审计证据核查与复核助手
 
-面向内部审计、财务报表审计及其他外部审计任务的辅助 Skill。它帮助审计人员从报告表述追溯原始材料，复算数字，识别期间与会计口径差异，检查完整上下文和反证，并给出可定位的证据及最小必要修改。
+最适合内审、专项审计、经济责任审计和报告复核：从报告追溯原件，核对上下文、金额与反证，提出最小必要修改。在财务报表审计中，可辅助选定样本的凭证检查、报表与附注勾稽、报告一致性复核、准则查找，以及已实现的分录筛选、分组汇总。
+
+所有输出都是供审计人员复核确认的工作草稿。风险评估、重要性与抽样判断、函证与监盘的执行、审计意见由审计人员负责；本skill不作最终责任认定，不替代签字和职业判断。
+
+合成材料，非真实业务。以下为实际运行生成的review.md节选，保留原文：
+
+> F2：确认有误；正确期末80,900元。 最小替换：本年期末权益应为 80,900.00 元，算法为重述期初 95,200.00 元减本年净亏损 12,300.00 元、减分配 2,000.00 元。前期差错更正 4,800.00 元已计入重述期初，不再重复扣减。
+
+[抽查过程与原始输出记录](docs/stage5-behavior-check.md)。
 
 English documentation: [README.md](README.md).
 
@@ -47,7 +55,18 @@ mkdir -p "$HOME/.agents/skills"
 cp -R evidence-reviewer "$HOME/.agents/skills/evidence-reviewer"
 ```
 
-已有同名版本时先比较并备份，避免混合两套文件。依赖虚拟环境独立保留，并在任务中告知宿主实际 Python 路径。安装后在技能列表选中它，或在支持的 Codex 界面使用 `$evidence-reviewer`；未出现时重启宿主。此处仅提供安装说明，不执行安装。路径及发现方式核对自 [OpenAI 官方 Skills 文档](https://learn.chatgpt.com/docs/build-skills)（2026-10-13）；插件市场分发需要另行打包，本包没有发布到市场。
+已有同名版本时先比较并备份，避免混合两套文件。依赖虚拟环境独立保留，并在任务中告知宿主实际 Python 路径。安装后在技能列表选中它，或在支持的 Codex 界面使用 `$evidence-reviewer`；未出现时重启宿主。此处仅提供安装说明，不执行安装。路径及发现方式核对自 [OpenAI 官方 Skills 文档](https://learn.chatgpt.com/docs/build-skills)（2026-11-05复核）；插件市场分发需要另行打包，本包没有发布到市场。
+
+Claude Code 本地安装使用个人目录 `~/.claude/skills/` 或项目目录 `.claude/skills/`。从本包根目录选择一种安装位置，在目标不存在时复制完整skill目录：
+
+```sh
+# 个人安装
+mkdir -p "$HOME/.claude/skills"
+cp -R evidence-reviewer "$HOME/.claude/skills/evidence-reviewer"
+# 或在目标项目根目录创建 .claude/skills，再复制 evidence-reviewer 到其中
+```
+
+项目安装后的入口应为 `.claude/skills/evidence-reviewer/SKILL.md`。同名旧安装先备份，替换整个目录，保持包外Python环境和依赖可用。路径依据[Claude Code官方技能文档](https://code.claude.com/docs/en/skills)于2026-11-05核对；本阶段未实际安装或运行Claude Code，宿主集成**未验证**。这些路径只针对本地Claude Code，不推定适用于其他产品或云端会话。
 
 入门请求可以这样写：
 
@@ -131,7 +150,7 @@ DEMO_PY
 
 再让宿主按 `tests/cases/financial/request.md` 和已取得的实际单元继续核查。演练目录由命令新建，使用结束后可自行清理。
 
-需要台账时，按 [workflow.md](evidence-reviewer/references/common/workflow.md) 准备请求并执行 `begin`、`inspect`；依据本轮实际阅读填写评估，再执行 `check-assessment`、`finalize` 和 `validate`。`begin` 仅准备快照与读取单元，不输出自动审计结论；`assessment.json` 的事实和判断必须由实际核查形成。项目必须位于材料目录之外，并使用新的项目路径。
+需要台账时，按 [workflow.md](evidence-reviewer/references/common/workflow.md) 准备请求并执行 `begin`、`inspect`、`scaffold`；依据本轮实际阅读填写真实ID骨架，再执行 `check-assessment`、`finalize`、`validate` 和 `export`。`begin` 仅准备快照与读取单元，不输出自动审计结论；`assessment.json` 的事实和判断必须由实际核查形成。项目必须位于材料目录之外，并使用新的项目路径。
 
 台账输出包括 `review.md`、`handoff.md`、`changes.md`、`history.md`，编制任务另有 `draft.md`。用户交付仍可集中为一张核查表或可替换段落。项目内部保留原件快照、缓存和历史，均按敏感审计材料管理；新轮 renderer 9 继承相对链接，整个项目可移动。旧 renderer 1–8 导出保留原字节；只有显式 `export --portable` 才在新目录生成可移动视图。
 

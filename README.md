@@ -1,6 +1,14 @@
 # Evidence Reviewer · Audit Evidence Verification and Review Assistant
 
-A skill that helps auditors for internal audit, financial-statement audit, and other external audit work. It supports tracing report language back to source materials, recalculating figures, spotting period and accounting-basis differences, checking full context and contrary evidence, and proposing locatable evidence with the minimum necessary edits.
+Best suited to internal audit, special-purpose audit, economic-responsibility audit, and report review: trace statements to originals, check context, figures and contrary evidence, and propose minimal edits. For financial-statement audits, it can assist with vouching selected samples, tying statements to notes, reviewing report consistency, looking up standards, and the implemented journal-entry filters and grouped summaries.
+
+All outputs are working drafts for auditors to review and confirm. Auditors remain responsible for risk assessment, materiality and sampling judgments, executing confirmations and inventory observation, and issuing audit opinions. This skill does not make final responsibility determinations or replace signatures and professional judgment.
+
+Synthetic materials, not real business. Verbatim excerpt from the actual generated review.md:
+
+> F2：确认有误；正确期末80,900元。 最小替换：本年期末权益应为 80,900.00 元，算法为重述期初 95,200.00 元减本年净亏损 12,300.00 元、减分配 2,000.00 元。前期差错更正 4,800.00 元已计入重述期初，不再重复扣减。
+
+[Execution record and original output](docs/stage5-behavior-check.md).
 
 中文说明见 [README.zh-CN.md](README.zh-CN.md)。
 
@@ -47,7 +55,18 @@ mkdir -p "$HOME/.agents/skills"
 cp -R evidence-reviewer "$HOME/.agents/skills/evidence-reviewer"
 ```
 
-If a same-named install already exists, compare and back it up first so two trees are not mixed. Keep the dependency venv separate and tell the host the real Python path for the task. After install, select it in the skill list or use `$evidence-reviewer` where Codex supports that; restart the host if it does not appear. These are install instructions only—this README does not perform the install. Paths and discovery were checked against the [OpenAI Skills documentation](https://learn.chatgpt.com/docs/build-skills) (2026-10-13). Marketplace distribution needs separate packaging; this package is not published to a marketplace.
+If a same-named install already exists, compare and back it up first so two trees are not mixed. Keep the dependency venv separate and tell the host the real Python path for the task. After install, select it in the skill list or use `$evidence-reviewer` where Codex supports that; restart the host if it does not appear. These are install instructions only—this README does not perform the install. Paths and discovery were checked against the [OpenAI Skills documentation](https://learn.chatgpt.com/docs/build-skills) (rechecked 2026-11-05). Marketplace distribution needs separate packaging; this package is not published to a marketplace.
+
+For local Claude Code, use personal `~/.claude/skills/` or project `.claude/skills/`. Choose one location and copy the complete skill folder from this package root when the target does not already exist:
+
+```sh
+# Personal installation
+mkdir -p "$HOME/.claude/skills"
+cp -R evidence-reviewer "$HOME/.claude/skills/evidence-reviewer"
+# Or create .claude/skills in the target project and copy evidence-reviewer into it
+```
+
+The project entry should be `.claude/skills/evidence-reviewer/SKILL.md`. Back up an older installation, replace the complete folder, and keep the separate Python environment available. Paths were checked against the [official Claude Code skills documentation](https://code.claude.com/docs/en/skills) on 2026-11-05. Claude Code installation and execution were **not verified** in this stage. These are local Claude Code paths; they are not assumed to work in other products or cloud sessions.
 
 A starter request can look like:
 
@@ -131,7 +150,7 @@ DEMO_PY
 
 Then have the host continue verification using `tests/cases/financial/request.md` and the units actually obtained. The demo directory is newly created; clean it up when finished.
 
-When a ledger is needed, prepare the request per [workflow.md](evidence-reviewer/references/common/workflow.md) and run `begin`, `inspect`; fill the assessment from this round's actual reading, then `check-assessment`, `finalize`, and `validate`. `begin` only prepares snapshots and read units—it does not emit automatic audit conclusions; facts and judgments in `assessment.json` must come from actual review. Keep the project **outside** the materials directory and use a new project path.
+When a ledger is needed, prepare the request per [workflow.md](evidence-reviewer/references/common/workflow.md) and run `begin`, `inspect`, and `scaffold`; fill the real-ID template from this round's actual reading, then `check-assessment`, `finalize`, `validate`, and `export`. `begin` only prepares snapshots and read units—it does not emit automatic audit conclusions; facts and judgments in `assessment.json` must come from actual review. Keep the project **outside** the materials directory and use a new project path.
 
 Ledger outputs include `review.md`, `handoff.md`, `changes.md`, and `history.md`; draft tasks also get `draft.md`. User deliverables can still be one verification table or replaceable paragraphs. Inside the project, original snapshots, caches, and history are sensitive audit material; renderer 9 inherits relative links and supports moving the whole project. Renderers 1–8 keep their historical bytes; only explicit `export --portable` produces a portable view in a new directory.
 

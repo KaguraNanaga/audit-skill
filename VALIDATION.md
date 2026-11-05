@@ -222,3 +222,39 @@ python3 -B tools/check_release.py
 全部0失败/错误。基础矩阵的缺工具跳过为旧DOC/XLS实际转换、Poppler、RapidOCR、Tesseract、WPS实际转换、实际OFD渲染；POSIX另跳过Windows专属共享测试。Windows的保留名failed后继续、独立锁sidecar和新增夹具确定性均实际通过。独立平台测试Windows13通过/2跳过、POSIX12通过/3跳过；结构测试各8通过/0跳过。固定历史对照、117个链接及110份发布清单七组均通过。
 
 Office任务实际使用LibreOffice26.2.6.3（620 Build:3），1项测试包含.wps/.et/.dps三条MS兼容二进制转换路径，未跳过；不是原生WPS生产器兼容性评测。独立OCR任务实际Tesseract5.5.0（chi_sim+eng）、RapidOCR1.4.4/onnxruntime1.31.1，两项真实识别和来源/拒绝流程通过；未扩大为OCR准确率结论。OFD文本与适配器契约测试通过，真实OFD图像渲染仍未验证。
+
+
+## 11. 阶段 5：文档改写及行为抽查（2026-11-05）
+
+规则基线为阶段2最终验收提交8cd924eb478bc670f82ad0f93e8f59cfee1d3162。改写前先保存SKILL与全部references的470个原段/表行/接口块，再拆分为1425个句级或完整接口条目；[逐条对照](docs/rewrite-rule-mapping.md)标明唯一合并位置及3类存疑，没有删除规则或变更运行行为。[完整SKILL diff](docs/SKILL.stage5.diff)与基线逐行比较。SKILL总52行、description154字符；SKILL和16份references合计57399→55763字符，下降1636（2.85%）。
+
+### 本机实际执行
+
+macOS 26.6.2 arm64、Python 3.14.3、openpyxl 3.1.5、pypdf 6.12.1、Pillow 12.2.0；该解释器未安装reportlab，未重建旧夹具。测试通过包外执行包装器设置固定阶段1/1.5/3/4基线，运行命令本体如下；LibreOffice实际转换在允许启动本机应用的环境执行。
+
+| 命令/检查 | 实际结果 |
+|---|---|
+| python3 -B tests/test_public.py | 64项：60通过、4跳过、0失败/错误；33.854秒 |
+| python3 -B tests/test_platform.py | 15项：14通过、1跳过；7.489秒 |
+| python3 -B tests/test_structure.py | 8项：8通过、0跳过；2.894秒 |
+| python3 -B tools/check_links.py | 1546个本地链接通过；外部网站不由此脚本验证 |
+| python3 -B tools/check_release.py --write-manifest及普通检查 | 113份发布文件通过 |
+| skill-creator quick_validate.py | Skill is valid |
+| git diff --check | 通过 |
+| 与阶段2验收包逐字节比较 | 81份运行脚本/测试/全部夹具及冻结清单/依赖/CI配置/.gitattributes完全一致；唯一工具修改为check_release维护文档白名单 |
+
+完整测试4个跳过分别为：非Windows主机不能执行原生Windows占用测试；未安装rapidocr-onnxruntime；没有tesseract；没有实际OFD渲染适配器。独立platform的1个跳过为同一Windows测试。跳过没有计入通过；OFD契约模拟测试不等于真实渲染验证。首轮环境清单读取未安装的reportlab元数据报PackageNotFoundError，改为如实登记未安装后重新取得环境记录；这不是回归测试失败。
+
+### 文档改写后的行为抽查
+
+两个新会话未继承开发过程及答案，分别只收到重写skill和原有financial/controls的sources/及request.md；业务输入逐字节不变。宿主提供的文件/图像工具可用，financial按宿主要求另读只读电子表格技能。两案都实际执行完整台账流程，并回读导出。[实际调用、输出、结论及失败日志](docs/stage5-behavior-check.md)以维护文档保存；发布时仅替换临时目录和用户目录前缀，保留替换前/后哈希。
+
+financial：实际inspect33个单元、9项Decimal复算；先检查原件及公式/缓存，再begin、inspect、select-main、search、scaffold，填写判断并提交。首次check-assessment的Finding关系方向错误被拒，修正后校验通过；一次交付脚本编排语法错误发生于shell执行前，重试成功。controls：实际inspect12个单元，打开PNG全图、写原页观察，保留其余17笔未测试；完整台账链通过。首次长输出显示截断后补读、自动生成19份字节码后清理的过程均记录。
+
+两案没有省略台账关键步骤；读取原件/看PNG提前于begin执行。此次未覆盖OCR、OFD/WPS/XML、table-query、大表、跨轮update、对抗性指令、万元精度情形或外部准则查询，未为触发步骤修改案例。抽查时SKILL与最终一致；其后4份参考补明原有条件的精确差异列于记录，补明处没有重新做独立会话验证。此为一次行为抽查，不是准确率、稳定性或全能力验证；执业人员人工评审未执行。
+
+README节选由financial实际台账导出的review.md按F2整行读取，双语README保留同一原文，标注合成材料、非真实业务；原文件哈希、run_id及选取行号列于行为记录。Claude Code个人及项目安装路径于2026-11-05对照官方文档核实；实际安装及运行未验证。OpenAI安装路径同期对照官方文档复核。包版本未提前升级；阶段6未执行。
+
+### 阶段5 CI
+
+待本阶段真实运行后填写；尚未将本机结果推定为跨平台结果。
