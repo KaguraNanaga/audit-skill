@@ -362,16 +362,16 @@ public的4个跳过为原生Windows共享文件占用、实际RapidOCR、实际T
 
 | 命令 | 修改前峰值MiB | 修改后峰值MiB |
 |---|---:|---:|
-| begin | 866.9 | 66.5 |
-| inspect | 293.2 | 306.5 |
-| search | 366.6 | 200.0 |
-| finalize | 3300.4 | 419.5 |
-| validate | 1979.9 | 1239.8 |
-| export | 2785.9 | 1298.1 |
+| begin | 866.2 | 67.1 |
+| inspect | 304.9 | 307.1 |
+| search | 390.2 | 200.5 |
+| finalize | 3214.5 | 419.1 |
+| validate | 2004.3 | 1240.4 |
+| export | 2570.7 | 1299.9 |
 
-修改前inspect为完整输出，修改后为--summary --limit 20；新版另实际执行read（20单元/12000正文字符预算）。搜索均覆盖同一范围，新版只限制预览。对应终端字节：inspect 9,062,170 → 14,677，search 2,529,422 → 5,695。review.md为727,324 → 3,517字节；新版另保留完整JSONL及可读附录，不能把缩小正文误称为删除了完整记录。
+修改前inspect为完整输出，修改后为--summary --limit 20；新版另实际执行read（20单元/12000正文字符预算）。搜索均覆盖同一范围，新版只限制预览。对应终端字节：inspect 9,062,467 → 14,677，search 2,529,422 → 5,695。review.md为727,324 → 3,341字节；新版另保留完整JSONL及可读附录，不能把缩小正文误称为删除了完整记录。
 
-探索测量曾发现新附录下提交峰值升高，随后修复整台账JSON序列化/哈希的临时副本，并以同一coverage工作负载复测得到上表。规范化字节及SHA256保持不变。begin时间约1.74 → 6.00秒，finalize约4.49 → 4.73秒；分块编码存在耗时取舍。这是单次合成样本，不能推断任意规模内存上限；读取仍整体加载JSON，validate/export实测仍约1240/1298 MiB。其他操作系统的峰值内存本轮未验证。
+探索测量曾发现新附录下提交峰值升高，随后修复整台账JSON序列化/哈希的临时副本，并以同一coverage工作负载复测得到上表。规范化字节及SHA256保持不变。begin时间约1.75 → 6.33秒，finalize约5.01 → 4.67秒；分块编码存在耗时取舍。这是单次合成样本，不能推断任意规模内存上限；读取仍整体加载JSON，validate/export实测仍约1240/1300 MiB。其他操作系统的峰值内存本轮未验证。
 
 ### 文档改进后的行为抽查
 
@@ -383,6 +383,32 @@ public的4个跳过为原生Windows共享文件占用、实际RapidOCR、实际T
 
 本案只有小型CSV与文本，未触发OCR、看图、OFD/WPS/XML、大表table-query、增量及恢复；这些能力不由本次抽查证明。实际调用、stdout/stderr、退出码、assessment、台账和结论保存于本地交付验证资料。人工评审：**待执行**；多宿主/普通模型对照及阶段6正式盲评：**待执行**。
 
+### 最终候选交付回看
+
+同一执行会话先后使用最终候选对原台账显式export --compact，未重新作业务判断，不计作第二次独立答题。最终skill目录聚合SHA256为77fa285b64412e154af968f635ce9eeb4b058d68297db85429c1e2af0e43a60e，reporting_v10.py为3fdb83c60b39c8ee2195c43660e3fbd4a82f7226e4201854da556d8580713a61。实际逐条检查293个本地链接、176个锚点链接及82个HTML锚点，均有效；主要意见、59条证据、20项计算、3项规则及限制保持，handoff的5项最小补证与assessment逐字一致。原台账及此前输出28个文件字节未变。
+
+该实际业务抽查的review.md由早期候选122,827字节变为最终视图53,050字节，handoff为2,009字节。这个结果与上面的极少判断、大量原始单元的资源样本不同，不能混成统一缩减比例。全文仍可能较长，应按章节/锚点读取。该案任务均声明在包内范围完成，未覆盖“非零未完成程序”的交接分支；资源样本中的partial任务分支另实际执行。
+
+最终实现另完整执行public82项（78通过/4跳过）、platform15项（14通过/1跳过）、structure8通过，未把跳过计入通过。回填维护记录后的普通发布检查再次通过222份文件和1588个本地链接；CI结果按实际运行回填如下。
+
 ### 本轮CI
 
-待执行；不以之前阶段的绿色结果替代本次提交。
+[实际运行42000150729](https://github.com/KaguraNanaga/audit-skill/actions/runs/42000150729)，提交01a278e50042443f7242b461234c6a0c3d94edae，9个任务全部成功。以下逐项读取实际日志；每个基础矩阵均运行新增9项回归，skip不计为通过。
+
+| 任务 | public通过/跳过 | platform通过/跳过 | structure通过/跳过 |
+|---|---|---|---|
+| [macos-latest / Python 3.11](https://github.com/KaguraNanaga/audit-skill/actions/runs/42000150729/job/127153030087) | 75/7 | 12/3 | 8/0 |
+| [macos-latest / Python 3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/42000150729/job/127153029743) | 75/7 | 12/3 | 8/0 |
+| [ubuntu-latest / Python 3.11](https://github.com/KaguraNanaga/audit-skill/actions/runs/42000150729/job/127153029778) | 75/7 | 12/3 | 8/0 |
+| [ubuntu-latest / Python 3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/42000150729/job/127153029934) | 75/7 | 12/3 | 8/0 |
+| [ubuntu-latest / Python 3.14](https://github.com/KaguraNanaga/audit-skill/actions/runs/42000150729/job/127153030013) | 75/7 | 12/3 | 8/0 |
+| [windows-latest / Python 3.11](https://github.com/KaguraNanaga/audit-skill/actions/runs/42000150729/job/127153029451) | 76/6 | 13/2 | 8/0 |
+| [windows-latest / Python 3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/42000150729/job/127153029979) | 76/6 | 13/2 | 8/0 |
+
+基础矩阵的操作系统/解释器为macos-latest、ubuntu-latest、windows-latest各Python3.11/3.12，另有Ubuntu/Python3.14；具体构建号与依赖版本保存在各任务实际日志。七组均通过历史结构对照、1588个本地链接与222份发布文件校验。基础环境缺LibreOffice、Poppler、双OCR及真实OFD渲染器时显式skip；POSIX另跳过原生Windows共享锁测试，Windows实际执行。
+
+- [Actual LibreOffice WPS-compatible routes / Python 3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/42000150729/job/127153029224)：1通过/0跳过，实际执行对应可选工具测试。
+- [Optional local OCR / Python 3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/42000150729/job/127153029294)：2通过/0跳过，实际执行对应可选工具测试。
+
+本节回填之后只修改RELEASE_NOTES、VALIDATION和发布清单；运行代码、测试和skill不变。最终文档提交的CI另以交付链接核对，不在此预填尚未执行结果。上述测试不代表多宿主准确率、真实OFD渲染或正式人工评审已完成。
+
