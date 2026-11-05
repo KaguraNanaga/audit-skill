@@ -1,0 +1,11 @@
+{
+  "frozen_on": "2026-11-05",
+  "synthetic": true,
+  "files": {
+    "tests/expected/table-query.json": "b24b6a090341c1cb8fd96b9109e62ec5efe8e2eff6c138d5dca7a61927a2a2b3",
+    "tests/table-fixtures/small.csv": "7a1a9ba9d3ef78b819f638f9b80b778bcb14e9af1a990a4145bad9547bd92934",
+    "tests/table-fixtures/small.tsv": "00c7a332f1c9d0e1a76f34db6474ea3a04cb61c56e8f6eafdc604d4bf862369e",
+    "tests/table-fixtures/small.xlsx": "df8af168a3e718104a0247d72ae90b205fe4dec67cedac7717327a3e8812dc33",
+    "tests/table-fixtures/synthetic-ledger-50000.csv": "919dc3c5cd956d437da1667c8525cb289602c65b77bb5e82b96f12460eac07b7"
+  }
+}

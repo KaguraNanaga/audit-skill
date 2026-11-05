@@ -10,9 +10,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-import ledger as L
-import readers
-from prepare import inventory
+from core import ledger as L
+from core import readers
+from core.prepare import inventory
 
 
 def load(path):
@@ -48,6 +48,22 @@ def check_files(project, work, check_outputs=False):
         if row['kind'] == 'SourceVersion' and row.get('raw_tool_path'):
             p = local_path(project, row['raw_tool_path'])
             L.require(p.is_file() and readers.digest(p) == row['raw_tool_sha256'], 'Raw web tool response changed or unavailable')
+    for row in work['records'].values():
+        if row['kind'] == 'SourceVersion':
+            for operation in row.get('processing', []):
+                if operation.get('state') == 'converted':
+                    p = local_path(project, operation['artifact'])
+                    L.require(p.is_file() and readers.digest(p) == operation['sha256'], 'Converted artifact missing or changed: ' + str(p))
+    from core import derived
+    for row in work['records'].values():
+        if row['kind'] == 'OCRAttempt' and row.get('raw_path'):
+            p = local_path(project, row['raw_path'])
+            L.require(p.is_file() and readers.digest(p) == row['raw_sha256'], 'OCR result missing or changed')
+            blocks = load(p)
+            units = [derived.unit_at(work, row['source_version_id'], uid) for uid in row['unit_ids']]
+            L.require(len(blocks) == len(units) and all(u and all(u.get(k) == block.get(k, 1) for k in ('text', 'bbox', 'confidence', 'frame')) for u, block in zip(units, blocks)), 'OCR result and registered units differ')
+    from core.table_query import validate as validate_queries
+    validate_queries(work, project)
     for artifact in work['artifacts']:
         p = local_path(project, artifact['path'])
         L.require(p.is_file() and readers.digest(p) == artifact['sha256'], 'Registered rendering/image changed or unavailable')
@@ -59,6 +75,9 @@ def check_files(project, work, check_outputs=False):
 
 
 def add_units(project, work, version_id, extracted):
+    for operation in extracted.get('processing', []):
+        if operation.get('artifact'):
+            operation['artifact'] = Path(operation['artifact']).relative_to(project).as_posix()
     units = []
     for item in extracted['units']:
         u = dict(item, id=L.uid())
@@ -101,55 +120,65 @@ def begin(args):
             'excluded_roots': request.get('exclusions', []), 'selected_main_version': None,
             'main_selection_reason': None, 'output_request': output},
             'run': {'id': run_id, 'previous_run_id': None, 'started_at': L.now(), 'finished_at': None,
-                    'state': 'staging', 'validation_version': 2, 'visual_checks_version': 1, 'visual_checks': [], 'source_version_snapshot': [], 'selected_main_version': None,
+                    'state': 'staging', 'table_queries_version': 1, 'derived_units_version': 1, 'validation_version': 2, 'visual_checks_version': 1, 'visual_checks': [], 'source_version_snapshot': [], 'selected_main_version': None,
                     'skill_version': L.VERSION, 'tool_versions': {'reader': readers.VERSION, 'python': sys.version},
                     'model_version': request.get('model_version'), 'errors': [], 'unfinished_steps': ['session_review', 'validation', 'commit', 'export']},
             'records': {}, 'units': {}, 'artifacts': [], 'excluded': [], 'outcome': None}
     work['run']['scope_revision'] = work['project']['scope_revision']
-    save_work(project, work)
-    try:
-        known_paths = set()
-        for root in roots:
-            files, skipped, errors = inventory(root, excluded)
-            work['excluded'] += [dict(x, root=str(root)) for x in skipped]
-            work['run']['errors'] += [dict(x, root=str(root), stage='inventory') for x in errors]
-            for f in files:
-                original = root / f['relative_path']
-                if str(original) in known_paths: continue
-                known_paths.add(str(original))
-                source_id, version_id = L.uid(), L.uid()
-                snapshot = project / 'sources' / version_id / original.name
-                snapshot.parent.mkdir(parents=True)
-                shutil.copyfile(original, snapshot)
-                L.require(readers.digest(snapshot) == f['sha256'] == readers.digest(original), 'Source changed during snapshot copy')
-                snapshot.chmod(0o444)
-                L.add(work, 'Source', dict(actual_name=original.name, known_paths=[str(original)], urls=[], role='unknown',
-                                         role_basis='Not yet classified by reviewer', issuer=None, signature_status='unknown',
-                                         confirmation_scope=None, origin_group_id=source_id), source_id)
-                L.add(work, 'SourceVersion', dict(source_id=source_id, actual_name=original.name, sha256=f['sha256'], availability='local_snapshot',
-                          format=original.suffix.lower(), local_snapshot=snapshot.relative_to(project).as_posix(), url=None,
-                          discovered_at=L.now(), acquired_at=L.now(), formed_at=None, facts_period=None, received_at=None,
-                          derived_from_version_ids=[], processing_method=readers.VERSION, audio_version_id=None), version_id)
-                work['run']['source_version_snapshot'].append(version_id)
-                extracted = readers.read(snapshot, project / 'cache' / version_id)
-                work['records'][version_id]['processing'] = extracted['processing']
-                add_units(project, work, version_id, extracted)
-                save_work(project, work)
-        if request.get('main_document'):
-            selected = str(request['main_document'])
-            matches = [v for v in work['run']['source_version_snapshot']
-                       if selected in work['records'][work['records'][v]['source_id']]['known_paths']
-                       or selected == work['records'][work['records'][v]['source_id']]['actual_name']]
-            L.require(len(matches) == 1, 'Requested main document is absent or ambiguous; select a precise source scope')
-            work['project'].update(selected_main_version=matches[0], main_selection_reason='Explicit request main_document')
-            work['run']['selected_main_version'] = matches[0]
+    with L.lock(project):
         save_work(project, work)
-        return {'project': str(project), 'run_id': run_id, 'files': len(known_paths), 'packet': str(project / 'staging/working.json'), 'state': 'staging', 'reviewed': False}
-    except Exception as exc:
-        work['run']['state'] = 'failed'
-        work['run']['errors'].append({'stage': 'begin', 'error': str(exc)})
-        save_work(project, work)
-        raise
+        try:
+            known_paths = set()
+            for root in roots:
+                files, skipped, errors = inventory(root, excluded)
+                work['excluded'] += [dict(x, root=str(root)) for x in skipped]
+                work['run']['errors'] += [dict(x, root=str(root), stage='inventory') for x in errors]
+                for f in files:
+                    original = root / f['relative_path']
+                    if str(original) in known_paths: continue
+                    known_paths.add(str(original))
+                    source_id, version_id = L.uid(), L.uid()
+                    snapshot = project / 'sources' / version_id / original.name
+                    try:
+                        snapshot.parent.mkdir(parents=True)
+                        shutil.copyfile(original, snapshot)
+                        L.require(readers.digest(snapshot) == f['sha256'] == readers.digest(original), 'Source changed during snapshot copy')
+                        snapshot.chmod(0o444)
+                    except (OSError, ValueError) as exc:
+                        work['run']['errors'].append(dict(root=str(root), path=f['relative_path'], stage='snapshot', state='failed', error=str(exc)))
+                        continue
+                    L.add(work, 'Source', dict(actual_name=original.name, known_paths=[str(original)], urls=[], role='unknown',
+                                             role_basis='Not yet classified by reviewer', issuer=None, signature_status='unknown',
+                                             confirmation_scope=None, origin_group_id=source_id), source_id)
+                    L.add(work, 'SourceVersion', dict(source_id=source_id, actual_name=original.name, sha256=f['sha256'], availability='local_snapshot',
+                              format=original.suffix.lower(), local_snapshot=snapshot.relative_to(project).as_posix(), url=None,
+                              discovered_at=L.now(), acquired_at=L.now(), formed_at=None, facts_period=None, received_at=None,
+                              derived_from_version_ids=[], processing_method=readers.VERSION, audio_version_id=None), version_id)
+                    work['run']['source_version_snapshot'].append(version_id)
+                    extracted = readers.read(snapshot, project / 'cache' / version_id)
+                    work['records'][version_id]['processing'] = extracted['processing']
+                    add_units(project, work, version_id, extracted)
+                    save_work(project, work)
+            if request.get('main_document'):
+                selected = str(request['main_document'])
+                matches = [v for v in work['run']['source_version_snapshot']
+                           if selected in work['records'][work['records'][v]['source_id']]['known_paths']
+                           or selected == work['records'][work['records'][v]['source_id']]['actual_name']]
+                failed_main = any(selected in {str(Path(e.get('root', '')) / e.get('path', '')),
+                                               Path(e.get('path', '')).name} for e in work['run']['errors'])
+                if not matches and failed_main:
+                    work['project']['main_selection_reason'] = 'Requested main failed acquisition; see per-file errors; no main version selected'
+                else:
+                    L.require(len(matches) == 1, 'Requested main document is absent or ambiguous; select a precise source scope')
+                    work['project'].update(selected_main_version=matches[0], main_selection_reason='Explicit request main_document')
+                    work['run']['selected_main_version'] = matches[0]
+            save_work(project, work)
+            return {'project': str(project), 'run_id': run_id, 'files': len(known_paths), 'packet': str(project / 'staging/working.json'), 'state': 'staging', 'reviewed': False}
+        except Exception as exc:
+            work['run']['state'] = 'failed'
+            work['run']['errors'].append({'stage': 'begin', 'error': str(exc)})
+            save_work(project, work)
+            raise
 
 
 def inspect(args):
@@ -157,7 +186,7 @@ def inspect(args):
     ledger_path = project / 'ledger/ledger.json'
     work = L.thaw(load(ledger_path)) if ledger_path.exists() else load(project / 'staging/working.json')
     if getattr(args, 'run', None):
-        import history
+        from core import history
         work = history.as_of(load(ledger_path), args.run)
     elif not getattr(args, 'committed', False) and (project / 'staging/working.json').exists():
         staged = load(project / 'staging/working.json')
@@ -191,10 +220,13 @@ def search(args):
                 if u['state'] in {'unread', 'failed', 'manual_check'}:
                     unread.append({'source_version_id': vid, 'unit_id': u['id'], 'state': u['state']})
                 if pattern.search(u['text']):
-                    results.append({'source_version_id': vid, 'unit_id': u['id'], 'locator': u['locator'], 'text': u['text']})
+                    hit = {'source_version_id': vid, 'unit_id': u['id'], 'locator': u['locator'], 'text': u['text']}
+                    from core.derived import is_ocr, WARNING
+                    if is_ocr(u): hit.update(warning=WARNING, derived_from=u['derived_from'])
+                    results.append(hit)
         record_id = L.add(work, 'SearchRecord', dict(purpose=args.purpose, material_snapshot=list(versions),
                           scope=[work['records'][work['records'][v]['source_id']]['actual_name'] for v in versions],
-                          keywords=[args.pattern], method='regex over all extracted units of selected snapshots; no OCR',
+                          keywords=[args.pattern], method='regex over extracted text and OCR locator units; images and unextracted units are not searched',
                           tool='review.py search', queried_at=L.now(), results=results, unread_parts=unread,
                           task_ids=[], claim_ids=[], external=False))
         save_work(project, work)
@@ -211,7 +243,7 @@ def select_main(args):
         work['project'].update(selected_main_version=args.version, main_selection_reason=args.reason)
         work['run']['selected_main_version'] = args.version
         if work.get('update_context') and previous != args.version:
-            import updates
+            from core import updates
             updates.add_change(work, 'main_changed', args.reason, old_version_id=previous, new_version_id=args.version)
             updates.mark_candidates(work)
         save_work(project, work)
@@ -279,7 +311,7 @@ def import_web(args):
             L.require(raw.is_file(), 'Raw tool output not found')
             # Content must occur in the supplied tool response, not merely a session paraphrase.
             if record['text']:
-                raw_content = raw.read_text()
+                raw_content = raw.read_text(encoding='utf-8')
                 try:
                     decoded = json.loads(raw_content)
                     raw_content += '\n' + json.dumps(decoded, ensure_ascii=False)
@@ -298,13 +330,13 @@ def import_web(args):
         L.require(not record.get('source_id') or (work.get('update_context') and existing and work['records'][source_id]['kind'] == 'Source'), 'Web source binding requires an existing source in a staged update')
         previous_version = None
         if existing:
-            import updates
+            from core import updates
             previous_version = next((v for v in updates.active_versions(work) if work['records'][v]['source_id'] == source_id), None)
         snapshot = None
         if record['text']:
             snapshot = project / 'sources' / version_id / 'web-tool-excerpt.txt'
             snapshot.parent.mkdir(parents=True)
-            snapshot.write_text(record['text'])
+            snapshot.write_text(record['text'], encoding='utf-8', newline='')
             snapshot.chmod(0o444)
         if not existing:
             L.add(work, 'Source', dict(actual_name=record['title'], known_paths=[], urls=[record['url']] if record['url'] else [], role='unknown',
@@ -330,7 +362,7 @@ def import_web(args):
                              acquisition_state=state, institution=record.get('institution'), candidate_urls=record.get('candidate_urls', []),
                              errors=record['errors'], task_ids=[], claim_ids=[]))
         if work.get('update_context'):
-            import updates
+            from core import updates
             updates.register_external(work, source_id, version_id, previous_version, state)
         save_work(project, work)
         return {'source_version_id': version_id, 'search_record_id': search_id, 'acquisition_state': state}
@@ -346,24 +378,24 @@ def assess(args, commit=False):
             staged_path = project / 'staging/working.json'
             staged = load(staged_path) if staged_path.exists() else None
             if staged and staged.get('update_context') and staged['run']['id'] != ledger['latest_run_id']:
-                work = L.materialize(get_work(project), assessment)
+                work = L.materialize(get_work(project), assessment, project=project)
                 check_files(project, work)
                 validation = L.validate_records(work)
                 if not commit:
                     return dict(validation, state='validated_candidate', persisted=False,
                                 pending_ids=work['run']['update_summary']['pending_ids'],
                                 calculations=[{'id': r['id'], 'purpose': r['purpose'], 'result': r['result']} for r in work['records'].values() if r['kind'] == 'Calculation'])
-                import history
+                from core import history
                 return history.finalize(project, work, sys.modules[__name__])
             work = L.thaw(ledger)
             L.require(work['assessment_sha256'] == L.checksum(assessment), 'Committed assessment differs; stage a new update instead of overwriting it')
-            if ledger.get('schema_version') == 'evidence-ledger-2.0': write_exports(project, ledger)
+            if ledger.get('schema_version') in {'evidence-ledger-2.0', 'evidence-ledger-3.0'}: write_exports(project, ledger)
             check_files(project, work, check_outputs=True)
             L.validate_records(work)
             return {'state': 'completed', 'idempotent_replay': True, 'run_id': work['run']['id']}
         work = get_work(project)
         L.require(work['run']['state'] == 'staging', 'Begin failed; preserve logs and start a new project after remedy')
-        work = L.materialize(work, assessment)
+        work = L.materialize(work, assessment, project=project)
         check_files(project, work)
         validation = L.validate_records(work)
         if not commit:
@@ -374,7 +406,7 @@ def assess(args, commit=False):
         for name, content in exports.items():
             path = f"outputs/{work['run']['id']}/{name}"
             L.add(work, 'OutputRecord', dict(run_id=work['run']['id'], output_kind=name.split('.')[0], path=path,
-                       renderer_version=6,
+                       renderer_version=9 if work['run'].get('table_queries_version') else 8 if work['run'].get('derived_units_version') else 7,
                        sha256=__import__('hashlib').sha256(content.encode()).hexdigest(), source_role='workpaper_or_draft',
                        actual_confirmation_status='unconfirmed', evidence_ids=[e['id'] for e in work['records'].values() if e['kind'] == 'Evidence']))
         L.validate_records(work)
@@ -392,28 +424,8 @@ def assess(args, commit=False):
 
 
 def write_exports(project, ledger):
-    if ledger.get('schema_version') == 'evidence-ledger-2.0':
-        import history
-        return history.write_exports(project, ledger, sys.modules[__name__])
-    work = L.thaw(ledger)
-    check_files(project, work)
-    exports = L.render(work, project)
-    for name, content in exports.items():
-        rel = f"outputs/{work['run']['id']}/{name}"
-        record = next(r for r in work['records'].values() if r['kind'] == 'OutputRecord' and r['path'] == rel)
-        L.require(__import__('hashlib').sha256(content.encode()).hexdigest() == record['sha256'], 'Renderer differs from committed output fingerprint')
-        path = project / rel
-        path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_name(path.name + '.tmp-' + L.uid())
-        with tmp.open('xb') as f:
-            f.write(content.encode())
-            f.flush()
-            os.fsync(f.fileno())
-        os.replace(tmp, path)
-    # Update export pointer only after all files match the authoritative ledger.
-    check_files(project, work, check_outputs=True)
-    L.atomic_json(project / 'outputs/current.json', {'run_id': work['run']['id'], 'ledger_sha256': ledger['integrity_sha256'],
-                  'files': [r['path'] for r in work['records'].values() if r['kind'] == 'OutputRecord']})
+    from core import history
+    return history.write_exports(project, ledger, sys.modules[__name__])
 
 
 def validate(args, export=False):
@@ -423,21 +435,38 @@ def validate(args, export=False):
         work = L.thaw(ledger)
         result = L.validate_records(work)
         check_files(project, work)
-        if export: write_exports(project, ledger)
+        if export and getattr(args, 'portable', False):
+            if work['run'].get('table_queries_version'):
+                from core.reporting_v9 import export_portable
+            elif work['run'].get('derived_units_version'):
+                from core.reporting_v8 import export_portable
+            else:
+                from core.reporting_v7 import export_portable
+            # Validate the existing authority before creating an optional view.
+            portable_requested = True
+        else:
+            portable_requested = False
+            if export: write_exports(project, ledger)
         check_files(project, work, check_outputs=True)
         pointer = load(project / 'outputs/current.json')
         L.require(pointer['run_id'] == work['run']['id'] and pointer['ledger_sha256'] == ledger['integrity_sha256'], 'Output pointer does not match ledger')
         expected = [r['path'] for r in work['records'].values() if r['kind'] == 'OutputRecord' and r['run_id'] == work['run']['id']]
         L.require(pointer['files'] == expected, 'Output pointer file list does not match current run')
+        if portable_requested:
+            return export_portable(project, ledger, sys.modules[__name__])
         return dict(result, state='completed', run_id=work['run']['id'], outputs='verified')
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'): stream.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--version', action='version', version='Evidence Reviewer package 0.4.0-beta.1; engine 0.4.0. Package version identifies the distributed skill; engine version identifies ledger and validation behavior.')
     sub = parser.add_subparsers(dest='command', required=True)
-    for name in ['begin', 'update', 'annotate-sources', 'inspect', 'search', 'select-main', 'render', 'import-web', 'check-assessment', 'finalize', 'validate', 'export', 'recover']:
+    for name in ['begin', 'update', 'annotate-sources', 'inspect', 'search', 'select-main', 'render', 'import-web', 'check-assessment', 'finalize', 'validate', 'export', 'recover', 'ocr', 'table-query', 'scaffold']:
         p = sub.add_parser(name)
         p.add_argument('--project', type=Path, required=True)
+        if name == 'export': p.add_argument('--portable', action='store_true', help='Create renderer-7 views in a new directory; preserve ledger and all historical outputs')
         if name == 'annotate-sources': p.add_argument('--annotations', type=Path, required=True)
         if name in {'begin', 'update'}: p.add_argument('--request', type=Path, required=True)
         if name in {'inspect', 'search'}: p.add_argument('--version', action='append')
@@ -456,13 +485,29 @@ def main():
             p.add_argument('--pages', type=int, nargs='+')
             p.add_argument('--docx-renderer')
             p.add_argument('--fontconfig')
+        if name == 'table-query':
+            p.add_argument('--version', required=True)
+            p.add_argument('--spec', type=Path, required=True)
+            p.add_argument('--limit', type=int, default=10)
+        if name == 'scaffold':
+            p.add_argument('--version', action='append')
+            p.add_argument('--unit', action='append')
+            p.add_argument('--limit', type=int, default=20)
+            p.add_argument('--out', type=Path)
+        if name == 'ocr':
+            p.add_argument('--version', required=True)
+            p.add_argument('--pages', type=int, nargs='+')
+            p.add_argument('--engine', choices=['tesseract', 'rapidocr'], default='tesseract')
+            p.add_argument('--timeout', type=float, default=120)
         if name == 'import-web': p.add_argument('--record', type=Path, required=True)
         if name in {'check-assessment', 'finalize'}: p.add_argument('--assessment', type=Path, required=True)
     args = parser.parse_args()
     try:
-        import updates
-        import history
-        commands = {'begin': begin, 'inspect': inspect, 'search': search, 'select-main': select_main,
+        from core import updates
+        from core import history
+        from core import table_query, scaffold
+        from core import ocr
+        commands = {'table-query': lambda a: table_query.run(a, sys.modules[__name__]), 'scaffold': lambda a: scaffold.run(a, sys.modules[__name__]), 'ocr': lambda a: ocr.run(a, sys.modules[__name__]), 'begin': begin, 'inspect': inspect, 'search': search, 'select-main': select_main,
                     'render': render_source, 'import-web': import_web,
                     'check-assessment': assess, 'finalize': lambda a: assess(a, True),
                     'validate': validate, 'export': lambda a: validate(a, True),

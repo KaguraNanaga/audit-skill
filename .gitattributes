@@ -1,0 +1,17 @@
+# Byte-stable text on all checkouts, including Windows.
+* text=auto eol=lf
+*.pdf binary
+*.xlsx binary
+*.xls binary
+*.docx binary
+*.doc binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.tif binary
+*.tiff binary
+*.webp binary
+*.ofd binary
+*.pptx binary
+*.ppt binary
+*.zip binary

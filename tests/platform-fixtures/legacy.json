@@ -1,0 +1,2544 @@
+[
+  {
+    "renderer": 1,
+    "ledger": {
+      "schema_version": "evidence-ledger-1.0",
+      "project": {
+        "excluded_roots": [],
+        "goal": "Synthetic legacy compatibility",
+        "id": "00000000-0000-0000-0000-000000000002",
+        "main_selection_reason": null,
+        "modes": [
+          "query"
+        ],
+        "output_request": {
+          "format": "md"
+        },
+        "requested_main_document": null,
+        "requested_source_urls": [],
+        "scope": {},
+        "scope_revision": "00000000-0000-0000-0000-000000000003",
+        "selected_main_version": null,
+        "source_roots": [
+          "/synthetic-fixture-materials"
+        ]
+      },
+      "runs": {
+        "00000000-0000-0000-0000-000000000001": {
+          "errors": [],
+          "finished_at": "2026-11-04T00:00:00+00:00",
+          "id": "00000000-0000-0000-0000-000000000001",
+          "model_version": null,
+          "previous_run_id": null,
+          "scope_revision": "00000000-0000-0000-0000-000000000003",
+          "selected_main_version": null,
+          "skill_version": "0.3.1",
+          "source_version_snapshot": [
+            "00000000-0000-0000-0000-000000000006"
+          ],
+          "started_at": "2026-11-04T00:00:00+00:00",
+          "state": "completed",
+          "tool_versions": {
+            "python": "synthetic baseline environment",
+            "reader": "readers-1.0"
+          },
+          "unfinished_steps": [],
+          "validation_version": 2,
+          "visual_checks": [],
+          "visual_checks_version": 1
+        }
+      },
+      "entities": {
+        "00000000-0000-0000-0000-000000000005": {
+          "id": "00000000-0000-0000-0000-000000000005",
+          "kind": "Source",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000006": {
+          "id": "00000000-0000-0000-0000-000000000006",
+          "kind": "SourceVersion",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000008": {
+          "id": "00000000-0000-0000-0000-000000000008",
+          "kind": "ReadRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-00000000000b": {
+          "id": "00000000-0000-0000-0000-00000000000b",
+          "kind": "Evidence",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-00000000000c": {
+          "id": "00000000-0000-0000-0000-00000000000c",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-00000000000d": {
+          "id": "00000000-0000-0000-0000-00000000000d",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        }
+      },
+      "revisions": {
+        "00000000-0000-0000-0000-00000000000e": {
+          "id": "00000000-0000-0000-0000-00000000000e",
+          "entity_id": "00000000-0000-0000-0000-000000000005",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "actual_name": "synthetic.txt",
+            "confirmation_scope": null,
+            "id": "00000000-0000-0000-0000-000000000005",
+            "issuer": null,
+            "kind": "Source",
+            "known_paths": [
+              "/synthetic-fixture-materials/synthetic.txt"
+            ],
+            "origin_group_id": "00000000-0000-0000-0000-000000000005",
+            "role": "unknown",
+            "role_basis": "Not yet classified by reviewer",
+            "signature_status": "unknown",
+            "urls": []
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000000f": {
+          "id": "00000000-0000-0000-0000-00000000000f",
+          "entity_id": "00000000-0000-0000-0000-000000000006",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "acquired_at": "2026-11-04T00:00:00+00:00",
+            "actual_name": "synthetic.txt",
+            "audio_version_id": null,
+            "availability": "local_snapshot",
+            "derived_from_version_ids": [],
+            "discovered_at": "2026-11-04T00:00:00+00:00",
+            "facts_period": null,
+            "format": ".txt",
+            "formed_at": null,
+            "id": "00000000-0000-0000-0000-000000000006",
+            "kind": "SourceVersion",
+            "local_snapshot": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+            "processing": [
+              {
+                "encoding": "utf-8-sig",
+                "method": "decode"
+              }
+            ],
+            "processing_method": "readers-1.0",
+            "received_at": null,
+            "sha256": "139afdb7fd0284e9b91b3f958ccbc202e937e8b62d958311bf410beee4c6fc1d",
+            "source_id": "00000000-0000-0000-0000-000000000005",
+            "url": null
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000010": {
+          "id": "00000000-0000-0000-0000-000000000010",
+          "entity_id": "00000000-0000-0000-0000-000000000008",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "errors": [],
+            "id": "00000000-0000-0000-0000-000000000008",
+            "kind": "ReadRecord",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "method": "readers-1.0",
+            "render_version": null,
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "state": "extracted",
+            "unit_id": "00000000-0000-0000-0000-000000000007"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000011": {
+          "id": "00000000-0000-0000-0000-000000000011",
+          "entity_id": "00000000-0000-0000-0000-00000000000b",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "unit_id": "00000000-0000-0000-0000-000000000007",
+            "verbatim_quote": "Synthetic recorded amount: 123.45",
+            "reviewer_summary": "Synthetic only",
+            "reading_method": "text",
+            "verification_state": "extracted_only",
+            "limitations": [],
+            "id": "00000000-0000-0000-0000-00000000000b",
+            "kind": "Evidence"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000012": {
+          "id": "00000000-0000-0000-0000-000000000012",
+          "entity_id": "00000000-0000-0000-0000-00000000000c",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "review",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/review.md",
+            "renderer_version": 1,
+            "sha256": "339cf64aad7176bda799f58806da3dadbf0a915610bfb17055f9e24bcb457a00",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-00000000000c",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000013": {
+          "id": "00000000-0000-0000-0000-000000000013",
+          "entity_id": "00000000-0000-0000-0000-00000000000d",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "handoff",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/handoff.md",
+            "renderer_version": 1,
+            "sha256": "0f41d0a3a050c68b66c4bcaf99ef9ce691db0e7c097700344a545d79e6598099",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-00000000000d",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        }
+      },
+      "current": {
+        "00000000-0000-0000-0000-000000000005": "00000000-0000-0000-0000-00000000000e",
+        "00000000-0000-0000-0000-000000000006": "00000000-0000-0000-0000-00000000000f",
+        "00000000-0000-0000-0000-000000000008": "00000000-0000-0000-0000-000000000010",
+        "00000000-0000-0000-0000-00000000000b": "00000000-0000-0000-0000-000000000011",
+        "00000000-0000-0000-0000-00000000000c": "00000000-0000-0000-0000-000000000012",
+        "00000000-0000-0000-0000-00000000000d": "00000000-0000-0000-0000-000000000013"
+      },
+      "latest_run_id": "00000000-0000-0000-0000-000000000001",
+      "record_order": [
+        "00000000-0000-0000-0000-000000000005",
+        "00000000-0000-0000-0000-000000000006",
+        "00000000-0000-0000-0000-000000000008",
+        "00000000-0000-0000-0000-00000000000b",
+        "00000000-0000-0000-0000-00000000000c",
+        "00000000-0000-0000-0000-00000000000d"
+      ],
+      "units": {
+        "00000000-0000-0000-0000-000000000006": [
+          {
+            "id": "00000000-0000-0000-0000-000000000007",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "read_id": "00000000-0000-0000-0000-000000000008",
+            "state": "extracted",
+            "text": "Synthetic recorded amount: 123.45"
+          }
+        ]
+      },
+      "artifacts": [],
+      "outcome": {
+        "answers": [
+          {
+            "text": "Synthetic statement only; no audit conclusion.",
+            "evidence_ids": [
+              "00000000-0000-0000-0000-00000000000b"
+            ]
+          }
+        ],
+        "draft": null,
+        "review_checks": [],
+        "limitations": []
+      },
+      "assessment_sha256": "aa6d23c6096f97c09809ce09610d084b3e5bb269bdd7a65730017a48faa85c56",
+      "integrity_sha256": "e2dccce1849c808fced7e2fb1365c44c6a37e062104b9b02c80c6826ca9c27bb"
+    },
+    "files": {
+      "outputs/00000000-0000-0000-0000-000000000001/review.md": "# 审查结果\n\n目标：Synthetic legacy compatibility\n\n轮次：`00000000-0000-0000-0000-000000000001`；完成时间：2026-11-04T00:00:00+00:00。这是供人工审定的审查结果。\n\n主稿：未指定／本任务不要求\n\n## 本次结果\n\nSynthetic statement only; no audit conclusion.\n\n[synthetic.txt](</synthetic-old-project/sources/00000000-0000-0000-0000-000000000006/synthetic.txt>)（行/段锚点=line-1；版本 00000000-0000-0000-0000-000000000006）\n\n## 业务检查覆盖\n\n## 必要补充材料\n\n本次没有登记尚待索取的材料。\n\n\n## 原件、读取覆盖及出处\n\n### [synthetic.txt](</synthetic-old-project/sources/00000000-0000-0000-0000-000000000006/synthetic.txt>)\n\n角色：unknown；身份依据：Not yet classified by reviewer；签署：unknown；同源组：00000000-0000-0000-0000-000000000005\n\n版本：`00000000-0000-0000-0000-000000000006`；取得：local_snapshot；SHA256：139afdb7fd0284e9b91b3f958ccbc202e937e8b62d958311bf410beee4c6fc1d\n\n- 行/段锚点=line-1：extracted；\n\n## 证据摘录及证明边界\n\n[synthetic.txt](</synthetic-old-project/sources/00000000-0000-0000-0000-000000000006/synthetic.txt>)（行/段锚点=line-1；版本 00000000-0000-0000-0000-000000000006）\n\n原文摘录：Synthetic recorded amount: 123.45\n\n审查概括：Synthetic only；图像说明：不适用\n\n读取：text；核验：extracted_only；限制：[]\n\n## 最终复核与初始历史\n\n\n本轮创建稳定ID、原件版本及初始Revision；所有判断与导出对应 00000000-0000-0000-0000-000000000001。未实施跨批补证更新。\n",
+      "outputs/00000000-0000-0000-0000-000000000001/handoff.md": "# 项目交接\n\n目标：Synthetic legacy compatibility\n\n最后完成轮次：`00000000-0000-0000-0000-000000000001`；主稿：未指定／不要求\n\n[本轮审查结果](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/review.md>)\n\n开放缺证：0；未完成业务任务：0。\n\n台账为 ledger/ledger.json，Markdown是导出视图。重建导出使用 review.py export；新材料更新属于阶段2，勿直接改写已提交台账。\n"
+    },
+    "source_path": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+    "source_text": "Synthetic recorded amount: 123.45\n",
+    "pointer": {
+      "run_id": "00000000-0000-0000-0000-000000000001",
+      "ledger_sha256": "e2dccce1849c808fced7e2fb1365c44c6a37e062104b9b02c80c6826ca9c27bb",
+      "files": [
+        "outputs/00000000-0000-0000-0000-000000000001/review.md",
+        "outputs/00000000-0000-0000-0000-000000000001/handoff.md"
+      ]
+    }
+  },
+  {
+    "renderer": 2,
+    "ledger": {
+      "schema_version": "evidence-ledger-1.0",
+      "project": {
+        "excluded_roots": [],
+        "goal": "Synthetic legacy compatibility",
+        "id": "00000000-0000-0000-0000-000000000002",
+        "main_selection_reason": null,
+        "modes": [
+          "query"
+        ],
+        "output_request": {
+          "format": "md"
+        },
+        "requested_main_document": null,
+        "requested_source_urls": [],
+        "scope": {},
+        "scope_revision": "00000000-0000-0000-0000-000000000003",
+        "selected_main_version": null,
+        "source_roots": [
+          "/synthetic-fixture-materials"
+        ]
+      },
+      "runs": {
+        "00000000-0000-0000-0000-000000000001": {
+          "errors": [],
+          "finished_at": "2026-11-04T00:00:00+00:00",
+          "id": "00000000-0000-0000-0000-000000000001",
+          "model_version": null,
+          "previous_run_id": null,
+          "scope_revision": "00000000-0000-0000-0000-000000000003",
+          "selected_main_version": null,
+          "skill_version": "0.3.1",
+          "source_version_snapshot": [
+            "00000000-0000-0000-0000-000000000006"
+          ],
+          "started_at": "2026-11-04T00:00:00+00:00",
+          "state": "completed",
+          "tool_versions": {
+            "python": "synthetic baseline environment",
+            "reader": "readers-1.0"
+          },
+          "unfinished_steps": [],
+          "validation_version": 2,
+          "visual_checks": [],
+          "visual_checks_version": 1
+        }
+      },
+      "entities": {
+        "00000000-0000-0000-0000-000000000005": {
+          "id": "00000000-0000-0000-0000-000000000005",
+          "kind": "Source",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000006": {
+          "id": "00000000-0000-0000-0000-000000000006",
+          "kind": "SourceVersion",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000008": {
+          "id": "00000000-0000-0000-0000-000000000008",
+          "kind": "ReadRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000014": {
+          "id": "00000000-0000-0000-0000-000000000014",
+          "kind": "Evidence",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000015": {
+          "id": "00000000-0000-0000-0000-000000000015",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000016": {
+          "id": "00000000-0000-0000-0000-000000000016",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        }
+      },
+      "revisions": {
+        "00000000-0000-0000-0000-000000000017": {
+          "id": "00000000-0000-0000-0000-000000000017",
+          "entity_id": "00000000-0000-0000-0000-000000000005",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "actual_name": "synthetic.txt",
+            "confirmation_scope": null,
+            "id": "00000000-0000-0000-0000-000000000005",
+            "issuer": null,
+            "kind": "Source",
+            "known_paths": [
+              "/synthetic-fixture-materials/synthetic.txt"
+            ],
+            "origin_group_id": "00000000-0000-0000-0000-000000000005",
+            "role": "unknown",
+            "role_basis": "Not yet classified by reviewer",
+            "signature_status": "unknown",
+            "urls": []
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000018": {
+          "id": "00000000-0000-0000-0000-000000000018",
+          "entity_id": "00000000-0000-0000-0000-000000000006",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "acquired_at": "2026-11-04T00:00:00+00:00",
+            "actual_name": "synthetic.txt",
+            "audio_version_id": null,
+            "availability": "local_snapshot",
+            "derived_from_version_ids": [],
+            "discovered_at": "2026-11-04T00:00:00+00:00",
+            "facts_period": null,
+            "format": ".txt",
+            "formed_at": null,
+            "id": "00000000-0000-0000-0000-000000000006",
+            "kind": "SourceVersion",
+            "local_snapshot": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+            "processing": [
+              {
+                "encoding": "utf-8-sig",
+                "method": "decode"
+              }
+            ],
+            "processing_method": "readers-1.0",
+            "received_at": null,
+            "sha256": "139afdb7fd0284e9b91b3f958ccbc202e937e8b62d958311bf410beee4c6fc1d",
+            "source_id": "00000000-0000-0000-0000-000000000005",
+            "url": null
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000019": {
+          "id": "00000000-0000-0000-0000-000000000019",
+          "entity_id": "00000000-0000-0000-0000-000000000008",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "errors": [],
+            "id": "00000000-0000-0000-0000-000000000008",
+            "kind": "ReadRecord",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "method": "readers-1.0",
+            "render_version": null,
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "state": "extracted",
+            "unit_id": "00000000-0000-0000-0000-000000000007"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000001a": {
+          "id": "00000000-0000-0000-0000-00000000001a",
+          "entity_id": "00000000-0000-0000-0000-000000000014",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "unit_id": "00000000-0000-0000-0000-000000000007",
+            "verbatim_quote": "Synthetic recorded amount: 123.45",
+            "reviewer_summary": "Synthetic only",
+            "reading_method": "text",
+            "verification_state": "extracted_only",
+            "limitations": [],
+            "id": "00000000-0000-0000-0000-000000000014",
+            "kind": "Evidence"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000001b": {
+          "id": "00000000-0000-0000-0000-00000000001b",
+          "entity_id": "00000000-0000-0000-0000-000000000015",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "review",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/review.md",
+            "renderer_version": 2,
+            "sha256": "c482945ecac6f265719bf412fbaa797adfe5fb2ba5d30578d5c937e2b8b2b104",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000015",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000001c": {
+          "id": "00000000-0000-0000-0000-00000000001c",
+          "entity_id": "00000000-0000-0000-0000-000000000016",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "handoff",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/handoff.md",
+            "renderer_version": 2,
+            "sha256": "0f41d0a3a050c68b66c4bcaf99ef9ce691db0e7c097700344a545d79e6598099",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000016",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        }
+      },
+      "current": {
+        "00000000-0000-0000-0000-000000000005": "00000000-0000-0000-0000-000000000017",
+        "00000000-0000-0000-0000-000000000006": "00000000-0000-0000-0000-000000000018",
+        "00000000-0000-0000-0000-000000000008": "00000000-0000-0000-0000-000000000019",
+        "00000000-0000-0000-0000-000000000014": "00000000-0000-0000-0000-00000000001a",
+        "00000000-0000-0000-0000-000000000015": "00000000-0000-0000-0000-00000000001b",
+        "00000000-0000-0000-0000-000000000016": "00000000-0000-0000-0000-00000000001c"
+      },
+      "latest_run_id": "00000000-0000-0000-0000-000000000001",
+      "record_order": [
+        "00000000-0000-0000-0000-000000000005",
+        "00000000-0000-0000-0000-000000000006",
+        "00000000-0000-0000-0000-000000000008",
+        "00000000-0000-0000-0000-000000000014",
+        "00000000-0000-0000-0000-000000000015",
+        "00000000-0000-0000-0000-000000000016"
+      ],
+      "units": {
+        "00000000-0000-0000-0000-000000000006": [
+          {
+            "id": "00000000-0000-0000-0000-000000000007",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "read_id": "00000000-0000-0000-0000-000000000008",
+            "state": "extracted",
+            "text": "Synthetic recorded amount: 123.45"
+          }
+        ]
+      },
+      "artifacts": [],
+      "outcome": {
+        "answers": [
+          {
+            "text": "Synthetic statement only; no audit conclusion.",
+            "evidence_ids": [
+              "00000000-0000-0000-0000-000000000014"
+            ]
+          }
+        ],
+        "draft": null,
+        "review_checks": [],
+        "limitations": []
+      },
+      "assessment_sha256": "aa6d23c6096f97c09809ce09610d084b3e5bb269bdd7a65730017a48faa85c56",
+      "integrity_sha256": "435c939f5baeee884320513fecc457d05a7f9747e7949f782faed8499972b030"
+    },
+    "files": {
+      "outputs/00000000-0000-0000-0000-000000000001/review.md": "# 查询结果\n\n目标：Synthetic legacy compatibility\n\n轮次：`00000000-0000-0000-0000-000000000001`；完成时间：2026-11-04T00:00:00+00:00。\n\n主稿：未指定／本任务不要求\n\n## 本次结果\n\nSynthetic statement only; no audit conclusion.\n\n[synthetic.txt](</synthetic-old-project/sources/00000000-0000-0000-0000-000000000006/synthetic.txt>)（行/段锚点=line-1；版本 00000000-0000-0000-0000-000000000006）\n\n\n## 原件、读取覆盖及出处\n\n### [synthetic.txt](</synthetic-old-project/sources/00000000-0000-0000-0000-000000000006/synthetic.txt>)\n\n角色：unknown；身份依据：Not yet classified by reviewer；签署：unknown；同源组：00000000-0000-0000-0000-000000000005\n\n版本：`00000000-0000-0000-0000-000000000006`；取得：local_snapshot；SHA256：139afdb7fd0284e9b91b3f958ccbc202e937e8b62d958311bf410beee4c6fc1d\n\n- 行/段锚点=line-1：extracted；\n\n## 证据摘录及证明边界\n\n[synthetic.txt](</synthetic-old-project/sources/00000000-0000-0000-0000-000000000006/synthetic.txt>)（行/段锚点=line-1；版本 00000000-0000-0000-0000-000000000006）\n\n原文摘录：Synthetic recorded amount: 123.45\n\n审查概括：Synthetic only；图像说明：不适用\n\n读取：text；核验：extracted_only；限制：[]\n",
+      "outputs/00000000-0000-0000-0000-000000000001/handoff.md": "# 项目交接\n\n目标：Synthetic legacy compatibility\n\n最后完成轮次：`00000000-0000-0000-0000-000000000001`；主稿：未指定／不要求\n\n[本轮审查结果](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/review.md>)\n\n开放缺证：0；未完成业务任务：0。\n\n台账为 ledger/ledger.json，Markdown是导出视图。重建导出使用 review.py export；新材料更新属于阶段2，勿直接改写已提交台账。\n"
+    },
+    "source_path": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+    "source_text": "Synthetic recorded amount: 123.45\n",
+    "pointer": {
+      "run_id": "00000000-0000-0000-0000-000000000001",
+      "ledger_sha256": "435c939f5baeee884320513fecc457d05a7f9747e7949f782faed8499972b030",
+      "files": [
+        "outputs/00000000-0000-0000-0000-000000000001/review.md",
+        "outputs/00000000-0000-0000-0000-000000000001/handoff.md"
+      ]
+    }
+  },
+  {
+    "renderer": 3,
+    "ledger": {
+      "schema_version": "evidence-ledger-1.0",
+      "project": {
+        "excluded_roots": [],
+        "goal": "Synthetic legacy compatibility",
+        "id": "00000000-0000-0000-0000-000000000002",
+        "main_selection_reason": null,
+        "modes": [
+          "query"
+        ],
+        "output_request": {
+          "format": "md"
+        },
+        "requested_main_document": null,
+        "requested_source_urls": [],
+        "scope": {},
+        "scope_revision": "00000000-0000-0000-0000-000000000003",
+        "selected_main_version": null,
+        "source_roots": [
+          "/synthetic-fixture-materials"
+        ]
+      },
+      "runs": {
+        "00000000-0000-0000-0000-000000000001": {
+          "errors": [],
+          "finished_at": "2026-11-04T00:00:00+00:00",
+          "id": "00000000-0000-0000-0000-000000000001",
+          "model_version": null,
+          "previous_run_id": null,
+          "scope_revision": "00000000-0000-0000-0000-000000000003",
+          "selected_main_version": null,
+          "skill_version": "0.3.1",
+          "source_version_snapshot": [
+            "00000000-0000-0000-0000-000000000006"
+          ],
+          "started_at": "2026-11-04T00:00:00+00:00",
+          "state": "completed",
+          "tool_versions": {
+            "python": "synthetic baseline environment",
+            "reader": "readers-1.0"
+          },
+          "unfinished_steps": [],
+          "validation_version": 2,
+          "visual_checks": [],
+          "visual_checks_version": 1
+        }
+      },
+      "entities": {
+        "00000000-0000-0000-0000-000000000005": {
+          "id": "00000000-0000-0000-0000-000000000005",
+          "kind": "Source",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000006": {
+          "id": "00000000-0000-0000-0000-000000000006",
+          "kind": "SourceVersion",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000008": {
+          "id": "00000000-0000-0000-0000-000000000008",
+          "kind": "ReadRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-00000000001d": {
+          "id": "00000000-0000-0000-0000-00000000001d",
+          "kind": "Evidence",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-00000000001e": {
+          "id": "00000000-0000-0000-0000-00000000001e",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-00000000001f": {
+          "id": "00000000-0000-0000-0000-00000000001f",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        }
+      },
+      "revisions": {
+        "00000000-0000-0000-0000-000000000020": {
+          "id": "00000000-0000-0000-0000-000000000020",
+          "entity_id": "00000000-0000-0000-0000-000000000005",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "actual_name": "synthetic.txt",
+            "confirmation_scope": null,
+            "id": "00000000-0000-0000-0000-000000000005",
+            "issuer": null,
+            "kind": "Source",
+            "known_paths": [
+              "/synthetic-fixture-materials/synthetic.txt"
+            ],
+            "origin_group_id": "00000000-0000-0000-0000-000000000005",
+            "role": "unknown",
+            "role_basis": "Not yet classified by reviewer",
+            "signature_status": "unknown",
+            "urls": []
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000021": {
+          "id": "00000000-0000-0000-0000-000000000021",
+          "entity_id": "00000000-0000-0000-0000-000000000006",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "acquired_at": "2026-11-04T00:00:00+00:00",
+            "actual_name": "synthetic.txt",
+            "audio_version_id": null,
+            "availability": "local_snapshot",
+            "derived_from_version_ids": [],
+            "discovered_at": "2026-11-04T00:00:00+00:00",
+            "facts_period": null,
+            "format": ".txt",
+            "formed_at": null,
+            "id": "00000000-0000-0000-0000-000000000006",
+            "kind": "SourceVersion",
+            "local_snapshot": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+            "processing": [
+              {
+                "encoding": "utf-8-sig",
+                "method": "decode"
+              }
+            ],
+            "processing_method": "readers-1.0",
+            "received_at": null,
+            "sha256": "139afdb7fd0284e9b91b3f958ccbc202e937e8b62d958311bf410beee4c6fc1d",
+            "source_id": "00000000-0000-0000-0000-000000000005",
+            "url": null
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000022": {
+          "id": "00000000-0000-0000-0000-000000000022",
+          "entity_id": "00000000-0000-0000-0000-000000000008",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "errors": [],
+            "id": "00000000-0000-0000-0000-000000000008",
+            "kind": "ReadRecord",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "method": "readers-1.0",
+            "render_version": null,
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "state": "extracted",
+            "unit_id": "00000000-0000-0000-0000-000000000007"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000023": {
+          "id": "00000000-0000-0000-0000-000000000023",
+          "entity_id": "00000000-0000-0000-0000-00000000001d",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "unit_id": "00000000-0000-0000-0000-000000000007",
+            "verbatim_quote": "Synthetic recorded amount: 123.45",
+            "reviewer_summary": "Synthetic only",
+            "reading_method": "text",
+            "verification_state": "extracted_only",
+            "limitations": [],
+            "id": "00000000-0000-0000-0000-00000000001d",
+            "kind": "Evidence"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000024": {
+          "id": "00000000-0000-0000-0000-000000000024",
+          "entity_id": "00000000-0000-0000-0000-00000000001e",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "review",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/review.md",
+            "renderer_version": 3,
+            "sha256": "e11e809d52314dce186aeeaa9f4a8a4fbec88e386dd5e79c135b507fb8381814",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-00000000001e",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000025": {
+          "id": "00000000-0000-0000-0000-000000000025",
+          "entity_id": "00000000-0000-0000-0000-00000000001f",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "handoff",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/handoff.md",
+            "renderer_version": 3,
+            "sha256": "0f41d0a3a050c68b66c4bcaf99ef9ce691db0e7c097700344a545d79e6598099",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-00000000001f",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        }
+      },
+      "current": {
+        "00000000-0000-0000-0000-000000000005": "00000000-0000-0000-0000-000000000020",
+        "00000000-0000-0000-0000-000000000006": "00000000-0000-0000-0000-000000000021",
+        "00000000-0000-0000-0000-000000000008": "00000000-0000-0000-0000-000000000022",
+        "00000000-0000-0000-0000-00000000001d": "00000000-0000-0000-0000-000000000023",
+        "00000000-0000-0000-0000-00000000001e": "00000000-0000-0000-0000-000000000024",
+        "00000000-0000-0000-0000-00000000001f": "00000000-0000-0000-0000-000000000025"
+      },
+      "latest_run_id": "00000000-0000-0000-0000-000000000001",
+      "record_order": [
+        "00000000-0000-0000-0000-000000000005",
+        "00000000-0000-0000-0000-000000000006",
+        "00000000-0000-0000-0000-000000000008",
+        "00000000-0000-0000-0000-00000000001d",
+        "00000000-0000-0000-0000-00000000001e",
+        "00000000-0000-0000-0000-00000000001f"
+      ],
+      "units": {
+        "00000000-0000-0000-0000-000000000006": [
+          {
+            "id": "00000000-0000-0000-0000-000000000007",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "read_id": "00000000-0000-0000-0000-000000000008",
+            "state": "extracted",
+            "text": "Synthetic recorded amount: 123.45"
+          }
+        ]
+      },
+      "artifacts": [],
+      "outcome": {
+        "answers": [
+          {
+            "text": "Synthetic statement only; no audit conclusion.",
+            "evidence_ids": [
+              "00000000-0000-0000-0000-00000000001d"
+            ]
+          }
+        ],
+        "draft": null,
+        "review_checks": [],
+        "limitations": []
+      },
+      "assessment_sha256": "aa6d23c6096f97c09809ce09610d084b3e5bb269bdd7a65730017a48faa85c56",
+      "integrity_sha256": "c61d20b55b43f6ddfd094a7ab6770cffab1079f84e2378f392092f0fbcec1ada"
+    },
+    "files": {
+      "outputs/00000000-0000-0000-0000-000000000001/review.md": "# 查询结果\n\nSynthetic statement only; no audit conclusion.\n\n[synthetic.txt](</synthetic-old-project/sources/00000000-0000-0000-0000-000000000006/synthetic.txt>)（行/段锚点=line-1；版本 00000000-0000-0000-0000-000000000006）\n\n出处与读取记录已保存，对应轮次 `00000000-0000-0000-0000-000000000001`。\n",
+      "outputs/00000000-0000-0000-0000-000000000001/handoff.md": "# 项目交接\n\n目标：Synthetic legacy compatibility\n\n最后完成轮次：`00000000-0000-0000-0000-000000000001`；主稿：未指定／不要求\n\n[本轮审查结果](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/review.md>)\n\n开放缺证：0；未完成业务任务：0。\n\n台账为 ledger/ledger.json，Markdown是导出视图。重建导出使用 review.py export；新材料更新属于阶段2，勿直接改写已提交台账。\n"
+    },
+    "source_path": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+    "source_text": "Synthetic recorded amount: 123.45\n",
+    "pointer": {
+      "run_id": "00000000-0000-0000-0000-000000000001",
+      "ledger_sha256": "c61d20b55b43f6ddfd094a7ab6770cffab1079f84e2378f392092f0fbcec1ada",
+      "files": [
+        "outputs/00000000-0000-0000-0000-000000000001/review.md",
+        "outputs/00000000-0000-0000-0000-000000000001/handoff.md"
+      ]
+    }
+  },
+  {
+    "renderer": 4,
+    "ledger": {
+      "schema_version": "evidence-ledger-1.0",
+      "project": {
+        "excluded_roots": [],
+        "goal": "Synthetic legacy compatibility",
+        "id": "00000000-0000-0000-0000-000000000002",
+        "main_selection_reason": null,
+        "modes": [
+          "query"
+        ],
+        "output_request": {
+          "format": "md"
+        },
+        "requested_main_document": null,
+        "requested_source_urls": [],
+        "scope": {},
+        "scope_revision": "00000000-0000-0000-0000-000000000003",
+        "selected_main_version": null,
+        "source_roots": [
+          "/synthetic-fixture-materials"
+        ]
+      },
+      "runs": {
+        "00000000-0000-0000-0000-000000000001": {
+          "errors": [],
+          "finished_at": "2026-11-04T00:00:00+00:00",
+          "id": "00000000-0000-0000-0000-000000000001",
+          "model_version": null,
+          "previous_run_id": null,
+          "scope_revision": "00000000-0000-0000-0000-000000000003",
+          "selected_main_version": null,
+          "skill_version": "0.3.1",
+          "source_version_snapshot": [
+            "00000000-0000-0000-0000-000000000006"
+          ],
+          "started_at": "2026-11-04T00:00:00+00:00",
+          "state": "completed",
+          "tool_versions": {
+            "python": "synthetic baseline environment",
+            "reader": "readers-1.0"
+          },
+          "unfinished_steps": [],
+          "validation_version": 2,
+          "visual_checks": [],
+          "visual_checks_version": 1
+        }
+      },
+      "entities": {
+        "00000000-0000-0000-0000-000000000005": {
+          "id": "00000000-0000-0000-0000-000000000005",
+          "kind": "Source",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000006": {
+          "id": "00000000-0000-0000-0000-000000000006",
+          "kind": "SourceVersion",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000008": {
+          "id": "00000000-0000-0000-0000-000000000008",
+          "kind": "ReadRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000026": {
+          "id": "00000000-0000-0000-0000-000000000026",
+          "kind": "Evidence",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000027": {
+          "id": "00000000-0000-0000-0000-000000000027",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000028": {
+          "id": "00000000-0000-0000-0000-000000000028",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000029": {
+          "id": "00000000-0000-0000-0000-000000000029",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-00000000002a": {
+          "id": "00000000-0000-0000-0000-00000000002a",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        }
+      },
+      "revisions": {
+        "00000000-0000-0000-0000-00000000002b": {
+          "id": "00000000-0000-0000-0000-00000000002b",
+          "entity_id": "00000000-0000-0000-0000-000000000005",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "actual_name": "synthetic.txt",
+            "confirmation_scope": null,
+            "id": "00000000-0000-0000-0000-000000000005",
+            "issuer": null,
+            "kind": "Source",
+            "known_paths": [
+              "/synthetic-fixture-materials/synthetic.txt"
+            ],
+            "origin_group_id": "00000000-0000-0000-0000-000000000005",
+            "role": "unknown",
+            "role_basis": "Not yet classified by reviewer",
+            "signature_status": "unknown",
+            "urls": []
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000002c": {
+          "id": "00000000-0000-0000-0000-00000000002c",
+          "entity_id": "00000000-0000-0000-0000-000000000006",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "acquired_at": "2026-11-04T00:00:00+00:00",
+            "actual_name": "synthetic.txt",
+            "audio_version_id": null,
+            "availability": "local_snapshot",
+            "derived_from_version_ids": [],
+            "discovered_at": "2026-11-04T00:00:00+00:00",
+            "facts_period": null,
+            "format": ".txt",
+            "formed_at": null,
+            "id": "00000000-0000-0000-0000-000000000006",
+            "kind": "SourceVersion",
+            "local_snapshot": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+            "processing": [
+              {
+                "encoding": "utf-8-sig",
+                "method": "decode"
+              }
+            ],
+            "processing_method": "readers-1.0",
+            "received_at": null,
+            "sha256": "139afdb7fd0284e9b91b3f958ccbc202e937e8b62d958311bf410beee4c6fc1d",
+            "source_id": "00000000-0000-0000-0000-000000000005",
+            "url": null
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000002d": {
+          "id": "00000000-0000-0000-0000-00000000002d",
+          "entity_id": "00000000-0000-0000-0000-000000000008",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "errors": [],
+            "id": "00000000-0000-0000-0000-000000000008",
+            "kind": "ReadRecord",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "method": "readers-1.0",
+            "render_version": null,
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "state": "extracted",
+            "unit_id": "00000000-0000-0000-0000-000000000007"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000002e": {
+          "id": "00000000-0000-0000-0000-00000000002e",
+          "entity_id": "00000000-0000-0000-0000-000000000026",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "unit_id": "00000000-0000-0000-0000-000000000007",
+            "verbatim_quote": "Synthetic recorded amount: 123.45",
+            "reviewer_summary": "Synthetic only",
+            "reading_method": "text",
+            "verification_state": "extracted_only",
+            "limitations": [],
+            "id": "00000000-0000-0000-0000-000000000026",
+            "kind": "Evidence"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000002f": {
+          "id": "00000000-0000-0000-0000-00000000002f",
+          "entity_id": "00000000-0000-0000-0000-000000000027",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "review",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/review.md",
+            "renderer_version": 4,
+            "sha256": "76176d2e648db648e4962d8bc71c39e8bac71038a5cc53a7e16928bd9103d617",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000027",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000030": {
+          "id": "00000000-0000-0000-0000-000000000030",
+          "entity_id": "00000000-0000-0000-0000-000000000028",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "handoff",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/handoff.md",
+            "renderer_version": 4,
+            "sha256": "d89baf7d0d55f6e7c7a673f4a038b865e3d135689efcc487a46c4805dab7dcd9",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000028",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000031": {
+          "id": "00000000-0000-0000-0000-000000000031",
+          "entity_id": "00000000-0000-0000-0000-000000000029",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "changes",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/changes.md",
+            "renderer_version": 4,
+            "sha256": "deaef3f5549101a8bae707698fcf8423d8b551c297534619ece89ba440361d64",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000029",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000032": {
+          "id": "00000000-0000-0000-0000-000000000032",
+          "entity_id": "00000000-0000-0000-0000-00000000002a",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "history",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/history.md",
+            "renderer_version": 4,
+            "sha256": "bb4ffebc6e49c91ec44a21e9b3c5f165cc3127e5f8b829be40874ae40b75db8c",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-00000000002a",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        }
+      },
+      "current": {
+        "00000000-0000-0000-0000-000000000005": "00000000-0000-0000-0000-00000000002b",
+        "00000000-0000-0000-0000-000000000006": "00000000-0000-0000-0000-00000000002c",
+        "00000000-0000-0000-0000-000000000008": "00000000-0000-0000-0000-00000000002d",
+        "00000000-0000-0000-0000-000000000026": "00000000-0000-0000-0000-00000000002e",
+        "00000000-0000-0000-0000-000000000027": "00000000-0000-0000-0000-00000000002f",
+        "00000000-0000-0000-0000-000000000028": "00000000-0000-0000-0000-000000000030",
+        "00000000-0000-0000-0000-000000000029": "00000000-0000-0000-0000-000000000031",
+        "00000000-0000-0000-0000-00000000002a": "00000000-0000-0000-0000-000000000032"
+      },
+      "latest_run_id": "00000000-0000-0000-0000-000000000001",
+      "record_order": [
+        "00000000-0000-0000-0000-000000000005",
+        "00000000-0000-0000-0000-000000000006",
+        "00000000-0000-0000-0000-000000000008",
+        "00000000-0000-0000-0000-000000000026",
+        "00000000-0000-0000-0000-000000000027",
+        "00000000-0000-0000-0000-000000000028",
+        "00000000-0000-0000-0000-000000000029",
+        "00000000-0000-0000-0000-00000000002a"
+      ],
+      "units": {
+        "00000000-0000-0000-0000-000000000006": [
+          {
+            "id": "00000000-0000-0000-0000-000000000007",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "read_id": "00000000-0000-0000-0000-000000000008",
+            "state": "extracted",
+            "text": "Synthetic recorded amount: 123.45"
+          }
+        ]
+      },
+      "artifacts": [],
+      "outcome": {
+        "answers": [
+          {
+            "text": "Synthetic statement only; no audit conclusion.",
+            "evidence_ids": [
+              "00000000-0000-0000-0000-000000000026"
+            ]
+          }
+        ],
+        "draft": null,
+        "review_checks": [],
+        "limitations": []
+      },
+      "assessment_sha256": "aa6d23c6096f97c09809ce09610d084b3e5bb269bdd7a65730017a48faa85c56",
+      "integrity_sha256": "e111ba8a0a919d2fce1b7962055d6d7d4b6eab69d16a097d70f2b4c62bf510fe"
+    },
+    "files": {
+      "outputs/00000000-0000-0000-0000-000000000001/review.md": "# 查询结果\n\nSynthetic statement only; no audit conclusion.\n\n[synthetic.txt](</synthetic-old-project/sources/00000000-0000-0000-0000-000000000006/synthetic.txt>)（行/段锚点=line-1；版本 00000000-0000-0000-0000-000000000006）\n\n出处与读取记录已保存，对应轮次 `00000000-0000-0000-0000-000000000001`。\n\n## 本轮变化与效力\n\n本轮未登记材料或范围变化。\n\n[本轮变更记录](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/changes.md>)；[截至本轮的判断历史](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/history.md>)\n",
+      "outputs/00000000-0000-0000-0000-000000000001/handoff.md": "# 项目交接\n\n目标：Synthetic legacy compatibility\n\n最后完成轮次：00000000-0000-0000-0000-000000000001；上一轮：无；当前主稿：不要求\n\n开放缺证：0；待复核对象：0。本轮完成不表示全部业务事项已有定论。\n\n[当前结果](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/review.md>)；[变更](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/changes.md>)；[历史](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/history.md>)\n\nledger/ledger.json为唯一权威台账。新材料用review.py update；提交中断用recover；缺失导出用export。历史文件不可作为最新结果，原件和既有台账不手改。\n",
+      "outputs/00000000-0000-0000-0000-000000000001/changes.md": "# 本轮变更与影响复核\n\n轮次：00000000-0000-0000-0000-000000000001；上一轮：无\n",
+      "outputs/00000000-0000-0000-0000-000000000001/history.md": "# 截至本轮的判断历史\n\n历史与现状分开；撤回、整改关闭和待复核均保留原判断。\n\n初始轮次的完整对象和初始Revision保存在权威台账；尚无跨轮变更。\n"
+    },
+    "source_path": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+    "source_text": "Synthetic recorded amount: 123.45\n",
+    "pointer": {
+      "run_id": "00000000-0000-0000-0000-000000000001",
+      "ledger_sha256": "e111ba8a0a919d2fce1b7962055d6d7d4b6eab69d16a097d70f2b4c62bf510fe",
+      "files": [
+        "outputs/00000000-0000-0000-0000-000000000001/review.md",
+        "outputs/00000000-0000-0000-0000-000000000001/handoff.md",
+        "outputs/00000000-0000-0000-0000-000000000001/changes.md",
+        "outputs/00000000-0000-0000-0000-000000000001/history.md"
+      ]
+    }
+  },
+  {
+    "renderer": 5,
+    "ledger": {
+      "schema_version": "evidence-ledger-1.0",
+      "project": {
+        "excluded_roots": [],
+        "goal": "Synthetic legacy compatibility",
+        "id": "00000000-0000-0000-0000-000000000002",
+        "main_selection_reason": null,
+        "modes": [
+          "query"
+        ],
+        "output_request": {
+          "format": "md"
+        },
+        "requested_main_document": null,
+        "requested_source_urls": [],
+        "scope": {},
+        "scope_revision": "00000000-0000-0000-0000-000000000003",
+        "selected_main_version": null,
+        "source_roots": [
+          "/synthetic-fixture-materials"
+        ]
+      },
+      "runs": {
+        "00000000-0000-0000-0000-000000000001": {
+          "errors": [],
+          "finished_at": "2026-11-04T00:00:00+00:00",
+          "id": "00000000-0000-0000-0000-000000000001",
+          "model_version": null,
+          "previous_run_id": null,
+          "scope_revision": "00000000-0000-0000-0000-000000000003",
+          "selected_main_version": null,
+          "skill_version": "0.3.1",
+          "source_version_snapshot": [
+            "00000000-0000-0000-0000-000000000006"
+          ],
+          "started_at": "2026-11-04T00:00:00+00:00",
+          "state": "completed",
+          "tool_versions": {
+            "python": "synthetic baseline environment",
+            "reader": "readers-1.0"
+          },
+          "unfinished_steps": [],
+          "validation_version": 2,
+          "visual_checks": [],
+          "visual_checks_version": 1
+        }
+      },
+      "entities": {
+        "00000000-0000-0000-0000-000000000005": {
+          "id": "00000000-0000-0000-0000-000000000005",
+          "kind": "Source",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000006": {
+          "id": "00000000-0000-0000-0000-000000000006",
+          "kind": "SourceVersion",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000008": {
+          "id": "00000000-0000-0000-0000-000000000008",
+          "kind": "ReadRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000033": {
+          "id": "00000000-0000-0000-0000-000000000033",
+          "kind": "Evidence",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000034": {
+          "id": "00000000-0000-0000-0000-000000000034",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000035": {
+          "id": "00000000-0000-0000-0000-000000000035",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000036": {
+          "id": "00000000-0000-0000-0000-000000000036",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000037": {
+          "id": "00000000-0000-0000-0000-000000000037",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        }
+      },
+      "revisions": {
+        "00000000-0000-0000-0000-000000000038": {
+          "id": "00000000-0000-0000-0000-000000000038",
+          "entity_id": "00000000-0000-0000-0000-000000000005",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "actual_name": "synthetic.txt",
+            "confirmation_scope": null,
+            "id": "00000000-0000-0000-0000-000000000005",
+            "issuer": null,
+            "kind": "Source",
+            "known_paths": [
+              "/synthetic-fixture-materials/synthetic.txt"
+            ],
+            "origin_group_id": "00000000-0000-0000-0000-000000000005",
+            "role": "unknown",
+            "role_basis": "Not yet classified by reviewer",
+            "signature_status": "unknown",
+            "urls": []
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000039": {
+          "id": "00000000-0000-0000-0000-000000000039",
+          "entity_id": "00000000-0000-0000-0000-000000000006",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "acquired_at": "2026-11-04T00:00:00+00:00",
+            "actual_name": "synthetic.txt",
+            "audio_version_id": null,
+            "availability": "local_snapshot",
+            "derived_from_version_ids": [],
+            "discovered_at": "2026-11-04T00:00:00+00:00",
+            "facts_period": null,
+            "format": ".txt",
+            "formed_at": null,
+            "id": "00000000-0000-0000-0000-000000000006",
+            "kind": "SourceVersion",
+            "local_snapshot": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+            "processing": [
+              {
+                "encoding": "utf-8-sig",
+                "method": "decode"
+              }
+            ],
+            "processing_method": "readers-1.0",
+            "received_at": null,
+            "sha256": "139afdb7fd0284e9b91b3f958ccbc202e937e8b62d958311bf410beee4c6fc1d",
+            "source_id": "00000000-0000-0000-0000-000000000005",
+            "url": null
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000003a": {
+          "id": "00000000-0000-0000-0000-00000000003a",
+          "entity_id": "00000000-0000-0000-0000-000000000008",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "errors": [],
+            "id": "00000000-0000-0000-0000-000000000008",
+            "kind": "ReadRecord",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "method": "readers-1.0",
+            "render_version": null,
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "state": "extracted",
+            "unit_id": "00000000-0000-0000-0000-000000000007"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000003b": {
+          "id": "00000000-0000-0000-0000-00000000003b",
+          "entity_id": "00000000-0000-0000-0000-000000000033",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "unit_id": "00000000-0000-0000-0000-000000000007",
+            "verbatim_quote": "Synthetic recorded amount: 123.45",
+            "reviewer_summary": "Synthetic only",
+            "reading_method": "text",
+            "verification_state": "extracted_only",
+            "limitations": [],
+            "id": "00000000-0000-0000-0000-000000000033",
+            "kind": "Evidence"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000003c": {
+          "id": "00000000-0000-0000-0000-00000000003c",
+          "entity_id": "00000000-0000-0000-0000-000000000034",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "review",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/review.md",
+            "renderer_version": 5,
+            "sha256": "1841315828778251eaaa2cfca940ad78e480932ed7ea0d335425b93afb8bfa31",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000034",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000003d": {
+          "id": "00000000-0000-0000-0000-00000000003d",
+          "entity_id": "00000000-0000-0000-0000-000000000035",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "handoff",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/handoff.md",
+            "renderer_version": 5,
+            "sha256": "dd4eaa21f34a33b706bf45d3812f3d68311abcbf7e7f56c66ab8b5564e7f3aa5",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000035",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000003e": {
+          "id": "00000000-0000-0000-0000-00000000003e",
+          "entity_id": "00000000-0000-0000-0000-000000000036",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "changes",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/changes.md",
+            "renderer_version": 5,
+            "sha256": "deaef3f5549101a8bae707698fcf8423d8b551c297534619ece89ba440361d64",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000036",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000003f": {
+          "id": "00000000-0000-0000-0000-00000000003f",
+          "entity_id": "00000000-0000-0000-0000-000000000037",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "history",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/history.md",
+            "renderer_version": 5,
+            "sha256": "bb4ffebc6e49c91ec44a21e9b3c5f165cc3127e5f8b829be40874ae40b75db8c",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000037",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        }
+      },
+      "current": {
+        "00000000-0000-0000-0000-000000000005": "00000000-0000-0000-0000-000000000038",
+        "00000000-0000-0000-0000-000000000006": "00000000-0000-0000-0000-000000000039",
+        "00000000-0000-0000-0000-000000000008": "00000000-0000-0000-0000-00000000003a",
+        "00000000-0000-0000-0000-000000000033": "00000000-0000-0000-0000-00000000003b",
+        "00000000-0000-0000-0000-000000000034": "00000000-0000-0000-0000-00000000003c",
+        "00000000-0000-0000-0000-000000000035": "00000000-0000-0000-0000-00000000003d",
+        "00000000-0000-0000-0000-000000000036": "00000000-0000-0000-0000-00000000003e",
+        "00000000-0000-0000-0000-000000000037": "00000000-0000-0000-0000-00000000003f"
+      },
+      "latest_run_id": "00000000-0000-0000-0000-000000000001",
+      "record_order": [
+        "00000000-0000-0000-0000-000000000005",
+        "00000000-0000-0000-0000-000000000006",
+        "00000000-0000-0000-0000-000000000008",
+        "00000000-0000-0000-0000-000000000033",
+        "00000000-0000-0000-0000-000000000034",
+        "00000000-0000-0000-0000-000000000035",
+        "00000000-0000-0000-0000-000000000036",
+        "00000000-0000-0000-0000-000000000037"
+      ],
+      "units": {
+        "00000000-0000-0000-0000-000000000006": [
+          {
+            "id": "00000000-0000-0000-0000-000000000007",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "read_id": "00000000-0000-0000-0000-000000000008",
+            "state": "extracted",
+            "text": "Synthetic recorded amount: 123.45"
+          }
+        ]
+      },
+      "artifacts": [],
+      "outcome": {
+        "answers": [
+          {
+            "text": "Synthetic statement only; no audit conclusion.",
+            "evidence_ids": [
+              "00000000-0000-0000-0000-000000000033"
+            ]
+          }
+        ],
+        "draft": null,
+        "review_checks": [],
+        "limitations": []
+      },
+      "assessment_sha256": "aa6d23c6096f97c09809ce09610d084b3e5bb269bdd7a65730017a48faa85c56",
+      "integrity_sha256": "81777b4c4fb629759fa92940f2b02a1c097214cbb7e13961a9646b2737d7546d"
+    },
+    "files": {
+      "outputs/00000000-0000-0000-0000-000000000001/review.md": "# 查询结果\n\nSynthetic statement only; no audit conclusion.\n\n[synthetic.txt](</synthetic-old-project/sources/00000000-0000-0000-0000-000000000006/synthetic.txt>)（行/段锚点=line-1；版本 00000000-0000-0000-0000-000000000006）\n\n出处与读取记录已保存，对应轮次 `00000000-0000-0000-0000-000000000001`。\n\n## 本轮变化与效力\n\n本轮未登记材料或范围变化。\n\n[本轮变更记录](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/changes.md>)；[截至本轮的判断历史](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/history.md>)\n\n## 自动汇总的材料读取覆盖\n\n结构校验通过不等于材料读取充分。读取状态：未登记读取失败；不代表已核查全部业务事实。\n\n",
+      "outputs/00000000-0000-0000-0000-000000000001/handoff.md": "# 项目交接\n\n目标：Synthetic legacy compatibility\n\n最后完成轮次：00000000-0000-0000-0000-000000000001；上一轮：无；当前主稿：不要求\n\n开放缺证：0；待复核对象：0。本轮完成不表示全部业务事项已有定论。\n\n[当前结果](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/review.md>)；[变更](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/changes.md>)；[历史](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/history.md>)\n\nledger/ledger.json为唯一权威台账。新材料用review.py update；提交中断用recover；缺失导出用export。历史文件不可作为最新结果，原件和既有台账不手改。\n\n## 自动汇总的材料读取覆盖\n\n结构校验通过不等于材料读取充分。读取状态：未登记读取失败；不代表已核查全部业务事实。\n\n",
+      "outputs/00000000-0000-0000-0000-000000000001/changes.md": "# 本轮变更与影响复核\n\n轮次：00000000-0000-0000-0000-000000000001；上一轮：无\n",
+      "outputs/00000000-0000-0000-0000-000000000001/history.md": "# 截至本轮的判断历史\n\n历史与现状分开；撤回、整改关闭和待复核均保留原判断。\n\n初始轮次的完整对象和初始Revision保存在权威台账；尚无跨轮变更。\n"
+    },
+    "source_path": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+    "source_text": "Synthetic recorded amount: 123.45\n",
+    "pointer": {
+      "run_id": "00000000-0000-0000-0000-000000000001",
+      "ledger_sha256": "81777b4c4fb629759fa92940f2b02a1c097214cbb7e13961a9646b2737d7546d",
+      "files": [
+        "outputs/00000000-0000-0000-0000-000000000001/review.md",
+        "outputs/00000000-0000-0000-0000-000000000001/handoff.md",
+        "outputs/00000000-0000-0000-0000-000000000001/changes.md",
+        "outputs/00000000-0000-0000-0000-000000000001/history.md"
+      ]
+    }
+  },
+  {
+    "renderer": 6,
+    "ledger": {
+      "schema_version": "evidence-ledger-1.0",
+      "project": {
+        "excluded_roots": [],
+        "goal": "Synthetic legacy compatibility",
+        "id": "00000000-0000-0000-0000-000000000002",
+        "main_selection_reason": null,
+        "modes": [
+          "query"
+        ],
+        "output_request": {
+          "format": "md"
+        },
+        "requested_main_document": null,
+        "requested_source_urls": [],
+        "scope": {},
+        "scope_revision": "00000000-0000-0000-0000-000000000003",
+        "selected_main_version": null,
+        "source_roots": [
+          "/synthetic-fixture-materials"
+        ]
+      },
+      "runs": {
+        "00000000-0000-0000-0000-000000000001": {
+          "errors": [],
+          "finished_at": "2026-11-04T00:00:00+00:00",
+          "id": "00000000-0000-0000-0000-000000000001",
+          "model_version": null,
+          "previous_run_id": null,
+          "scope_revision": "00000000-0000-0000-0000-000000000003",
+          "selected_main_version": null,
+          "skill_version": "0.3.1",
+          "source_version_snapshot": [
+            "00000000-0000-0000-0000-000000000006"
+          ],
+          "started_at": "2026-11-04T00:00:00+00:00",
+          "state": "completed",
+          "tool_versions": {
+            "python": "synthetic baseline environment",
+            "reader": "readers-1.0"
+          },
+          "unfinished_steps": [],
+          "validation_version": 2,
+          "visual_checks": [],
+          "visual_checks_version": 1
+        }
+      },
+      "entities": {
+        "00000000-0000-0000-0000-000000000005": {
+          "id": "00000000-0000-0000-0000-000000000005",
+          "kind": "Source",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000006": {
+          "id": "00000000-0000-0000-0000-000000000006",
+          "kind": "SourceVersion",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000008": {
+          "id": "00000000-0000-0000-0000-000000000008",
+          "kind": "ReadRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000040": {
+          "id": "00000000-0000-0000-0000-000000000040",
+          "kind": "Evidence",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000041": {
+          "id": "00000000-0000-0000-0000-000000000041",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000042": {
+          "id": "00000000-0000-0000-0000-000000000042",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000043": {
+          "id": "00000000-0000-0000-0000-000000000043",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000044": {
+          "id": "00000000-0000-0000-0000-000000000044",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        }
+      },
+      "revisions": {
+        "00000000-0000-0000-0000-000000000045": {
+          "id": "00000000-0000-0000-0000-000000000045",
+          "entity_id": "00000000-0000-0000-0000-000000000005",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "actual_name": "synthetic.txt",
+            "confirmation_scope": null,
+            "id": "00000000-0000-0000-0000-000000000005",
+            "issuer": null,
+            "kind": "Source",
+            "known_paths": [
+              "/synthetic-fixture-materials/synthetic.txt"
+            ],
+            "origin_group_id": "00000000-0000-0000-0000-000000000005",
+            "role": "unknown",
+            "role_basis": "Not yet classified by reviewer",
+            "signature_status": "unknown",
+            "urls": []
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000046": {
+          "id": "00000000-0000-0000-0000-000000000046",
+          "entity_id": "00000000-0000-0000-0000-000000000006",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "acquired_at": "2026-11-04T00:00:00+00:00",
+            "actual_name": "synthetic.txt",
+            "audio_version_id": null,
+            "availability": "local_snapshot",
+            "derived_from_version_ids": [],
+            "discovered_at": "2026-11-04T00:00:00+00:00",
+            "facts_period": null,
+            "format": ".txt",
+            "formed_at": null,
+            "id": "00000000-0000-0000-0000-000000000006",
+            "kind": "SourceVersion",
+            "local_snapshot": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+            "processing": [
+              {
+                "encoding": "utf-8-sig",
+                "method": "decode"
+              }
+            ],
+            "processing_method": "readers-1.0",
+            "received_at": null,
+            "sha256": "139afdb7fd0284e9b91b3f958ccbc202e937e8b62d958311bf410beee4c6fc1d",
+            "source_id": "00000000-0000-0000-0000-000000000005",
+            "url": null
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000047": {
+          "id": "00000000-0000-0000-0000-000000000047",
+          "entity_id": "00000000-0000-0000-0000-000000000008",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "errors": [],
+            "id": "00000000-0000-0000-0000-000000000008",
+            "kind": "ReadRecord",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "method": "readers-1.0",
+            "render_version": null,
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "state": "extracted",
+            "unit_id": "00000000-0000-0000-0000-000000000007"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000048": {
+          "id": "00000000-0000-0000-0000-000000000048",
+          "entity_id": "00000000-0000-0000-0000-000000000040",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "unit_id": "00000000-0000-0000-0000-000000000007",
+            "verbatim_quote": "Synthetic recorded amount: 123.45",
+            "reviewer_summary": "Synthetic only",
+            "reading_method": "text",
+            "verification_state": "extracted_only",
+            "limitations": [],
+            "id": "00000000-0000-0000-0000-000000000040",
+            "kind": "Evidence"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000049": {
+          "id": "00000000-0000-0000-0000-000000000049",
+          "entity_id": "00000000-0000-0000-0000-000000000041",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "review",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/review.md",
+            "renderer_version": 6,
+            "sha256": "1841315828778251eaaa2cfca940ad78e480932ed7ea0d335425b93afb8bfa31",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000041",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000004a": {
+          "id": "00000000-0000-0000-0000-00000000004a",
+          "entity_id": "00000000-0000-0000-0000-000000000042",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "handoff",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/handoff.md",
+            "renderer_version": 6,
+            "sha256": "dd4eaa21f34a33b706bf45d3812f3d68311abcbf7e7f56c66ab8b5564e7f3aa5",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000042",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000004b": {
+          "id": "00000000-0000-0000-0000-00000000004b",
+          "entity_id": "00000000-0000-0000-0000-000000000043",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "changes",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/changes.md",
+            "renderer_version": 6,
+            "sha256": "deaef3f5549101a8bae707698fcf8423d8b551c297534619ece89ba440361d64",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000043",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000004c": {
+          "id": "00000000-0000-0000-0000-00000000004c",
+          "entity_id": "00000000-0000-0000-0000-000000000044",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "history",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/history.md",
+            "renderer_version": 6,
+            "sha256": "bb4ffebc6e49c91ec44a21e9b3c5f165cc3127e5f8b829be40874ae40b75db8c",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000044",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        }
+      },
+      "current": {
+        "00000000-0000-0000-0000-000000000005": "00000000-0000-0000-0000-000000000045",
+        "00000000-0000-0000-0000-000000000006": "00000000-0000-0000-0000-000000000046",
+        "00000000-0000-0000-0000-000000000008": "00000000-0000-0000-0000-000000000047",
+        "00000000-0000-0000-0000-000000000040": "00000000-0000-0000-0000-000000000048",
+        "00000000-0000-0000-0000-000000000041": "00000000-0000-0000-0000-000000000049",
+        "00000000-0000-0000-0000-000000000042": "00000000-0000-0000-0000-00000000004a",
+        "00000000-0000-0000-0000-000000000043": "00000000-0000-0000-0000-00000000004b",
+        "00000000-0000-0000-0000-000000000044": "00000000-0000-0000-0000-00000000004c"
+      },
+      "latest_run_id": "00000000-0000-0000-0000-000000000001",
+      "record_order": [
+        "00000000-0000-0000-0000-000000000005",
+        "00000000-0000-0000-0000-000000000006",
+        "00000000-0000-0000-0000-000000000008",
+        "00000000-0000-0000-0000-000000000040",
+        "00000000-0000-0000-0000-000000000041",
+        "00000000-0000-0000-0000-000000000042",
+        "00000000-0000-0000-0000-000000000043",
+        "00000000-0000-0000-0000-000000000044"
+      ],
+      "units": {
+        "00000000-0000-0000-0000-000000000006": [
+          {
+            "id": "00000000-0000-0000-0000-000000000007",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "read_id": "00000000-0000-0000-0000-000000000008",
+            "state": "extracted",
+            "text": "Synthetic recorded amount: 123.45"
+          }
+        ]
+      },
+      "artifacts": [],
+      "outcome": {
+        "answers": [
+          {
+            "text": "Synthetic statement only; no audit conclusion.",
+            "evidence_ids": [
+              "00000000-0000-0000-0000-000000000040"
+            ]
+          }
+        ],
+        "draft": null,
+        "review_checks": [],
+        "limitations": []
+      },
+      "assessment_sha256": "aa6d23c6096f97c09809ce09610d084b3e5bb269bdd7a65730017a48faa85c56",
+      "integrity_sha256": "da4895504754056e7348a1902ed7a3ec96e1cf799f833d92e6aef3a34a604351"
+    },
+    "files": {
+      "outputs/00000000-0000-0000-0000-000000000001/review.md": "# 查询结果\n\nSynthetic statement only; no audit conclusion.\n\n[synthetic.txt](</synthetic-old-project/sources/00000000-0000-0000-0000-000000000006/synthetic.txt>)（行/段锚点=line-1；版本 00000000-0000-0000-0000-000000000006）\n\n出处与读取记录已保存，对应轮次 `00000000-0000-0000-0000-000000000001`。\n\n## 本轮变化与效力\n\n本轮未登记材料或范围变化。\n\n[本轮变更记录](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/changes.md>)；[截至本轮的判断历史](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/history.md>)\n\n## 自动汇总的材料读取覆盖\n\n结构校验通过不等于材料读取充分。读取状态：未登记读取失败；不代表已核查全部业务事实。\n\n",
+      "outputs/00000000-0000-0000-0000-000000000001/handoff.md": "# 项目交接\n\n目标：Synthetic legacy compatibility\n\n最后完成轮次：00000000-0000-0000-0000-000000000001；上一轮：无；当前主稿：不要求\n\n开放缺证：0；待复核对象：0。本轮完成不表示全部业务事项已有定论。\n\n[当前结果](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/review.md>)；[变更](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/changes.md>)；[历史](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/history.md>)\n\nledger/ledger.json为唯一权威台账。新材料用review.py update；提交中断用recover；缺失导出用export。历史文件不可作为最新结果，原件和既有台账不手改。\n\n## 自动汇总的材料读取覆盖\n\n结构校验通过不等于材料读取充分。读取状态：未登记读取失败；不代表已核查全部业务事实。\n\n",
+      "outputs/00000000-0000-0000-0000-000000000001/changes.md": "# 本轮变更与影响复核\n\n轮次：00000000-0000-0000-0000-000000000001；上一轮：无\n",
+      "outputs/00000000-0000-0000-0000-000000000001/history.md": "# 截至本轮的判断历史\n\n历史与现状分开；撤回、整改关闭和待复核均保留原判断。\n\n初始轮次的完整对象和初始Revision保存在权威台账；尚无跨轮变更。\n"
+    },
+    "source_path": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+    "source_text": "Synthetic recorded amount: 123.45\n",
+    "pointer": {
+      "run_id": "00000000-0000-0000-0000-000000000001",
+      "ledger_sha256": "da4895504754056e7348a1902ed7a3ec96e1cf799f833d92e6aef3a34a604351",
+      "files": [
+        "outputs/00000000-0000-0000-0000-000000000001/review.md",
+        "outputs/00000000-0000-0000-0000-000000000001/handoff.md",
+        "outputs/00000000-0000-0000-0000-000000000001/changes.md",
+        "outputs/00000000-0000-0000-0000-000000000001/history.md"
+      ]
+    }
+  },
+  {
+    "renderer": 6,
+    "ledger": {
+      "schema_version": "evidence-ledger-2.0",
+      "project": {
+        "excluded_roots": [],
+        "goal": "Synthetic legacy compatibility",
+        "id": "00000000-0000-0000-0000-000000000002",
+        "main_selection_reason": null,
+        "modes": [
+          "query"
+        ],
+        "output_request": {
+          "format": "md"
+        },
+        "requested_main_document": null,
+        "requested_source_urls": [],
+        "scope": {},
+        "scope_revision": "00000000-0000-0000-0000-000000000003",
+        "selected_main_version": null,
+        "source_roots": [
+          "/synthetic-fixture-materials"
+        ]
+      },
+      "runs": {
+        "00000000-0000-0000-0000-000000000001": {
+          "errors": [],
+          "finished_at": "2026-11-04T00:00:00+00:00",
+          "id": "00000000-0000-0000-0000-000000000001",
+          "model_version": null,
+          "previous_run_id": null,
+          "scope_revision": "00000000-0000-0000-0000-000000000003",
+          "selected_main_version": null,
+          "skill_version": "0.3.1",
+          "source_version_snapshot": [
+            "00000000-0000-0000-0000-000000000006"
+          ],
+          "started_at": "2026-11-04T00:00:00+00:00",
+          "state": "completed",
+          "tool_versions": {
+            "python": "synthetic baseline environment",
+            "reader": "readers-1.0"
+          },
+          "unfinished_steps": [],
+          "validation_version": 2,
+          "visual_checks": [],
+          "visual_checks_version": 1
+        }
+      },
+      "entities": {
+        "00000000-0000-0000-0000-000000000005": {
+          "id": "00000000-0000-0000-0000-000000000005",
+          "kind": "Source",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000006": {
+          "id": "00000000-0000-0000-0000-000000000006",
+          "kind": "SourceVersion",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000008": {
+          "id": "00000000-0000-0000-0000-000000000008",
+          "kind": "ReadRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000040": {
+          "id": "00000000-0000-0000-0000-000000000040",
+          "kind": "Evidence",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000041": {
+          "id": "00000000-0000-0000-0000-000000000041",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000042": {
+          "id": "00000000-0000-0000-0000-000000000042",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000043": {
+          "id": "00000000-0000-0000-0000-000000000043",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        },
+        "00000000-0000-0000-0000-000000000044": {
+          "id": "00000000-0000-0000-0000-000000000044",
+          "kind": "OutputRecord",
+          "created_run_id": "00000000-0000-0000-0000-000000000001"
+        }
+      },
+      "revisions": {
+        "00000000-0000-0000-0000-000000000045": {
+          "id": "00000000-0000-0000-0000-000000000045",
+          "entity_id": "00000000-0000-0000-0000-000000000005",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "actual_name": "synthetic.txt",
+            "confirmation_scope": null,
+            "id": "00000000-0000-0000-0000-000000000005",
+            "issuer": null,
+            "kind": "Source",
+            "known_paths": [
+              "/synthetic-fixture-materials/synthetic.txt"
+            ],
+            "origin_group_id": "00000000-0000-0000-0000-000000000005",
+            "role": "unknown",
+            "role_basis": "Not yet classified by reviewer",
+            "signature_status": "unknown",
+            "urls": []
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000046": {
+          "id": "00000000-0000-0000-0000-000000000046",
+          "entity_id": "00000000-0000-0000-0000-000000000006",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "acquired_at": "2026-11-04T00:00:00+00:00",
+            "actual_name": "synthetic.txt",
+            "audio_version_id": null,
+            "availability": "local_snapshot",
+            "derived_from_version_ids": [],
+            "discovered_at": "2026-11-04T00:00:00+00:00",
+            "facts_period": null,
+            "format": ".txt",
+            "formed_at": null,
+            "id": "00000000-0000-0000-0000-000000000006",
+            "kind": "SourceVersion",
+            "local_snapshot": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+            "processing": [
+              {
+                "encoding": "utf-8-sig",
+                "method": "decode"
+              }
+            ],
+            "processing_method": "readers-1.0",
+            "received_at": null,
+            "sha256": "139afdb7fd0284e9b91b3f958ccbc202e937e8b62d958311bf410beee4c6fc1d",
+            "source_id": "00000000-0000-0000-0000-000000000005",
+            "url": null
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000047": {
+          "id": "00000000-0000-0000-0000-000000000047",
+          "entity_id": "00000000-0000-0000-0000-000000000008",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "errors": [],
+            "id": "00000000-0000-0000-0000-000000000008",
+            "kind": "ReadRecord",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "method": "readers-1.0",
+            "render_version": null,
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "state": "extracted",
+            "unit_id": "00000000-0000-0000-0000-000000000007"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000048": {
+          "id": "00000000-0000-0000-0000-000000000048",
+          "entity_id": "00000000-0000-0000-0000-000000000040",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "source_version_id": "00000000-0000-0000-0000-000000000006",
+            "unit_id": "00000000-0000-0000-0000-000000000007",
+            "verbatim_quote": "Synthetic recorded amount: 123.45",
+            "reviewer_summary": "Synthetic only",
+            "reading_method": "text",
+            "verification_state": "extracted_only",
+            "limitations": [],
+            "id": "00000000-0000-0000-0000-000000000040",
+            "kind": "Evidence"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-000000000049": {
+          "id": "00000000-0000-0000-0000-000000000049",
+          "entity_id": "00000000-0000-0000-0000-000000000041",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "review",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/review.md",
+            "renderer_version": 6,
+            "sha256": "1841315828778251eaaa2cfca940ad78e480932ed7ea0d335425b93afb8bfa31",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000041",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000004a": {
+          "id": "00000000-0000-0000-0000-00000000004a",
+          "entity_id": "00000000-0000-0000-0000-000000000042",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "handoff",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/handoff.md",
+            "renderer_version": 6,
+            "sha256": "dd4eaa21f34a33b706bf45d3812f3d68311abcbf7e7f56c66ab8b5564e7f3aa5",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000042",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000004b": {
+          "id": "00000000-0000-0000-0000-00000000004b",
+          "entity_id": "00000000-0000-0000-0000-000000000043",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "changes",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/changes.md",
+            "renderer_version": 6,
+            "sha256": "deaef3f5549101a8bae707698fcf8423d8b551c297534619ece89ba440361d64",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000043",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        },
+        "00000000-0000-0000-0000-00000000004c": {
+          "id": "00000000-0000-0000-0000-00000000004c",
+          "entity_id": "00000000-0000-0000-0000-000000000044",
+          "previous_revision_id": null,
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "time": "2026-11-04T00:00:00+00:00",
+          "actor": "Codex session with deterministic tools",
+          "before": null,
+          "after": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "output_kind": "history",
+            "path": "outputs/00000000-0000-0000-0000-000000000001/history.md",
+            "renderer_version": 6,
+            "sha256": "bb4ffebc6e49c91ec44a21e9b3c5f165cc3127e5f8b829be40874ae40b75db8c",
+            "source_role": "workpaper_or_draft",
+            "actual_confirmation_status": "unconfirmed",
+            "evidence_ids": [],
+            "id": "00000000-0000-0000-0000-000000000044",
+            "kind": "OutputRecord"
+          },
+          "reason": "Initial single-review record",
+          "trigger_refs": [
+            "00000000-0000-0000-0000-000000000006"
+          ]
+        }
+      },
+      "current": {
+        "00000000-0000-0000-0000-000000000005": "00000000-0000-0000-0000-000000000045",
+        "00000000-0000-0000-0000-000000000006": "00000000-0000-0000-0000-000000000046",
+        "00000000-0000-0000-0000-000000000008": "00000000-0000-0000-0000-000000000047",
+        "00000000-0000-0000-0000-000000000040": "00000000-0000-0000-0000-000000000048",
+        "00000000-0000-0000-0000-000000000041": "00000000-0000-0000-0000-000000000049",
+        "00000000-0000-0000-0000-000000000042": "00000000-0000-0000-0000-00000000004a",
+        "00000000-0000-0000-0000-000000000043": "00000000-0000-0000-0000-00000000004b",
+        "00000000-0000-0000-0000-000000000044": "00000000-0000-0000-0000-00000000004c"
+      },
+      "latest_run_id": "00000000-0000-0000-0000-000000000001",
+      "record_order": [
+        "00000000-0000-0000-0000-000000000005",
+        "00000000-0000-0000-0000-000000000006",
+        "00000000-0000-0000-0000-000000000008",
+        "00000000-0000-0000-0000-000000000040",
+        "00000000-0000-0000-0000-000000000041",
+        "00000000-0000-0000-0000-000000000042",
+        "00000000-0000-0000-0000-000000000043",
+        "00000000-0000-0000-0000-000000000044"
+      ],
+      "units": {
+        "00000000-0000-0000-0000-000000000006": [
+          {
+            "id": "00000000-0000-0000-0000-000000000007",
+            "limitations": [],
+            "locator": {
+              "paragraph_anchor": "line-1",
+              "unit": "block"
+            },
+            "read_id": "00000000-0000-0000-0000-000000000008",
+            "state": "extracted",
+            "text": "Synthetic recorded amount: 123.45"
+          }
+        ]
+      },
+      "artifacts": [],
+      "outcome": {
+        "answers": [
+          {
+            "text": "Synthetic statement only; no audit conclusion.",
+            "evidence_ids": [
+              "00000000-0000-0000-0000-000000000040"
+            ]
+          }
+        ],
+        "draft": null,
+        "review_checks": [],
+        "limitations": []
+      },
+      "assessment_sha256": "aa6d23c6096f97c09809ce09610d084b3e5bb269bdd7a65730017a48faa85c56",
+      "run_order": [
+        "00000000-0000-0000-0000-000000000001"
+      ],
+      "run_snapshots": {
+        "00000000-0000-0000-0000-000000000001": {
+          "project": {
+            "excluded_roots": [],
+            "goal": "Synthetic legacy compatibility",
+            "id": "00000000-0000-0000-0000-000000000002",
+            "main_selection_reason": null,
+            "modes": [
+              "query"
+            ],
+            "output_request": {
+              "format": "md"
+            },
+            "requested_main_document": null,
+            "requested_source_urls": [],
+            "scope": {},
+            "scope_revision": "00000000-0000-0000-0000-000000000003",
+            "selected_main_version": null,
+            "source_roots": [
+              "/synthetic-fixture-materials"
+            ]
+          },
+          "outcome": {
+            "answers": [
+              {
+                "text": "Synthetic statement only; no audit conclusion.",
+                "evidence_ids": [
+                  "00000000-0000-0000-0000-000000000040"
+                ]
+              }
+            ],
+            "draft": null,
+            "review_checks": [],
+            "limitations": []
+          },
+          "current": {
+            "00000000-0000-0000-0000-000000000005": "00000000-0000-0000-0000-000000000045",
+            "00000000-0000-0000-0000-000000000006": "00000000-0000-0000-0000-000000000046",
+            "00000000-0000-0000-0000-000000000008": "00000000-0000-0000-0000-000000000047",
+            "00000000-0000-0000-0000-000000000040": "00000000-0000-0000-0000-000000000048",
+            "00000000-0000-0000-0000-000000000041": "00000000-0000-0000-0000-000000000049",
+            "00000000-0000-0000-0000-000000000042": "00000000-0000-0000-0000-00000000004a",
+            "00000000-0000-0000-0000-000000000043": "00000000-0000-0000-0000-00000000004b",
+            "00000000-0000-0000-0000-000000000044": "00000000-0000-0000-0000-00000000004c"
+          },
+          "record_order": [
+            "00000000-0000-0000-0000-000000000005",
+            "00000000-0000-0000-0000-000000000006",
+            "00000000-0000-0000-0000-000000000008",
+            "00000000-0000-0000-0000-000000000040",
+            "00000000-0000-0000-0000-000000000041",
+            "00000000-0000-0000-0000-000000000042",
+            "00000000-0000-0000-0000-000000000043",
+            "00000000-0000-0000-0000-000000000044"
+          ],
+          "unit_version_ids": [
+            "00000000-0000-0000-0000-000000000006"
+          ],
+          "artifact_ids": [],
+          "assessment_sha256": "aa6d23c6096f97c09809ce09610d084b3e5bb269bdd7a65730017a48faa85c56"
+        }
+      },
+      "integrity_sha256": "5968bad583e6cb155bdf0e6e8ac47defe7bd1e299095386390ff4751cba8c37d"
+    },
+    "files": {
+      "outputs/00000000-0000-0000-0000-000000000001/review.md": "# 查询结果\n\nSynthetic statement only; no audit conclusion.\n\n[synthetic.txt](</synthetic-old-project/sources/00000000-0000-0000-0000-000000000006/synthetic.txt>)（行/段锚点=line-1；版本 00000000-0000-0000-0000-000000000006）\n\n出处与读取记录已保存，对应轮次 `00000000-0000-0000-0000-000000000001`。\n\n## 本轮变化与效力\n\n本轮未登记材料或范围变化。\n\n[本轮变更记录](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/changes.md>)；[截至本轮的判断历史](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/history.md>)\n\n## 自动汇总的材料读取覆盖\n\n结构校验通过不等于材料读取充分。读取状态：未登记读取失败；不代表已核查全部业务事实。\n\n",
+      "outputs/00000000-0000-0000-0000-000000000001/handoff.md": "# 项目交接\n\n目标：Synthetic legacy compatibility\n\n最后完成轮次：00000000-0000-0000-0000-000000000001；上一轮：无；当前主稿：不要求\n\n开放缺证：0；待复核对象：0。本轮完成不表示全部业务事项已有定论。\n\n[当前结果](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/review.md>)；[变更](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/changes.md>)；[历史](</synthetic-old-project/outputs/00000000-0000-0000-0000-000000000001/history.md>)\n\nledger/ledger.json为唯一权威台账。新材料用review.py update；提交中断用recover；缺失导出用export。历史文件不可作为最新结果，原件和既有台账不手改。\n\n## 自动汇总的材料读取覆盖\n\n结构校验通过不等于材料读取充分。读取状态：未登记读取失败；不代表已核查全部业务事实。\n\n",
+      "outputs/00000000-0000-0000-0000-000000000001/changes.md": "# 本轮变更与影响复核\n\n轮次：00000000-0000-0000-0000-000000000001；上一轮：无\n",
+      "outputs/00000000-0000-0000-0000-000000000001/history.md": "# 截至本轮的判断历史\n\n历史与现状分开；撤回、整改关闭和待复核均保留原判断。\n\n初始轮次的完整对象和初始Revision保存在权威台账；尚无跨轮变更。\n"
+    },
+    "source_path": "sources/00000000-0000-0000-0000-000000000006/synthetic.txt",
+    "source_text": "Synthetic recorded amount: 123.45\n",
+    "pointer": {
+      "run_id": "00000000-0000-0000-0000-000000000001",
+      "ledger_sha256": "5968bad583e6cb155bdf0e6e8ac47defe7bd1e299095386390ff4751cba8c37d",
+      "files": [
+        "outputs/00000000-0000-0000-0000-000000000001/review.md",
+        "outputs/00000000-0000-0000-0000-000000000001/handoff.md",
+        "outputs/00000000-0000-0000-0000-000000000001/changes.md",
+        "outputs/00000000-0000-0000-0000-000000000001/history.md"
+      ]
+    }
+  }
+]

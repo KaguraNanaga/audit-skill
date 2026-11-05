@@ -41,7 +41,7 @@ class PublicCLI(unittest.TestCase):
     def call(self, command, *args, success=True):
         result = subprocess.run(
             [sys.executable, "-B", str(CLI), command, "--project", str(self.project), *map(str, args)],
-            capture_output=True, text=True,
+            capture_output=True, text=True, encoding="utf-8",
             env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"),
         )
         payload = result.stdout if result.returncode == 0 else result.stderr
@@ -224,4 +224,20 @@ class PublicCLI(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    import test_platform
+    import test_structure
+    import test_ocr
+    import test_table_query
+    import test_scaffold
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(PublicCLI)
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_platform))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_structure))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_ocr))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_table_query))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_scaffold))
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    print(json.dumps({"tests_run": result.testsRun,
+                      "passed": result.testsRun - len(result.skipped) - len(result.failures) - len(result.errors),
+                      "failures": len(result.failures), "errors": len(result.errors),
+                      "skipped": [{"test": str(test), "reason": reason} for test, reason in result.skipped]}, ensure_ascii=False))
+    raise SystemExit(not result.wasSuccessful())
