@@ -1,0 +1,32 @@
+{
+  "schema": "stage6-evaluation-record-1",
+  "status": "待执行",
+  "administrator_only": {
+    "case": null, "run_number": null, "blind_id": null,
+    "model_and_configuration": null, "skill_commit": null, "package_version": null,
+    "engine_version": null, "input_manifest_sha256": null,
+    "environment_and_tools": null, "time_and_context_budget": null,
+    "isolation_controls": null, "isolation_verified": false,
+    "started_at": null, "finished_at": null, "failure_or_retry": null
+  },
+  "actual_run_artifacts": {
+    "tool_calls_with_parameters_stdout_stderr_exit_codes": [],
+    "page_images_opened_and_observations": [],
+    "query_specs_results_and_fingerprints": [],
+    "assessment_ledger_exports": [],
+    "step_trace": [], "source_and_unit_coverage": [],
+    "unread_units_and_uncovered_steps": [], "final_conclusion": null
+  },
+  "blind_scoring": {
+    "status": "待执行", "blind_id": null,
+    "run_number_and_skill_version_redacted": false,
+    "redaction_log_path": null, "scorer_access_controls": null,
+    "required_item_results": [], "allowed_conclusion_assessment": null,
+    "forbidden_conclusion_results": [], "traceability_and_boundary_results": [],
+    "finding_recall": null, "false_positive_count": null,
+    "coverage_honesty": null, "step_adherence": null
+  },
+  "model_review": {"status": "待执行", "reviewer_configuration": null, "record_path": null},
+  "human_review": {"status": "待执行", "reviewer_role": null, "reviewed_at": null, "record_path": null},
+  "three_run_stability": {"status": "待执行", "semantic_agreement": null, "disagreements": [], "accuracy_claim": null}
+}

@@ -2,7 +2,7 @@
 name: evidence-reviewer
 description: 用于审计、复核、底稿、核对、审计报告、取证、勾稽、复算、内审、经济责任审计、合同审查，以及 audit、working paper、vouching、tie-out：定位原件，核对事实与金额，复核报告及补证，处理OFD/WPS/XML、OCR定位和大表筛选。不适用于与证据核查无关的普通写作、一般编程或闲聊。
 metadata:
-  version: "0.4.0-beta.1"
+  version: "0.5.0-beta.1"
   engine_version: "0.4.0"
   instructions_revision: "2026-11-05-stage5"
 ---

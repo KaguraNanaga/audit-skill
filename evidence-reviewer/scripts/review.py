@@ -466,7 +466,7 @@ def main():
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, 'reconfigure'): stream.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--version', action='version', version='Evidence Reviewer package 0.4.0-beta.1; engine 0.4.0. Package version identifies the distributed skill; engine version identifies ledger and validation behavior.')
+    parser.add_argument('--version', action='version', version='Evidence Reviewer package 0.5.0-beta.1; engine 0.4.0. Package version identifies the distributed skill; engine version identifies ledger and validation behavior.')
     sub = parser.add_subparsers(dest='command', required=True)
     for name in ['begin', 'update', 'annotate-sources', 'inspect', 'search', 'select-main', 'render', 'import-web', 'check-assessment', 'finalize', 'validate', 'export', 'recover', 'ocr', 'table-query', 'scaffold']:
         p = sub.add_parser(name)

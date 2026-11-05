@@ -12,7 +12,7 @@ Synthetic materials, not real business. Verbatim excerpt from the actual generat
 
 中文说明见 [README.zh-CN.md](README.zh-CN.md)。
 
-Public package version: **0.4.0-beta.1**. The ledger engine is **0.4.0**; the two numbers identify the release package and the runtime engine separately. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for changes and [VALIDATION.md](VALIDATION.md) for what was actually tested and what was not.
+Public package version: **0.5.0-beta.1**. The ledger engine is **0.4.0**; the two numbers identify the release package and the runtime engine separately. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for changes and [VALIDATION.md](VALIDATION.md) for what was actually tested and what was not.
 
 ## Scope
 
@@ -181,7 +181,9 @@ To upgrade an existing install, back up the old evidence-reviewer folder and rep
 
 ## Optional OCR locators (stage 3)
 
-Engine 0.4.0 supports local Tesseract with chi_sim+eng and optional RapidOCR via requirements-ocr.txt. Python 3.13+ uses Tesseract. OCR adds searchable derived locators; it never marks original pages viewed. See the [OCR contract](evidence-reviewer/references/common/ocr.md). Package version remains 0.4.0-beta.1 until the complete planned release is finished.
+Engine 0.4.0 supports local Tesseract with chi_sim+eng and optional RapidOCR via requirements-ocr.txt. Python 3.13+ uses Tesseract. OCR adds searchable derived locators; it never marks original pages viewed. See the [OCR contract](evidence-reviewer/references/common/ocr.md). Package version is 0.5.0-beta.1; the ledger engine remains 0.4.0. Stage 6 adds evaluation fixtures and a protocol, not completed model or human evaluation.
+
+Stage 6 adds six independently frozen synthetic cases: PDF instruction injection versus management assertions, a late image-only supplement, continued financial tables with unit differences, a true negative with explained distractors, a 50,000-row ledger with 60 attachments including two OFD invoices, and a raw-material discovery baseline with four cross-document issues. There is no dedicated discovery capability in this version. See [case construction and actual PDF rendering checks](tests/README.md) and the [evaluation protocol](VALIDATION.md#阶段6评测协议). All 18 planned independent runs, blind scoring and at least one human review per case remain pending. Tests of data handling do not establish audit accuracy.
 
 ## Table queries and assessment scaffolds (stage 4)
 

@@ -12,7 +12,7 @@
 
 English documentation: [README.md](README.md).
 
-公开包版本：**0.4.0-beta.1**。台账引擎为 **0.4.0**；两者分别表示发布包和运行引擎版本。变更见 [RELEASE_NOTES.md](RELEASE_NOTES.md)，实际测试及未验证范围见 [VALIDATION.md](VALIDATION.md)。
+公开包版本：**0.5.0-beta.1**。台账引擎为 **0.4.0**；两者分别表示发布包和运行引擎版本。变更见 [RELEASE_NOTES.md](RELEASE_NOTES.md)，实际测试及未验证范围见 [VALIDATION.md](VALIDATION.md)。
 
 ## 适用范围
 
@@ -181,7 +181,9 @@ python3 -B tools/check_release.py
 
 ## 可选OCR定位（阶段3）
 
-引擎0.4.0支持离线Tesseract（本地chi_sim+eng）或可选RapidOCR；依赖单独放在requirements-ocr.txt，Python3.13及以上使用Tesseract。先登记/渲染原页，再执行ocr；识别不改变原页未核状态。安装与命令见[OCR定位层](evidence-reviewer/references/common/ocr.md)。包版本仍为0.4.0-beta.1，目标0.5.0-beta.1待全部阶段完成后统一更新。
+引擎0.4.0支持离线Tesseract（本地chi_sim+eng）或可选RapidOCR；依赖单独放在requirements-ocr.txt，Python3.13及以上使用Tesseract。先登记/渲染原页，再执行ocr；识别不改变原页未核状态。安装与命令见[OCR定位层](evidence-reviewer/references/common/ocr.md)。包版本为0.5.0-beta.1，台账引擎保持0.4.0。阶段6新增案例与评测协议，模型和人工评测仍待执行。
+
+阶段6新增六组独立冻结的合成案例：PDF指令注入与单位主张的区分、后部纯图像补充协议、续表与万元/元口径、有合理解释干扰项的真阴性、50000行及60份附件（含两张OFD发票），以及四类跨文档问题的原始材料发现基线。当前版本没有专门的发现能力。[案例构造和实际PDF渲染检查](tests/README.md)及[评测协议](VALIDATION.md#阶段6评测协议)分别记录；计划中的18次独立运行、盲评及每案至少一次人工评审均待执行，数据处理测试不代表审计准确率。
 
 ## 大表查询与评估骨架（阶段4）
 

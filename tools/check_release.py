@@ -20,6 +20,14 @@ ROOT_FILES = {
 TEXT_SUFFIXES = {".md", ".py", ".json", ".yaml", ".txt"}
 PRIVATE_PATH = re.compile(r"/(?:Users|home)/[A-Za-z0-9_.-]+/|[A-Za-z]:\\Users\\[^\\]+\\")
 KEY_PATTERN = re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|\b(?:ghp_|github_pat_)[A-Za-z0-9_]{20,}")
+STAGE6_DATA = {
+    'tests/cases/stage6-03/sources/收支明细.csv',
+    'tests/cases/stage6-05/sources/序时账.csv',
+    'tests/cases/stage6-05/sources/附件030.ofd',
+    'tests/cases/stage6-05/sources/附件060.ofd',
+    *('tests/cases/stage6-06/sources/' + name for name in
+      ('合同台账.csv', '付款流水.csv', '审批记录.csv', '发票记录.csv')),
+}
 
 
 def release_files():
@@ -48,6 +56,7 @@ def release_files():
             or s == "evidence-reviewer/SKILL.md"
             or s == "evidence-reviewer/LICENSE"
             or s == "evidence-reviewer/agents/openai.yaml"
+            or s in STAGE6_DATA
             or (rel.parent.as_posix() == "evidence-reviewer/scripts" and p.suffix == ".py")
             or (len(rel.parts) == 4 and rel.parts[:3] == ("evidence-reviewer", "scripts", "core") and p.suffix == ".py")
             or (len(rel.parts) == 4 and rel.parts[:2] == ("evidence-reviewer", "references") and rel.parts[2] in {"common", "evidence-review"} and p.suffix == ".md")
@@ -104,7 +113,7 @@ def main():
     current = hashes(files)
     if args.write_manifest:
         MANIFEST.write_text(json.dumps({
-            "package_version": "0.4.0-beta.1", "engine_version": "0.4.0",
+            "package_version": "0.5.0-beta.1", "engine_version": "0.4.0",
             "scope": "Selected public package; manifest excludes itself. No authenticity or audit-accuracy guarantee.",
             "files": current,
         }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

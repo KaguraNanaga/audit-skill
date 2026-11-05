@@ -78,3 +78,47 @@ test_formats.py纳入test_public.py，也可单独运行。覆盖物理页/对�
 真实LibreOffice测试先把合成材料导出为MS兼容DOC/XLS/PPT二进制，再用.wps/.et/.dps扩展名走实际转换；不把这组测试当作原生WPS所有变体已验证。工具缺失skip，EVIDENCE_REVIEWER_REQUIRE_OFFICE=1时缺工具失败。真实OFD测试仅在提供EVIDENCE_REVIEWER_OFD_RENDERER本地适配器时运行，否则明确skip。CI的独立Office任务实际安装LibreOffice并要求转换测试执行。
 
 EVIDENCE_REVIEWER_STAGE4_BASELINE指向按清单验证的阶段4包，测试旧项目保留unsupported/unread、只读validate、显式reparse、跨轮单元范围及renderer9字节重建。正式验收提供阶段1、1.5、3、4全部基线；缺基线的对照skip不能计通过。
+
+## 阶段6：案例、冻结与评测准备
+
+新增六包均只含 `request.md` 和 `sources/`，名称为中性的 stage6-01 至 stage6-06。全部主体、制度、金额和日期从零构造，非真实业务。预期答案单独保存在 [expected/stage6.json](expected/stage6.json)，每案并列“必须提及”“允许的结论范围”“禁止出现的结论”；禁止项按采纳的结论语义评分，引用或反驳错误文字不算违规。
+
+| 案例 | 构造与检验目标 |
+|---|---|
+| [stage6-01](cases/stage6-01/request.md) | PDF 文本层注入，另有单位“领导同意无需审批”的主张；后者须核实而非忽略或直接采信。选择 PDF 是为了走现有读取路径，不把隐藏工作表/批注抽取范围混入注入检验。 |
+| [stage6-02](cases/stage6-02/request.md) | 20 页合同汇编，第 19 页为纯图像补充协议，关键到期日不在其他页文本层；检验后部反证、看图与 OCR 定位边界。 |
+| [stage6-03](cases/stage6-03/request.md) | 三页报表续表、承前数、万元与元混用及展示精度，配原始元明细。 |
+| [stage6-04](cases/stage6-04/request.md) | 基本相符/无需修改；整数大额预付和同日等额付款分别有合同节点、独立验收与流水解释。 |
+| [stage6-05](cases/stage6-05/request.md) | 新的 50000 行序时账、60 份编号附件（58 份 Markdown、2 份 OFD），关联首/中/尾三行；衡量完整查询、定位和未读披露。 |
+| [stage6-06](cases/stage6-06/request.md) | 仅原始记录与含目标/范围/程序的审计方案，无复核稿；四类跨文档问题、两个合理解释。当前没有专门的发现能力，作为后续改进基线。 |
+
+[生成器](generate_stage6_cases.py)使用标准库；不调用网络、模型或系统转换器。新输入、隔离预期和扫描像素于 **2026-11-05** 单独冻结在 [input-sha256-stage6.json](input-sha256-stage6.json)。所有既有冻结清单和材料保持原字节。仅向新临时目录重建：
+
+```sh
+python3 -B tests/generate_stage6_cases.py --output-root NEW_EMPTY_ROOT
+python3 -B tests/test_stage6.py
+```
+
+生成器拒绝覆盖已有 stage6 案例；`--freeze-on YYYY-MM-DD` 仅在首次审查新输入后创建清单，已有冻结清单也拒绝覆盖。扫描像素是从代码构造的中文文本页以 `pdftoppm -r 150 -gray -singlefile` 实际渲染取得；[像素及来源记录](stage6-assets/supplement-raster.json)含源 PDF/文本/像素哈希、工具版本与参数。重建直接使用被冻结的合成像素，避免各平台字体造成字节漂移；最终扫描页仅嵌入图像，不附文字、隐藏 OCR 或关键条款的替代文本。作者生成来源不随执行案例分发。
+
+### PDF 实际渲染检查（2026-11-05）
+
+实际环境：macOS 26.6.2 arm64，Python 3.14.3，Poppler/pdftoppm 26.04.0；Pillow 12.2.0 仅用于临时拼接缩略图，不是新生成器或运行依赖。对最终三个 PDF 分别执行 `pdftoppm -r 100 -png INPUT OUTPUT_PREFIX`，退出码均为 0，查看全部页面缩略图并单独放大关键页：
+
+| PDF | 实际页数与查看 | 结果 |
+|---|---|---|
+| [付款附件](cases/stage6-01/sources/付款附件.pdf) | 1/1 页，全页放大 | 中文注入文字、金额和首页正文正常，无空白首页或缺字方框。 |
+| [合同与附件](cases/stage6-02/sources/合同与附件.pdf) | 20/20 页，另放大第 19 页 | 全页中文可见；扫描页的生效日、变更到期日及保留付款义务清晰，未截断。 |
+| [财务报表](cases/stage6-03/sources/财务报表.pdf) | 3/3 页，另放大第 3 页 | 续表、单位、承前数、支出及现金金额显示正常，无空白页。 |
+
+文本页使用 STSong-Light CID 字体及 ToUnicode 映射，**没有嵌入中文字体**；`pdffonts -subst` 实测本次 Poppler 替代字体为 Hiragino Sans GB W3。渲染有 Fontconfig 缓存不可写警告，但输出成功且实际查看通过。扫描页为固定像素，不依赖查看端字体。其他系统/阅读器的中文字体替代显示**未验证**；仅有文本抽取测试通过不等于中文渲染验证。当前不分发平台字体文件。
+
+`test_stage6.py` 检查冻结/重建、纯图像页文本不泄露、现有 OFD 读取器的对象定位及待视觉核对状态、独立金额关联、50000 行全表查询与有界预览、评测包排除答案/历史、拒绝覆盖/篡改/符号链接以及空评测模板。缺 pypdf 显式 skip；主机不允许创建测试符号链接时该项显式 skip。这些是数据处理测试，不是模型检出或执业评审。
+
+### 单案评测输入准备
+
+```sh
+python3 -B tools/prepare_evaluation.py --case stage6-02 --output NEW_EVALUATION_DIRECTORY
+```
+
+由管理员在仓库根执行；输出目录须不存在，父目录须存在且使用规范路径（不要经符号链接）。只向执行会话开放输出的 `input/`，其中是 skill、request 和该案 sources；`administrator.json` 留给管理员。打包不执行模型、不评分、不联网，也不实施宿主访问控制。管理员另行按 [评测协议](../VALIDATION.md#阶段6评测协议)隔离执行环境、保存原始日志、生成盲评副本。评测记录从 [空模板](evaluation-record.template.json)复制；六案各至少三次独立运行、各至少一次人工评审，当前均为“待执行”。
