@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:synthetic:invoice" currency="CNY"><Line id="A"><Amount>123.4500</Amount></Line><Line id="B"><Amount>0.0100</Amount></Line><Memo>合成材料，非真实业务</Memo></Invoice>

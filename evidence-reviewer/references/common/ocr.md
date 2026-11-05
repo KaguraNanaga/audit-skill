@@ -22,6 +22,8 @@ python3 scripts/review.py search --project /项目 --pattern '合同金额' --pu
 
 省略pages时处理该版本所有已登记page/image单元；指定pages使用正整数物理页序号，单页独立图片为1。无明确物理页绑定的Word XML段落不作为OCR页；多帧图片需要先分别生成并登记单页图，当前命令不把多帧识别结果冒充单页。
 
+OFD先用显式 --ofd-renderer 登记实际物理页图，再对原页单元执行ocr；文本对象单元不替代OCR来源页。没有页图时保存失败尝试，详见[格式说明](formats.md)。
+
 每次调用追加不可变OCRAttempt，保存源版本/单元、页图ID和哈希、引擎版本、参数、超时、成功结果路径/哈希或失败原因。RapidOCR另保存包内模型哈希和运行库版本。重试保留先前尝试并追加新记录。OCR输出为ocr_derived单元，保留derived_from（版本、原单元、物理页、页图ID及哈希）、置信度、像素bbox（原点为页图左上角）及所属attempt_id。结果文件为规范化的OCR块列表，不是原件字节。
 
 search默认包含OCR单元，每条命中带“OCR 派生，仅供定位，需打开原页确认”；仍列出原页未核范围。先打开该版本、该页图并确认所需区域，再在assessment.observations登记原页read_id、artifact_id及实际所见。生成图、识别成功和search命中都不创建viewed记录。

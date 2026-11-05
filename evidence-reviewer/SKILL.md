@@ -4,7 +4,7 @@ description: 为内审、财务报表及专项审计提供证据核查与复核�
 metadata:
   version: "0.4.0-beta.1"
   engine_version: "0.4.0"
-  instructions_revision: "2026-11-05-stage4"
+  instructions_revision: "2026-11-05-stage2"
 ---
 
 # 审计证据核查与复核助手
@@ -54,3 +54,5 @@ metadata:
 扫描材料需要可搜索定位时，读[可选OCR定位层](references/common/ocr.md)；OCR命中需回到匹配原页确认。
 
 大表定位与统计需要保存可追溯筛选结果时，读[表查询](references/common/table-query.md)；生成待填写评估时，读[评估骨架](references/common/scaffold.md)。
+
+OFD/WPS或电子发票XML材料，读[格式读取与来源限制](references/common/formats.md)；OFD只抽文本层，原页确认仍需实际页图。

@@ -1,0 +1,7 @@
+{
+  "ofd_pages": 2,
+  "ofd_text": ["合成金额 123.4500", "仅用于格式测试"],
+  "ofd_object_ids": ["4", "6"],
+  "xml_amounts": ["123.4500", "0.0100"],
+  "pptx_text": ["SYNTHETIC FIRST 123.45", "合成第二页"]
+}

@@ -62,7 +62,7 @@ def diff_versions(work, old, new):
     old_images = [x['sha256'] for x in work['artifacts'] if x['source_version_id'] == old and x['method'] == 'embedded/original image']
     new_images = [x['sha256'] for x in work['artifacts'] if x['source_version_id'] == new and x['method'] == 'embedded/original image']
     fmt = work['records'][new]['format']
-    visual = fmt == '.pdf' or bool(old_images != new_images) or (a == b and fmt in {'.docx', '.doc', '.pdf', '.png', '.jpg', '.jpeg', '.tiff'})
+    visual = fmt in {'.pdf', '.ofd'} or bool(old_images != new_images) or (a == b and fmt in {'.docx', '.doc', '.wps', '.dps', '.pptx', '.pdf', '.png', '.jpg', '.jpeg', '.tiff'})
     return dict(text_changed=a != b, image_bytes_changed=old_images != new_images, visual_check_required=visual,
                 text_diff='\n'.join(difflib.unified_diff(a.splitlines(), b.splitlines(), fromfile=old or 'not provided', tofile=new, lineterm=''))[:30000],
                 diff_limit='First 30000 characters only; read full source units/pages for the actual review')

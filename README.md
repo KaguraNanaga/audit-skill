@@ -83,6 +83,10 @@ Explicit portable export: `python -B evidence-reviewer/scripts/review.py export 
 | Legacy DOC | Optional macOS `textutil`, then LibreOffice → DOCX | Conversion may change pagination/objects; other OSes need another available converter and must keep provenance |
 | XLSX | `openpyxl`; cells, formulas, cached values | Does not recalculate formulas; does not auto-check colors, partial rich text, images, charts, or voucher continuation |
 | Legacy XLS | `soffice` (LibreOffice) then XLSX path | Converted caches and complex objects still need review |
+| OFD | Stdlib ZIP/XML text layer; optional `--ofd-renderer` | Physical page + object position; every page stays pending visual review; no page image without an actual renderer |
+| Generic / invoice XML | Stdlib, namespace-aware indexed element paths | Text and attributes only; no invoice/signature authentication or external entity resolution |
+| WPS / ET / DPS | Optional LibreOffice → DOCX / XLSX / PPTX | Original and derived fingerprints remain separate; native WPS variants require actual sample verification |
+| PPTX | Stdlib text in declared slide order | Slide/object anchors; layout, images, notes, masters and animations remain unverified |
 | Text or mixed PDF | `pypdf` by physical page | Text present ≠ images read; textless pages stay pending visual review; no built-in OCR |
 | PDF page images | Poppler `pdftoppm` | `render` only produces images; you must open them with an image tool and raise resolution when needed |
 | PNG, JPG, JPEG, TIFF, WebP | Register original + fingerprint; host image tool views | No auto OCR; multi-page TIFF needs all relevant frames; other formats need conversion with an audit trail |
@@ -90,6 +94,8 @@ Explicit portable export: `python -B evidence-reviewer/scripts/review.py export 
 | External rule lookup | Host search/open tools; scripts import records | No body, no attachment, or unchecked effectiveness → state limits; search snippets cannot replace originals |
 
 When a dependency is missing or a read fails, keep the failure record, continue with what can be verified, and do not treat a read failure as proof that an event does not exist. Encrypted PDFs without a usable password cannot be read; this package does not bypass passwords. Install required system tools through channels your environment allows; they are not in `requirements.txt`.
+
+OFD/WPS/XML commands, locators and optional rendering are documented in [format support](evidence-reviewer/references/common/formats.md). These add no Python dependencies. OFD rendering requires a local Python adapter reporting `--version` and accepting `INPUT --output_dir DIR --pages N...`; no OFD renderer is bundled. An older project retains its unread units until an explicit `update` with `relation=reparse`; schema and renderer 9 remain unchanged. `table-query` continues to accept CSV/TSV/XLSX source versions.
 
 ## Workflow and minimal example
 

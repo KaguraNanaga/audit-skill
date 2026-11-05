@@ -75,3 +75,7 @@ POSIX 使用 fcntl，Windows 使用 msvcrt 系统锁。独立 `.writer.lock` 不
 ## 阶段 4：表查询与骨架
 
 大表确定性筛选、分组Decimal求和、计数及查询来源引用见[表查询](table-query.md)；真实ID预填、空判断与更新候选说明见[评估骨架](scaffold.md)。新轮用renderer9，旧1–8保持历史字节，查询不自动生成审计结论。
+
+## 阶段 2：OFD、WPS及XML
+
+begin自动按扩展名选择OFD文本层、通用XML或WPS转换读取。OFD/XML/PPTX读取使用标准库；.wps/.et/.dps需要可选LibreOffice。OFD的render显式传 --ofd-renderer，成功页图可供ocr定位，再实际打开并登记原页observations。定位字段、来源链、适配器接口和旧项目显式reparse见[格式说明](formats.md)。schema及renderer9保持，旧项目不自动重新解析。

@@ -4,13 +4,14 @@ import hashlib
 import io
 import itertools
 import json
+import platform
 import re
 import xml.etree.ElementTree as ET
 import zipfile
 from html.parser import HTMLParser
 from pathlib import Path
 
-VERSION = 'readers-1.2'
+VERSION = 'readers-1.3'
 W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
 
 
@@ -191,11 +192,16 @@ def read(path, cache):
     provenance = []
     try:
         suffix = path.suffix.lower()
-        if suffix in {'.doc', '.xls'}:
+        from .converters import TARGETS
+        if suffix in TARGETS:
             from .converters import convert
-            target = 'docx' if suffix == '.doc' else 'xlsx'
+            target = TARGETS[suffix]
             out = convert(path, cache, target, provenance)
-            rows = docx(out, cache) if target == 'docx' else xlsx(out, cache)
+            if target == 'pptx':
+                from .pptx_reader import read as pptx
+                rows = pptx(out, cache)
+            else:
+                rows = docx(out, cache) if target == 'docx' else xlsx(out, cache)
             for row in rows:
                 row['limitations'].append('Locator belongs to converted content; pagination, objects and cached values require review')
         elif suffix == '.docx':
@@ -204,6 +210,23 @@ def read(path, cache):
             rows = xlsx(path, cache)
         elif suffix == '.pdf':
             rows = pdf(path, cache)
+        elif suffix == '.ofd':
+            from .ofd_reader import read as ofd
+            rows = ofd(path, cache)
+            provenance.append({'method': 'OFD XML text layer', 'tool': 'Python stdlib zipfile/XML',
+                               'version': platform.python_version(),
+                               'parameters': {'text_layer_only': True, 'page_order': 'declared document/page order'},
+                               'parent_sha256': digest(path), 'state': 'partial' if any(u['state'] == 'failed' for u in rows) else 'extracted'})
+        elif suffix == '.xml':
+            from .xml_reader import read as xml
+            rows = xml(path, cache)
+            provenance.append({'method': 'generic XML', 'tool': 'Python stdlib XML',
+                               'version': platform.python_version(),
+                               'parameters': {'locator': 'namespace-aware indexed element path', 'external_entities': False},
+                               'parent_sha256': digest(path), 'state': 'extracted'})
+        elif suffix == '.pptx':
+            from .pptx_reader import read as pptx
+            rows = pptx(path, cache)
         elif suffix in ('.png', '.jpg', '.jpeg', '.tif', '.tiff', '.webp'):
             rows = [unit({'unit': 'image', 'image': path.name}, state='manual_check', artifact=str(path), artifact_sha256=digest(path), limitations=['Visual inspection required'])]
         elif suffix in ('.txt', '.md', '.csv', '.tsv', '.srt', '.vtt', '.html', '.htm', '.json'):

@@ -52,6 +52,7 @@ def release_files():
             or (len(rel.parts) == 4 and rel.parts[:3] == ("evidence-reviewer", "scripts", "core") and p.suffix == ".py")
             or (len(rel.parts) == 4 and rel.parts[:2] == ("evidence-reviewer", "references") and rel.parts[2] in {"common", "evidence-review"} and p.suffix == ".md")
             or (rel.parent.as_posix() == "tests/table-fixtures" and p.suffix in {".csv", ".tsv"})
+            or (rel.parent.as_posix() == "tests/format-fixtures" and p.suffix in {".ofd", ".xml", ".pptx"})
             or s == "docs/internals.md"
             or (rel.parent.as_posix() == "tools" and p.suffix == ".py")
             or (rel.parts[0] == "tests" and p.suffix in TEXT_SUFFIXES | {".pdf", ".png", ".xlsx", ".docx"})
@@ -64,7 +65,7 @@ def release_files():
 
 
 def inspected_texts(p):
-    if p.suffix in {".xlsx", ".docx"}:
+    if p.suffix in {".xlsx", ".docx", ".ofd", ".pptx"}:
         with zipfile.ZipFile(p) as z:
             for name in z.namelist():
                 if name.endswith((".xml", ".rels")):
