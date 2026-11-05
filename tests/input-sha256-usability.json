@@ -1,0 +1,8 @@
+{
+  "frozen_on": "2026-11-05",
+  "baseline_manifest_sha256": "873624576f445fbbd773a969c2ad0f070bad2241da6e808df7f53ecb01995ed8",
+  "files": {
+    "tests/usability-fixtures/legacy-7-9.json": "dfbad8022bdfdd63503b22883f6c8f98a53ba7f8e3bb6eba81d83a00e1a89595",
+    "tests/usability-fixtures/project-spec.json": "47a52bbd2d05596b3441aedd4dfcd70475e0b496f1307010f787fb96967ae55d"
+  }
+}

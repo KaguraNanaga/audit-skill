@@ -76,10 +76,12 @@ class PlatformCLI(unittest.TestCase):
         count=0
         for md in (project/'outputs').rglob('*.md'):
             for target in re.findall(r'\]\(<([^<>]+)>\)',md.read_text(encoding='utf-8')):
-                target=unquote(target)
+                target, _, fragment=unquote(target).partition('#')
                 self.assertFalse(Path(target).is_absolute(),target)
                 self.assertNotIn('\\',target)
-                self.assertTrue((md.parent/target).resolve().is_file(),target)
+                resolved=(md.parent/target).resolve()
+                self.assertTrue(resolved.is_file(),target)
+                if fragment:self.assertIn('id="'+fragment+'"',resolved.read_text(encoding='utf-8'))
                 count+=1
         self.assertGreater(count,0)
 

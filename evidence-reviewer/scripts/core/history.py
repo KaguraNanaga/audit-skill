@@ -301,8 +301,8 @@ def finalize(project, work, api):
     exports = L.render(preview, project)
     for name, content in exports.items():
         eid = L.uid()
-        body = dict(id=eid, kind='OutputRecord', run_id=work['run']['id'], output_kind=name.split('.')[0],
-                    path=f"outputs/{work['run']['id']}/{name}", renderer_version=9 if work['run'].get('table_queries_version') else 8 if work['run'].get('derived_units_version') else 7,
+        body = dict(id=eid, kind='OutputRecord', run_id=work['run']['id'], output_kind=name if name.endswith('.jsonl') else name.split('.')[0],
+                    path=f"outputs/{work['run']['id']}/{name}", renderer_version=L.output_renderer(preview),
                     sha256=hashlib.sha256(content.encode()).hexdigest(), source_role='workpaper_or_draft',
                     actual_confirmation_status='unconfirmed', evidence_ids=[x['id'] for x in work['records'].values() if x['kind'] == 'Evidence'])
         append_revision(ledger, body, work['run'], 'Export of this committed run', [])

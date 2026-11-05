@@ -48,3 +48,9 @@ calculations：`{key,purpose,inputs:[],formula,rounding:{places:2,mode:"ROUND_HA
 
 0.3.1增量评估另可提供visual_resolutions，每项含check_id、decision（withdrawn/not_relevant）和reason，明确退出未核视觉事项；仍被主稿、当前判断或本轮答案采用时拒绝。实际补看只需登记匹配版本及范围的observations，程序据此解决。见[原页核查跟进](visual-followup.md)。
 
+
+## 6. 发现型程序与未完成项
+
+没有复核稿时按[发现型流程](../evidence-review/discovery.md)从目标建立tasks。未开始用not_started，关键程序尚未实施用partial；实际已完成但仍不足以判断时可用done/undetermined，basis说明证据边界。范围清楚的样本程序可以done，uncovered_scope仍披露样本外总体。程序完成与问题是否成立分别填写。
+
+已有材料未读、读取失败或工具不可用先写tasks.uncovered_scope、next_step和limitations，具体到来源及页/单元；只有核过已提供相关材料后，才把需要新增的证据列为EvidenceGap。renderer10展示这些登记状态，不自动识别语义矛盾，也不强迫部分成果伪装完成。review_checks保存真实最终检查，现有校验通过只说明结构、引用等通过。

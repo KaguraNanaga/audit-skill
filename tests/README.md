@@ -122,3 +122,11 @@ python3 -B tools/prepare_evaluation.py --case stage6-02 --output NEW_EVALUATION_
 ```
 
 由管理员在仓库根执行；输出目录须不存在，父目录须存在且使用规范路径（不要经符号链接）。只向执行会话开放输出的 `input/`，其中是 skill、request 和该案 sources；`administrator.json` 留给管理员。打包不执行模型、不评分、不联网，也不实施宿主访问控制。管理员另行按 [评测协议](../VALIDATION.md#阶段6评测协议)隔离执行环境、保存原始日志、生成盲评副本。评测记录从 [空模板](evaluation-record.template.json)复制；六案各至少三次独立运行、各至少一次人工评审，当前均为“待执行”。
+
+## 宿主可用性回归（2026-11-05）
+
+新增`test_inspection.py`覆盖目录分页、长Unicode单元续读、范围变化拒绝、显式元数据截断、完整搜索记录/有限预览、历史读取范围、renderer10附录完整性及篡改检查、旧1–9导出保留和显式compact视图。冻结清单为`input-sha256-usability.json`，冻结日期2026-11-05；未修改任何既有冻结输入。
+
+`usability-fixtures/project-spec.json`只保存合成参数，`generate_usability_fixtures.py --output NEW_DIRECTORY`从零生成96份文本、一个12000行合成表及一个长Unicode单元。测试实际生成两遍比较输入哈希，不复制真实业务材料。`usability-fixtures/legacy-7-9.json`由本轮修改前经213文件发布清单验证的包实际生成，基线清单指纹记录在冻结清单中；生成器的--baseline只接受本地且清单验证通过的目录。旧1–6继续使用原冻结夹具。
+
+资源测量与模型行为抽查的实际结果见根目录VALIDATION.md；程序测试不等于审计准确率评测，分发目录不包含真实业务数据。

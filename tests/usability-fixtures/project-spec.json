@@ -1,0 +1,8 @@
+{
+  "kind": "synthetic_usability_load",
+  "documents": 96,
+  "lines_per_document": 80,
+  "table_rows": 12000,
+  "long_text_repeats": 20000,
+  "note": "Synthetic generated inputs only; not a business population or expected audit conclusion"
+}

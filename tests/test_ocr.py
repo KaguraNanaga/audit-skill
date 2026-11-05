@@ -39,6 +39,11 @@ class OCRContract(unittest.TestCase):
         self.assertEqual(u['derived_from']['unit_id'],parent['id'])
         hit=self.call('search','--pattern','123.45','--purpose','Synthetic OCR location')['results'][0]
         self.assertEqual(hit['warning'],derived.WARNING)
+        bounded=self.call('search','--pattern','123.45','--purpose','Bounded OCR locator','--limit','1')
+        self.assertEqual(bounded['results'][0]['warning'],derived.WARNING)
+        fragment=self.call('read','--version',source['version']['id'],'--unit',u['id'])
+        self.assertEqual(fragment['units'][0]['warning'],derived.WARNING)
+        self.assertTrue(self.call('search-results','--search-id',bounded['search_record_id'],'--section','unread_parts')['total'])
         self.assertTrue(self.call('search','--pattern','absent','--purpose','Synthetic missing')['unread_parts'])
 
     def test_ocr_only_check_and_finalize_rejected_then_matching_observation(self):

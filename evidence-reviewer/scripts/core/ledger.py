@@ -33,8 +33,24 @@ def encoded(obj):
     return (json.dumps(obj, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + '\n').encode()
 
 
+def encoded_chunks(obj):
+    """Identical canonical bytes without constructing the whole serialized ledger."""
+    encoder = json.JSONEncoder(ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False)
+    # Buffer small encoder tokens to avoid one syscall/hash update per punctuation.
+    parts, size = [], 0
+    for token in encoder.iterencode(obj):
+        parts.append(token); size += len(token)
+        if size >= 65536:
+            yield ''.join(parts).encode('utf-8')
+            parts, size = [], 0
+    parts.append('\n')
+    yield ''.join(parts).encode('utf-8')
+
+
 def checksum(obj):
-    return hashlib.sha256(encoded(obj)).hexdigest()
+    digest = hashlib.sha256()
+    for chunk in encoded_chunks(obj): digest.update(chunk)
+    return digest.hexdigest()
 
 
 def require(condition, message):
@@ -47,11 +63,11 @@ def nonempty(value):
 
 
 def atomic_json(path, value):
-    from .persistence import atomic_bytes
+    from .persistence import atomic_chunks
     def before_replace():
         if Path(path).name == 'ledger.json' and os.environ.get('EVIDENCE_REVIEWER_FAILPOINT') == 'before_replace':
             os._exit(86)
-    atomic_bytes(path, encoded(value), before_replace=before_replace)
+    atomic_chunks(path, encoded_chunks(value), before_replace=before_replace)
 
 
 # Preserve the existing call interface; the platform implementations live separately.
@@ -493,7 +509,15 @@ def locator_text(locator):
     return '；'.join(f'{names.get(k,k)}={v}' for k, v in locator.items() if k != 'unit' and v is not None)
 
 
+def output_renderer(work):
+    outputs = [x for x in work['records'].values() if x['kind'] == 'OutputRecord' and x.get('run_id') == work['run']['id']]
+    return work.get('_renderer_version', outputs[0].get('renderer_version', 1) if outputs else 10)
+
+
 def render(work, project_path):
+    if output_renderer(work) == 10:
+        from . import reporting_v10
+        return reporting_v10.render(work, project_path)
     # Match JSON round-trip ordering even inside locators/rounding/search dictionaries.
     normalized = json.loads(encoded(work))
     normalized['records'] = {key: normalized['records'][key] for key in work['records']}

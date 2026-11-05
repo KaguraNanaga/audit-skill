@@ -183,15 +183,12 @@ def begin(args):
 
 def inspect(args):
     project = args.project.resolve()
-    ledger_path = project / 'ledger/ledger.json'
-    work = L.thaw(load(ledger_path)) if ledger_path.exists() else load(project / 'staging/working.json')
-    if getattr(args, 'run', None):
-        from core import history
-        work = history.as_of(load(ledger_path), args.run)
-    elif not getattr(args, 'committed', False) and (project / 'staging/working.json').exists():
-        staged = load(project / 'staging/working.json')
-        if staged.get('update_context') and staged['run']['id'] != work['run']['id']:
-            work = get_work(project)
+    from core import inspection
+    work = inspection.load_work(args, sys.modules[__name__])
+    if getattr(args, 'summary', False):
+        L.require(not getattr(args, 'records', False), '--summary cannot be combined with --records; full records remain available through inspect')
+        return inspection.catalog(args, work)
+    L.require(not getattr(args, 'offset', 0) and getattr(args, 'limit', None) is None and not getattr(args, 'snapshot', None), 'Use --summary for catalog pagination; use read for unit pagination')
     versions = args.version or work['run']['source_version_snapshot']
     records = work['records']
     rows = []
@@ -210,6 +207,8 @@ def inspect(args):
 def search(args):
     project = args.project.resolve()
     with L.lock(project):
+        if getattr(args, 'limit', None) is not None:
+            L.require(1 <= args.limit <= 100, 'limit must be 1..100')
         work = get_work(project)
         versions = args.version if args.version is not None else list(dict.fromkeys(work['run'].get('active_source_version_ids', work['run']['source_version_snapshot']) + work['run'].get('changed_version_ids', []) + ([work['project']['selected_main_version']] if work['project'].get('selected_main_version') else [])))
         L.require(set(versions) <= set(work['units']), 'Unknown search version')
@@ -230,6 +229,9 @@ def search(args):
                           tool='review.py search', queried_at=L.now(), results=results, unread_parts=unread,
                           task_ids=[], claim_ids=[], external=False))
         save_work(project, work)
+        if getattr(args, 'limit', None) is not None:
+            from core.inspection import search_page
+            return search_page(args, work, work['records'][record_id], 'explicit' if args.version is not None else 'active_changed_and_selected_main')
         return {'search_record_id': record_id, 'matches': len(results), 'results': results, 'unread_parts': unread, 'searched_version_ids': versions, 'scope_selection': 'explicit' if args.version is not None else 'active_changed_and_selected_main'}
 
 
@@ -410,8 +412,8 @@ def assess(args, commit=False):
         exports = L.render(work, project)
         for name, content in exports.items():
             path = f"outputs/{work['run']['id']}/{name}"
-            L.add(work, 'OutputRecord', dict(run_id=work['run']['id'], output_kind=name.split('.')[0], path=path,
-                       renderer_version=9 if work['run'].get('table_queries_version') else 8 if work['run'].get('derived_units_version') else 7,
+            L.add(work, 'OutputRecord', dict(run_id=work['run']['id'], output_kind=name if name.endswith('.jsonl') else name.split('.')[0], path=path,
+                       renderer_version=L.output_renderer(work),
                        sha256=__import__('hashlib').sha256(content.encode()).hexdigest(), source_role='workpaper_or_draft',
                        actual_confirmation_status='unconfirmed', evidence_ids=[e['id'] for e in work['records'].values() if e['kind'] == 'Evidence']))
         L.validate_records(work)
@@ -440,7 +442,10 @@ def validate(args, export=False):
         work = L.thaw(ledger)
         result = L.validate_records(work)
         check_files(project, work)
-        if export and getattr(args, 'portable', False):
+        compact_requested = export and getattr(args, 'compact', False)
+        if compact_requested:
+            portable_requested = False
+        elif export and getattr(args, 'portable', False):
             if work['run'].get('table_queries_version'):
                 from core.reporting_v9 import export_portable
             elif work['run'].get('derived_units_version'):
@@ -459,6 +464,9 @@ def validate(args, export=False):
         L.require(pointer['files'] == expected, 'Output pointer file list does not match current run')
         if portable_requested:
             return export_portable(project, ledger, sys.modules[__name__])
+        if compact_requested:
+            from core.reporting_v10 import export_compact
+            return export_compact(project, ledger, sys.modules[__name__])
         return dict(result, state='completed', run_id=work['run']['id'], outputs='verified')
 
 
@@ -468,20 +476,36 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--version', action='version', version='Evidence Reviewer package 0.5.0-beta.1; engine 0.4.0. Package version identifies the distributed skill; engine version identifies ledger and validation behavior.')
     sub = parser.add_subparsers(dest='command', required=True)
-    for name in ['begin', 'update', 'annotate-sources', 'inspect', 'search', 'select-main', 'render', 'import-web', 'check-assessment', 'finalize', 'validate', 'export', 'recover', 'ocr', 'table-query', 'scaffold']:
+    for name in ['begin', 'update', 'annotate-sources', 'inspect', 'read', 'search', 'search-results', 'select-main', 'render', 'import-web', 'check-assessment', 'finalize', 'validate', 'export', 'recover', 'ocr', 'table-query', 'scaffold']:
         p = sub.add_parser(name)
         p.add_argument('--project', type=Path, required=True)
-        if name == 'export': p.add_argument('--portable', action='store_true', help='Create renderer-7 views in a new directory; preserve ledger and all historical outputs')
+        if name == 'export':
+            views = p.add_mutually_exclusive_group()
+            views.add_argument('--portable', action='store_true', help='Create legacy portable views in a new directory; preserve ledger and historical outputs')
+            views.add_argument('--compact', action='store_true', help='Create renderer-10 views in a new directory; preserve ledger, historical outputs and current pointer')
         if name == 'annotate-sources': p.add_argument('--annotations', type=Path, required=True)
         if name in {'begin', 'update'}: p.add_argument('--request', type=Path, required=True)
         if name in {'inspect', 'search'}: p.add_argument('--version', action='append')
+        if name in {'inspect', 'read', 'search-results'}:
+            p.add_argument('--run'); p.add_argument('--committed', action='store_true')
+            p.add_argument('--offset', type=int, default=0); p.add_argument('--limit', type=int)
+        if name in {'inspect', 'read'}:
+            p.add_argument('--snapshot', help='Reject continuation if the run/version/unit-ID scope changed')
         if name == 'inspect':
-            p.add_argument('--run'); p.add_argument('--committed', action='store_true'); p.add_argument('--records', action='store_true')
+            p.add_argument('--records', action='store_true'); p.add_argument('--summary', action='store_true')
+        if name == 'read':
+            p.add_argument('--version', required=True); p.add_argument('--unit')
+            p.add_argument('--text-offset', type=int, default=0)
+            p.add_argument('--chars', type=int, default=12000)
+        if name == 'search-results':
+            p.add_argument('--search-id', required=True)
+            p.add_argument('--section', choices=['results', 'unread_parts', 'scope'], default='results')
         if name == 'recover':
             p.add_argument('--abort', action='store_true'); p.add_argument('--reason')
         if name == 'search':
             p.add_argument('--pattern', required=True)
             p.add_argument('--purpose', required=True)
+            p.add_argument('--limit', type=int, help='Bound response only; retain all results in SearchRecord')
         if name == 'select-main':
             p.add_argument('--version', required=True)
             p.add_argument('--reason', required=True)
@@ -511,9 +535,9 @@ def main():
     try:
         from core import updates
         from core import history
-        from core import table_query, scaffold
+        from core import table_query, scaffold, inspection
         from core import ocr
-        commands = {'table-query': lambda a: table_query.run(a, sys.modules[__name__]), 'scaffold': lambda a: scaffold.run(a, sys.modules[__name__]), 'ocr': lambda a: ocr.run(a, sys.modules[__name__]), 'begin': begin, 'inspect': inspect, 'search': search, 'select-main': select_main,
+        commands = {'read': lambda a: inspection.read(a, sys.modules[__name__]), 'search-results': lambda a: inspection.saved_search(a, sys.modules[__name__]), 'table-query': lambda a: table_query.run(a, sys.modules[__name__]), 'scaffold': lambda a: scaffold.run(a, sys.modules[__name__]), 'ocr': lambda a: ocr.run(a, sys.modules[__name__]), 'begin': begin, 'inspect': inspect, 'search': search, 'select-main': select_main,
                     'render': render_source, 'import-web': import_web,
                     'check-assessment': assess, 'finalize': lambda a: assess(a, True),
                     'validate': validate, 'export': lambda a: validate(a, True),

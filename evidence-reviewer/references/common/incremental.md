@@ -95,4 +95,4 @@ python3 /skill/scripts/review.py recover --project /项目
 
 遇到写入冲突，保存工作包和报错，确认其他写入者结束后重试。提交中断先执行recover，检查返回的rolled_back、unrecovered_run_ids、pending_review_run_id和recovery_warnings；未恢复的轮次继续列为未完成。损坏、多分支或无法验证时保留现场并交维护者处理。导出缺失用export重建；放弃未提交工作用recover --abort并填写实际原因。
 
-当前引擎0.4.0读取schema1/2/3；新轮使用renderer9，历史1–8按登记指纹恢复。inspect、validate和普通export保留旧台账与旧输出。需要可移动视图时显式export --portable，写入新目录及派生manifest，保留current指针。显式update/finalize才提交新轮及必要升级；历史轮只显示当时单元和事实。旧Gap缺依据保持原记录并提示复核，实际修订时补真实关闭依据。
+当前引擎0.4.0读取schema1/2/3；新轮使用renderer10，历史1–9按登记指纹恢复。inspect、validate和普通export保留旧台账与旧输出。需要可移动视图时显式export --portable，写入新目录及派生manifest，保留current指针。需要简明正文及完整附录时显式export --compact，新建renderer10视图；见[有界读取与续读](workflow.md#有界读取与续读)。显式update/finalize才提交新轮及必要升级；历史轮只显示当时单元和事实。旧Gap缺依据保持原记录并提示复核，实际修订时补真实关闭依据。

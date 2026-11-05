@@ -32,13 +32,17 @@ def sync_directory(directory):
 
 
 def atomic_bytes(path, content, before_replace=None):
+    return atomic_chunks(path, (content,), before_replace)
+
+
+def atomic_chunks(path, chunks, before_replace=None):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     # A short basename avoids overflowing a near-limit destination component.
     tmp = path.parent / ('.write-' + uuid.uuid4().hex + '.tmp')
     try:
         with tmp.open('xb') as stream:
-            stream.write(content)
+            for chunk in chunks: stream.write(chunk)
             stream.flush()
             os.fsync(stream.fileno())
         if before_replace:

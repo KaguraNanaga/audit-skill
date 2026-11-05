@@ -231,6 +231,7 @@ if __name__ == "__main__":
     import test_scaffold
     import test_formats
     import test_stage6
+    import test_inspection
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(PublicCLI)
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_platform))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_structure))
@@ -239,6 +240,7 @@ if __name__ == "__main__":
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_scaffold))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_formats))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_stage6))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_inspection))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     print(json.dumps({"tests_run": result.testsRun,
                       "passed": result.testsRun - len(result.skipped) - len(result.failures) - len(result.errors),

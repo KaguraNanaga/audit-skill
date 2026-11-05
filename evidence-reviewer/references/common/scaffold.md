@@ -14,3 +14,5 @@ python3 scripts/review.py scaffold --project /项目 --version 实际版本ID --
 JSON预填实际版本、unit ID；已登记查询单元另带真实query_id及result_locator。逐字摘录、概括、读取方法、核验状态和答案由执行会话实际阅读后填写。说明文件另存填写步骤、候选/已选/未纳入数量及实际ID；JSON保持合法语法。未纳入内容继续按任务判断相关性和阅读状态，预览不作为抽样结论。
 
 更新轮次另预填真实change_id、影响候选target_id，筛查结论和决策留空。阅读后按[评估字段](assessment.md)填写实际结果，删除未采用的空对象并补必要任务、计算和观察。未填好的骨架应被check-assessment拒绝；程序不会自动把它提交。查询来源见[表查询](table-query.md)，图像和OCR见[OCR定位](ocr.md)。
+
+发现型任务先按[发现型流程](../evidence-review/discovery.md)制定程序，再根据实际阅读的unit ID定向生成骨架。scaffold默认前20单元不是样本设计，也不会自动创建完整审计方案；tasks、反证关系、合理解释及未完成项由执行会话据实填写。读取采用[有界接口](workflow.md#有界读取与续读)，保留长单元和分页的续读位置。

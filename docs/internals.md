@@ -71,7 +71,7 @@ CI增加固定阶段4提交56095f85541e269d97259d76dddbe3b195a555fa，验证旧s
 
 ## 文档改写移入的实现与历史契约
 
-下列段落保留基线规则；版本号按原段所属阶段理解。当前引擎0.4.0、读取器readers-1.3、新轮renderer9，schema1/2/3可读取。执行者遇到异常按skill中的恢复操作处理，维护者在此核对实现保证。
+下列段落保留基线规则；版本号按原段所属阶段理解。当前引擎0.4.0、读取器readers-1.3、新轮renderer10，schema1/2/3可读取。执行者遇到异常按skill中的恢复操作处理，维护者在此核对实现保证。
 
 ### R0303 · 校验与提交
 
@@ -140,3 +140,15 @@ recover先验证权威台账、结构与引用文件。台账完整时保留它�
 ### R0192 · 中止事务
 
 放弃未提交评估用recover --abort --reason '实际原因'，工作包归档；只移动属于该待办轮的事务，保留已提交索引。恢复也检查旧版误移至取消目录的已提交事务。回退或存在pending_review_run_id时，不能称最新工作全部恢复。
+
+## 有界读取和renderer 10（2026-11-05）
+
+本轮不改变schema 1/2/3、引擎0.4.0、读取器或既有实体字段。新增inspection.py封装只读视图；review.py显式注册read/search-results，inspect --summary与search --limit为可选参数，旧完整调用保留。目录按来源分页，read按单元及正文字符预算分页，元数据预览显式截断。范围token绑定轮次、SourceVersion记录和单元ID序列；命令不会新增ReadRecord或把返回成功登记为已核。搜索仍在原SearchRecord保存完整结果，因此台账内存和搜索存储并未变成常量空间。
+
+L.output_renderer从本轮已有OutputRecord读取版本；没有本轮输出时选择10，测试覆盖旧显式_renderer_version。L.render在旧JSON规范化之前分发10，旧1–9路径保持原排序和格式。新renderer独立构造正文、来源目录和JSONL附录，不调用旧renderer，也不深复制整个工作包。完整记录附录排除OutputRecord以避免循环指纹，输出记录本身保留于权威台账；历史附录按轮次/实体/修订ID排序，保证提交、读回、恢复和重建的字节一致。
+
+所有新附录沿用OutputRecord登记和原子写入、事务、校验机制。新compact视图只在明确export --compact时创建新目录，附派生台账指纹、renderer、参数及各文件哈希；不会改写旧输出或current指针。export --portable仍沿用已有路径。
+
+read和目录的输出有界不等于进程内存有界：get_work/thaw仍整体加载台账，materialize和历史构建仍有副本，所有导出内容仍先在内存形成字符串。资源测量工具仅使用合成输入，报告实际环境、峰值RSS和文件大小；不得据一次样本外推任意材料上限。无resource模块的平台明确记录峰值未验证。
+
+资源抽查发现新增完整附录时提交峰值仍受整台账JSON副本放大，随后将checksum和atomic_json改为分块编码、哈希和写入。encoded_chunks的UTF-8字节与既有encoded逐字节相同（sort_keys、indent、Unicode、末尾换行均保留）；编码失败删除临时文件，旧权威文件不变，fsync/替换/故障注入语义沿用。此修复没有改变台账格式、指纹算法或字段，也没有使整体JSON读取变为流式。旧1–9指纹回归和实际资源复测分别验证兼容与效果。

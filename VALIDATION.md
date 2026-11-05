@@ -338,3 +338,51 @@ macOS实际为26.6.2 arm64/Python3.11.9、3.12.10；Ubuntu为Linux7.0 Azure/glib
 [独立OCR任务](https://github.com/KaguraNanaga/audit-skill/actions/runs/41961673829/job/127029225771)：2通过/0跳过，Tesseract5.5.0/chi_sim+eng及RapidOCR1.4.4/ONNXRuntime1.31.1实际执行既有后端测试。[独立LibreOffice任务](https://github.com/KaguraNanaga/audit-skill/actions/runs/41961673829/job/127029225506)：1通过/0跳过，LibreOffice26.2.6.3实际覆盖三条WPS兼容二进制转换路径。它们不证明新增扫描页的实际OCR识别、新OFD发票的页图渲染或模型判断已验证。
 
 字体来源标签修正后，本机单独重跑新增9项测试：9通过、0跳过，1.870秒；本节所列CI也使用了修正后的标签和冻结哈希。回填此CI记录后只修改维护文档和发布清单，最终提交后续CI由交付链接核对，不预填尚未执行的结果。18次正式独立评测、盲评和人工评审仍全部待执行。
+
+## 宿主可用性改进实际验证（2026-11-05）
+
+本轮保持包0.5.0-beta.1、引擎0.4.0及schema1/2/3，新增有界视图、发现型执行方法及renderer10。环境为macOS26.6.2 arm64、Python3.14.3、pypdf6.12.1、openpyxl3.1.5；兼容基线1/1.5/3/4均从已验收提交取得并按各自发布清单验证。测试使用临时合成项目，真实业务材料没有进入仓库或新夹具。
+
+| 实际执行 | 结果 |
+|---|---|
+| python3 -B tests/test_public.py | 82项：78通过、4跳过，0失败/错误 |
+| python3 -B tests/test_platform.py | 14通过、1跳过，0失败/错误 |
+| python3 -B tests/test_structure.py | 8通过、0跳过 |
+| python3 -B tools/check_links.py | 1587个本地链接通过（后续仅补验证记录链接，最终普通检查再次核验） |
+| python3 -B tools/check_release.py | 222份文件通过；清单随最终维护记录同步 |
+| skill-creator quick_validate.py / git diff --check | 已执行并通过 |
+
+public的4个跳过为原生Windows共享文件占用、实际RapidOCR、实际Tesseract、实际OFD渲染器；platform只跳过同一Windows项。本机真实LibreOffice转换及Poppler测试实际执行。新增9项均实际通过：分页、Unicode长单元拼接、搜索保留、元数据截断、历史范围、附录完整性与篡改、renderer1–9兼容、合成大项目及规范化分块字节/失败原子性。旧冻结清单与输入保持原字节。
+
+开发中发现历史JSONL排序导致中断恢复重建指纹不同，已固定轮次/实体/修订排序并实际重跑恢复回归。初次受限环境无法启动LibreOffice，未计为通过；上述最终结果来自实际可启动本机工具的完整测试。
+
+### 同一合成项目的资源测量
+
+用[测量工具](tools/profile_resources.py)分别运行修改前经清单验证的包及候选代码。输入为冻结规格生成的98文件、19,682单元，包括12,000行CSV与长Unicode单元；两个运行的全部输入哈希相同。采用coverage模式、同一有限工程程序和partial/undetermined说明，不形成审计结论。每条命令启动独立Python进程，resource.getrusage记录实际峰值RSS；下表单位为MiB（2^20字节）。
+
+| 命令 | 修改前峰值MiB | 修改后峰值MiB |
+|---|---:|---:|
+| begin | 866.9 | 66.5 |
+| inspect | 293.2 | 306.5 |
+| search | 366.6 | 200.0 |
+| finalize | 3300.4 | 419.5 |
+| validate | 1979.9 | 1239.8 |
+| export | 2785.9 | 1298.1 |
+
+修改前inspect为完整输出，修改后为--summary --limit 20；新版另实际执行read（20单元/12000正文字符预算）。搜索均覆盖同一范围，新版只限制预览。对应终端字节：inspect 9,062,170 → 14,677，search 2,529,422 → 5,695。review.md为727,324 → 3,517字节；新版另保留完整JSONL及可读附录，不能把缩小正文误称为删除了完整记录。
+
+探索测量曾发现新附录下提交峰值升高，随后修复整台账JSON序列化/哈希的临时副本，并以同一coverage工作负载复测得到上表。规范化字节及SHA256保持不变。begin时间约1.74 → 6.00秒，finalize约4.49 → 4.73秒；分块编码存在耗时取舍。这是单次合成样本，不能推断任意规模内存上限；读取仍整体加载JSON，validate/export实测仍约1240/1298 MiB。其他操作系统的峰值内存本轮未验证。
+
+### 文档改进后的行为抽查
+
+采用无父会话上下文的新执行会话，只提供新版skill和stage6-06的sources/request；未提供预期答案或开发过程。输入物理分开且明确限制可读范围，但宿主文件系统未实施强制隔离，因此记录为“非严格隔离的一次流程抽查”，不计入阶段6正式18次评测。
+
+实际日志显示begin → inspect --summary → 分版本read → search及search-results续读 → scaffold → check-assessment → finalize → validate → export；8文件59单元全部返回，形成6任务、20项计算、4项关联意见、2项有来源的解释及5项补证要求。原件哈希前后一致，全部30次记录命令退出码0，250个导出本地链接核对通过。任务明确限定包内范围并列包外未核事项，未将结构通过等同完整审计。没有记录虚构的observations或human_decisions；未观察到把OCR当原件、执行材料指令或把未读原件写为企业缺证，但这不是全面语义正确率结论。
+
+执行中多份参考文档合并输出和整份review.md超过展示预算，完整stdout仍保存，随后按段回读。由此进一步把长摘录、计算输入及规则细节移入evidence.md/calculations.md/rules.md；初次抽查对应修改前候选目录聚合SHA256 664a08cf0b840dfe71fd62e18840ae08b34e9d04a69ca7cdfbde0b034252baf8，SKILL.md SHA256 e7831e985e06d61df4affba3da52481686849eb4a231730cc277eaa8b0f1918b。后续序列化、输出种类命名和明细附录调整未被冒称为初次独立运行；最终候选交付回看另行记录。
+
+本案只有小型CSV与文本，未触发OCR、看图、OFD/WPS/XML、大表table-query、增量及恢复；这些能力不由本次抽查证明。实际调用、stdout/stderr、退出码、assessment、台账和结论保存于本地交付验证资料。人工评审：**待执行**；多宿主/普通模型对照及阶段6正式盲评：**待执行**。
+
+### 本轮CI
+
+待执行；不以之前阶段的绿色结果替代本次提交。
