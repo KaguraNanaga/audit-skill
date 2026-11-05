@@ -411,4 +411,3 @@ public的4个跳过为原生Windows共享文件占用、实际RapidOCR、实际T
 - [Optional local OCR / Python 3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/42000150729/job/127153029294)：2通过/0跳过，实际执行对应可选工具测试。
 
 本节回填之后只修改RELEASE_NOTES、VALIDATION和发布清单；运行代码、测试和skill不变。最终文档提交的CI另以交付链接核对，不在此预填尚未执行结果。上述测试不代表多宿主准确率、真实OFD渲染或正式人工评审已完成。
-
