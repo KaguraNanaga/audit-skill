@@ -25,7 +25,7 @@
 
 用`read --version V --limit 20 --chars 12000`取得真实单元及read_id；按next中的offset、text_offset和snapshot继续。长单元须读完必要上下文。任务actual_scope写实际读取位置，uncovered_scope写剩余范围；中断前将具体来源、下一游标及下一动作写入工作中的assessment草稿或任务next_step。读取接口本身不替使用者登记“已核”。完整参数见[运行接口](../common/workflow.md#有界读取与续读)。
 
-关键词用`search --limit 10`定位，并用`search-results --search-id ID`继续同次搜索的命中、范围和未读部分。图像/OFD页用render及可用图像工具回看；OCR命中仅供定位。工具不可用时明确文件、页/单元、失败原因和受影响程序，继续其他可核事项。
+关键词用`search --target both --limit 10`定位，并用`search-results --search-id ID`继续同次搜索的命中、范围和未读部分。图像/OFD页用render及可用图像工具回看；OCR命中仅供定位。工具不可用时明确文件、页/单元、失败原因和受影响程序，继续其他可核事项。
 
 进入下一步的条件：拟核事项的材料关系和读取缺口已明确。检索预览不足以证明原件不存在或附件没有例外。
 
@@ -41,7 +41,7 @@
 
 ## 4. 填写评估并区分执行缺口与证据缺口
 
-用`scaffold --version V --unit U`选择实际采用的单元，填写assessment.json；跨文件可重复--version/--unit。增加第1步的tasks及已实施结果，按[评估字段](../common/assessment.md)关联真实记录。先完成可行的补读再决定是否索资：
+用`scaffold --version V --unit U`选择实际采用的单元，填写assessment.json；跨文件可重复--version/--unit。增加第1步的tasks及已实施结果，按[评估字段](../common/assessment.md)关联真实记录。先完成可行的补读再决定是否索资；文件名搜索、候选单元/Evidence/observations及gap_type严格按[候选核查契约](../common/assessment.md#6-发现型程序与未完成项)填写：
 
 | 实际情况 | 写入位置及后续动作 |
 |---|---|
@@ -51,12 +51,12 @@
 | 需要的材料未提供 | EvidenceGap写具体待证事实、已查范围、最小补证；不推断业务未发生 |
 | 材料已核但不足以证明 | 保留已核Evidence，说明哪一命题、条件仍缺支持及最小补证 |
 
-execution_state描述程序实际执行程度，result描述该程序结果。完成一个声明清楚的样本核查可以记done，但不能把样本外总体写为已核；关键步骤仍可做而未做时记partial。已充分检查仍可能undetermined，诚实的部分成果可提交。
+execution_state描述程序实际执行程度，result描述该程序结果。完成一个声明清楚的样本核查可以记done，但不能把样本外总体写为已核；关键步骤仍可做而未做时记partial。已充分检查仍可能undetermined，诚实的部分成果填写delivery的partial状态、实际原因和下一步后可提交。
 
 ## 5. 对照计划后提交和交接
 
 按原目标逐项核对tasks，尤其检查未开始、部分执行、无异常及不适用项。review_checks记录重要结论及重要无异常项的实际复核依据；检查摘要是否保留相同限制。不要把“通过结构校验”作为程序完成依据。
 
-执行`check-assessment → finalize → validate → export`。renderer 10的review.md给出答案、任务、意见和限制，handoff.md指向具体待办；完整搜索、读取及派生来源在附录。已有历史项目需要简明视图时显式`export --compact`，不修改原历史目录。
+执行`check-assessment → finalize → validate → export`。renderer 11的review.md给出答案、任务、意见和限制，handoff.md指向具体待办；完整搜索、读取及派生来源在附录。已有历史项目需要简明视图时显式`export --compact --renderer 11`，不修改原历史目录。
 
 交付说明实际程序、已核事实、需解释或补证事项及未完成范围。后续按next_step继续，新增材料走update；历史结论随证据复核，不能只维护原意见。所有输出供审计人员复核确认。

@@ -2,7 +2,7 @@
 
 先完成阅读和scaffold，再按任务、来源、命题、计算、规则顺序填写；完成实际最终检查后运行check-assessment。
 
-assessment.json是完成实际阅读后的结构化结果，不是要求脚本推理的提示词。顶层允许source_annotations、observations、tasks、claims、evidence、links、gaps、calculations、rules、findings、human_decisions、answers、draft、review_checks、limitations；不用的列表可省略。各对象用唯一key作为本文件别名，所有*_id、*_ids自动解析为UUID；来源ID及unit ID必须用inspect返回值。以下是当前实现契约。
+assessment.json是完成实际阅读后的结构化结果，不是要求脚本推理的提示词。顶层允许source_annotations、observations、tasks、claims、evidence、links、gaps、calculations、rules、findings、human_decisions、answers、draft、review_checks、limitations、delivery；不用的列表可省略。各对象用唯一key作为本文件别名，所有*_id、*_ids自动解析为UUID；来源ID及unit ID必须用inspect返回值。以下是当前实现契约。
 
 ## 1. 填写任务与答案
 
@@ -25,7 +25,7 @@ viewed只记录实际查看，不自动代表所有内容可辨。看过但只�
 - claims：`{key,proposition,type,origin,assessment,basis,task_ids:[],source_locator:null,child_ids:[],parent_id:null}`。type=fact/assumption/normative；origin=source_statement/reviewer_hypothesis/reviewer_opinion。材料陈述须source_locator:{source_version_id,unit_id}；原件比对线索用reviewer_hypothesis。assessment=unassessed/insufficient/partial/supported/refuted。
 - evidence：`{key,source_version_id,unit_id,verbatim_quote,reviewer_summary,reading_method,verification_state,limitations:[]}`。quote是该单元逐字子串，不是概括；可以增加image_region_description，但需真实view记录。verification_state=extracted_only/original_viewed/transcript_unverified/tool_body_read/snippet_only。修订/隐藏层限制保留。
 - links：`{key,evidence_id,claim_id,direction,supported_scope,conditions,sufficiency,limitations,source_usage}`。direction=supports/opposes/context；source_usage=fact_basis/statement_only/context。AI/template/workpaper不能fact_basis证明业务事实；同源材料不计独立票数。充分程度及必要条件用范围明确文字描述，不能用支持方向代替。
-- gaps：`{key,task_ids:[],claim_ids:[],expected_fact,search_record_ids:[],reason_insufficient,minimal_request,state}`。SearchRecord引用真实search/import-web记录；state=open/satisfied/withdrawn。缺证可以没有Evidence，不能虚构证据填表。
+- gaps：`{key,task_ids:[],claim_ids:[],expected_fact,search_record_ids:[],reason_insufficient,minimal_request,state,gap_type,candidate_reviews:[]}`。SearchRecord引用真实search/import-web记录；state=open/satisfied/withdrawn。缺证可以没有Evidence，不能虚构证据填表。
 
 ## 4. 保存Decimal复算
 
@@ -42,7 +42,7 @@ calculations：`{key,purpose,inputs:[],formula,rounding:{places:2,mode:"ROUND_HA
 - draft：`{title,confirmation_status:"unconfirmed",sections:[{heading,text,evidence_ids:[],calculation_ids:[]}]}`。draft模式必需，分事实、分析、待核、确认；不能填不存在签字/日期。
 - human_decisions：仅实际人工审定时建 `{key,target_id,decision,reason,at,actual_actor,source_evidence_id}`，必须可核实外部记录；宿主模型复核不属于人工审定。
 
-新建和明确修订的EvidenceGap使用validation_version=2（程序登记，不接受降级）：satisfied需非空resolution_reason及指向实际Evidence的resolution_evidence_ids；withdrawn需非空resolution_reason，不要求伪造证明。open保留真实搜索与不足说明。
+新建和明确修订的EvidenceGap使用validation_version=3（程序登记，不接受降级）：satisfied需非空resolution_reason及指向实际Evidence的resolution_evidence_ids；withdrawn需非空resolution_reason，不要求伪造证明。open按下节保存目录搜索与候选核查；旧validation_version=1/2仍可读取和validate，不静默补字段。
 
 增量更新另支持screening、impact_review、link_retirements及既有对象id/revision_reason字段，按[incremental.md](incremental.md)使用；初次评估不接受更新操作。既有来源的实质source_annotations应先暂存，直接写入assessment会提示先执行annotate-sources；新来源仍可在评估时分类。
 
@@ -53,4 +53,19 @@ calculations：`{key,purpose,inputs:[],formula,rounding:{places:2,mode:"ROUND_HA
 
 没有复核稿时按[发现型流程](../evidence-review/discovery.md)从目标建立tasks。未开始用not_started，关键程序尚未实施用partial；实际已完成但仍不足以判断时可用done/undetermined，basis说明证据边界。范围清楚的样本程序可以done，uncovered_scope仍披露样本外总体。程序完成与问题是否成立分别填写。
 
-已有材料未读、读取失败或工具不可用先写tasks.uncovered_scope、next_step和limitations，具体到来源及页/单元；只有核过已提供相关材料后，才把需要新增的证据列为EvidenceGap。renderer10展示这些登记状态，不自动识别语义矛盾，也不强迫部分成果伪装完成。review_checks保存真实最终检查，现有校验通过只说明结构、引用等通过。
+先用`search --target names`或`both`检索本轮全部活动来源（不加--version可覆盖活动/变更/主稿），关键词包含事实、材料名称及必要同义词。将真实SearchRecord ID写入search_record_ids。完整命中都要处理，包括分页后部和引用搜索的正文命中；未命中的相关附件也应据实际阅读加入候选。图像正文仍需回原页。
+
+每个candidate_reviews项为`{source_version_id,unit_ids:[],decision,reason,evidence_ids:[]}`。同一来源只列一项，unit_ids写实际核过或待核范围；decision为unread/tool_blocked/irrelevant/insufficient/sufficient。已核三类须列真实原件单元及同源Evidence，候选文件中的全部扫描/失败/未抽取原始单元都须列入范围并有匹配原页的observations，避免只看首页就排除整份附件；OCR和查询派生单元不能代替原件核查。reason写排除理由或仍不足的具体条件，不用“已检查”代替内容。
+
+| gap_type | 使用条件与处理 |
+|---|---|
+| pending_read | 有unread候选，关联not_started/partial任务；继续读已有材料 |
+| tool_blocked | 有tool_blocked候选，关联not_started/partial任务；记录错误及替代路径 |
+| not_provided | 全部命中已处理且均irrelevant，或目录检索无候选；结合相关附件核查后判断仍未提供 |
+| insufficient | 至少一项已核insufficient；说明现有证据尚不能证明哪个条件 |
+
+前两类进入“材料核查待办”，不进入“必要补充材料”；后两类才列具体minimal_request。对外缺口中出现unread、tool_blocked或sufficient会拒绝；sufficient说明该候选已被执行者声明足以证明，须据实关闭缺口或纠正矛盾。搜索范围、关键词或语义判断是否充分仍由执行者负责，校验不会证明不存在。
+
+新引擎有未开始/部分执行任务、待复核对象或待核缺口时，提交须填`delivery:{status:"partial",reason:"实际中断或受限原因",next_step:"具体来源/页/游标及后续动作"}`。没有这些项可省略，或按实情填status=recorded_scope_complete；未登记任务时不能声明完成。done/undetermined可保留已核仍不足的补证，不等于审计意见。review_checks保存真实最终检查。
+
+check-assessment、finalize和validate返回review_state（partial/recorded_scope_complete/not_assessed）；finalize及已提交validate另返回commit_state=completed，既有state=completed仍表示事务提交。renderer11在正文/交接首部显示阶段性原因和下一步；完成只覆盖已登记程序，脚本无法验证遗漏的程序或虚构的阅读行为。

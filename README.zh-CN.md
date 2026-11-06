@@ -12,7 +12,7 @@
 
 English documentation: [README.md](README.md).
 
-公开包版本：**0.5.0-beta.1**。台账引擎为 **0.4.0**；两者分别表示发布包和运行引擎版本。变更见 [RELEASE_NOTES.md](RELEASE_NOTES.md)，实际测试及未验证范围见 [VALIDATION.md](VALIDATION.md)。
+公开包版本：**0.5.0-beta.2**。台账引擎为 **0.4.1**；两者分别表示发布包和运行引擎版本。变更见 [RELEASE_NOTES.md](RELEASE_NOTES.md)，实际测试及未验证范围见 [VALIDATION.md](VALIDATION.md)。
 
 ## 适用范围
 
@@ -114,7 +114,7 @@ $env:EVIDENCE_REVIEWER_SOFFICE = 'C:/Program Files/LibreOffice/program/soffice.c
 
 缺依赖或无法读取时保留失败记录，继续可验证部分，不把读取失败解释为事项不存在。加密 PDF 无可用密码时无法完成读取；本包不绕过密码。必要的系统工具请通过本机认可的软件渠道安装，它们不包含在 `requirements.txt` 中。
 
-OFD/WPS/XML的命令、定位和可选渲染见[格式说明](evidence-reviewer/references/common/formats.md)，不增加Python依赖。OFD渲染需要本地Python适配器，支持 `--version` 及 `输入 --output_dir 目录 --pages 页码...`；本包不附渲染器。旧项目保留原未读单元，显式 `update` 并指定 `relation=reparse` 才重新解析；schema保持，新轮使用renderer10。table-query继续接受CSV/TSV/XLSX原件版本。
+OFD/WPS/XML的命令、定位和可选渲染见[格式说明](evidence-reviewer/references/common/formats.md)，不增加Python依赖。OFD渲染需要本地Python适配器，支持 `--version` 及 `输入 --output_dir 目录 --pages 页码...`；本包不附渲染器。旧项目保留原未读单元，显式 `update` 并指定 `relation=reparse` 才重新解析；schema保持，新轮使用renderer11。table-query继续接受CSV/TSV/XLSX原件版本。
 
 ## 流程与最小示例
 
@@ -152,7 +152,7 @@ DEMO_PY
 
 需要台账时，按 [workflow.md](evidence-reviewer/references/common/workflow.md) 准备请求并执行 `begin`、`inspect`、`scaffold`；依据本轮实际阅读填写真实ID骨架，再执行 `check-assessment`、`finalize`、`validate` 和 `export`。`begin` 仅准备快照与读取单元，不输出自动审计结论；`assessment.json` 的事实和判断必须由实际核查形成。项目必须位于材料目录之外，并使用新的项目路径。
 
-台账输出包括 `review.md`、`handoff.md`、`changes.md`、`history.md`，编制任务另有 `draft.md`。用户交付仍可集中为一张核查表或可替换段落。项目内部保留原件快照、缓存和历史，均按敏感审计材料管理；新轮 renderer 10 使用相对链接，整个项目可移动。旧 renderer 1–9 导出保留原字节；显式 `export --compact` 在新目录生成renderer10简明视图，`export --portable` 保留原兼容行为。
+台账输出包括 `review.md`、`handoff.md`、`changes.md`、`history.md`，编制任务另有 `draft.md`。用户交付仍可集中为一张核查表或可替换段落。项目内部保留原件快照、缓存和历史，均按敏感审计材料管理；新轮 renderer 11 使用相对链接，整个项目可移动。旧 renderer 1–10 导出保留原字节；显式 `export --compact --renderer 11` 在新目录生成renderer11简明视图，`export --portable` 保留原兼容行为。
 
 ## 验证与反馈
 
@@ -181,13 +181,13 @@ python3 -B tools/check_release.py
 
 ## 可选OCR定位（阶段3）
 
-引擎0.4.0支持离线Tesseract（本地chi_sim+eng）或可选RapidOCR；依赖单独放在requirements-ocr.txt，Python3.13及以上使用Tesseract。先登记/渲染原页，再执行ocr；识别不改变原页未核状态。安装与命令见[OCR定位层](evidence-reviewer/references/common/ocr.md)。包版本为0.5.0-beta.1，台账引擎保持0.4.0。阶段6新增案例与评测协议，模型和人工评测仍待执行。
+引擎0.4.1支持离线Tesseract（本地chi_sim+eng）或可选RapidOCR；依赖单独放在requirements-ocr.txt，Python3.13及以上使用Tesseract。先登记/渲染原页，再执行ocr；识别不改变原页未核状态。安装与命令见[OCR定位层](evidence-reviewer/references/common/ocr.md)。包版本为0.5.0-beta.2，台账引擎保持0.4.1。阶段6新增案例与评测协议，模型和人工评测仍待执行。
 
 阶段6新增六组独立冻结的合成案例：PDF指令注入与单位主张的区分、后部纯图像补充协议、续表与万元/元口径、有合理解释干扰项的真阴性、50000行及60份附件（含两张OFD发票），以及四类跨文档问题的原始材料发现基线。当前版本没有专门的发现能力。[案例构造和实际PDF渲染检查](tests/README.md)及[评测协议](VALIDATION.md#阶段6评测协议)分别记录；计划中的18次独立运行、盲评及每案至少一次人工评审均待执行，数据处理测试不代表审计准确率。
 
 ## 大表查询与评估骨架（阶段4）
 
-新增table-query与scaffold，支持CSV/TSV/XLSX筛选、Decimal分组求和及计数，完整结果保存在项目内，终端仅显示摘要/前N行。骨架只预填真实ID，判断留空，不覆盖已有评估。见[表查询](evidence-reviewer/references/common/table-query.md)及[评估骨架](evidence-reviewer/references/common/scaffold.md)。不新增依赖；新轮renderer10，旧1–9保持。
+新增table-query与scaffold，支持CSV/TSV/XLSX筛选、Decimal分组求和及计数，完整结果保存在项目内，终端仅显示摘要/前N行。骨架只预填真实ID，判断留空，不覆盖已有评估。见[表查询](evidence-reviewer/references/common/table-query.md)及[评估骨架](evidence-reviewer/references/common/scaffold.md)。不新增依赖；新轮renderer11，旧1–10保持。
 
 ## 发现型核查与有界读取
 
@@ -195,4 +195,12 @@ python3 -B tools/check_release.py
 
 材料较多时先用`inspect --summary --limit 20`取目录，再用`read --version V --limit 20 --chars 12000`分段读取；按返回游标续读。`search --limit 10`只限制预览，完整搜索记录保留，可用`search-results --search-id ID`继续。旧完整inspect/search调用仍可用；新接口限制返回规模，JSON台账整体内存上限尚无保证。
 
-新轮采用renderer10：review.md呈现结果、任务、意见和限制，handoff.md指向待办，完整读取、搜索和派生来源保存在有指纹的附录。旧renderer1–9不改字节；需要新视图时显式`export --compact`生成独立目录。工具不可用、未读及尚未实施的程序分别披露；模型或宿主兼容性仅按[实际验证记录](VALIDATION.md)陈述，不保证所有智能体都能正确完成核查。
+新轮采用renderer11：review.md呈现结果、任务、意见和限制，handoff.md指向待办，完整读取、搜索和派生来源保存在有指纹的附录。旧renderer1–10不改字节；需要新视图时显式`export --compact --renderer 11`生成独立目录。工具不可用、未读及尚未实施的程序分别披露；模型或宿主兼容性仅按[实际验证记录](VALIDATION.md)陈述，不保证所有智能体都能正确完成核查。
+
+## 提出缺证前先核已有材料
+
+用`search --target both --limit 10`检索文件名和正文；names只查文件名，默认text保留旧行为。文件名命中是定位线索，不是已读记录。新开放缺口须覆盖本轮全部来源目录，并逐项处理完整搜索命中，包括分页后部。已核候选引用真实原件单元和Evidence；扫描、失败及未抽取单元还须有匹配原页的observations。
+
+pending_read与tool_blocked进入执行待办；not_provided与insufficient通过候选核查后才列对外补证。部分成果须填写delivery的实际原因和具体下一步。commit_state=completed表示台账提交成功，review_state另报部分完成、已登记程序完成或未评估；均不确认审计结论。具体见[字段契约](evidence-reviewer/references/common/assessment.md#6-发现型程序与未完成项)。
+
+引擎0.4.1增加带版本的字段，兼容旧schema1/2/3；旧项目原样validate。显式`export --compact --renderer 11`生成独立新视图，普通`export --compact`仍默认renderer10。关键词是否充分、相关附件是否核全及证据判断仍依赖宿主；结构门槛无法识别虚构阅读，也不保证发现全部问题。本轮未处理大表空表头及金额规范化失败。

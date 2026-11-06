@@ -95,4 +95,6 @@ python3 /skill/scripts/review.py recover --project /项目
 
 遇到写入冲突，保存工作包和报错，确认其他写入者结束后重试。提交中断先执行recover，检查返回的rolled_back、unrecovered_run_ids、pending_review_run_id和recovery_warnings；未恢复的轮次继续列为未完成。损坏、多分支或无法验证时保留现场并交维护者处理。导出缺失用export重建；放弃未提交工作用recover --abort并填写实际原因。
 
-当前引擎0.4.0读取schema1/2/3；新轮使用renderer10，历史1–9按登记指纹恢复。inspect、validate和普通export保留旧台账与旧输出。需要可移动视图时显式export --portable，写入新目录及派生manifest，保留current指针。需要简明正文及完整附录时显式export --compact，新建renderer10视图；见[有界读取与续读](workflow.md#有界读取与续读)。显式update/finalize才提交新轮及必要升级；历史轮只显示当时单元和事实。旧Gap缺依据保持原记录并提示复核，实际修订时补真实关闭依据。
+当前引擎0.4.1读取schema1/2/3；新轮使用renderer11，历史1–10按登记指纹恢复。inspect、validate和普通export保留旧台账与旧输出。需要可移动视图时显式export --portable，写入新目录及派生manifest，保留current指针。需要简明正文及完整附录时显式export --compact，默认新建renderer10视图，加`--renderer 11`才使用新显示；见[有界读取与续读](workflow.md#有界读取与续读)。显式update/finalize才提交新轮及必要升级；历史轮只显示当时单元和事实。旧Gap缺依据保持原记录并提示复核，实际修订时补真实关闭依据。
+
+新修订缺口按[候选核查契约](assessment.md#6-发现型程序与未完成项)处理：新增来源使旧搜索覆盖不足时重查，已有v3开放缺口同样要求覆盖当前来源；仍未读则明确改为执行待办。旧v1/v2缺口原样保留时，新视图将其列为待核，部分交付须给实际原因及下一步。仅update/finalize提交新字段，不静默改写历史。

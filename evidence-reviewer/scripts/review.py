@@ -120,7 +120,7 @@ def begin(args):
             'excluded_roots': request.get('exclusions', []), 'selected_main_version': None,
             'main_selection_reason': None, 'output_request': output},
             'run': {'id': run_id, 'previous_run_id': None, 'started_at': L.now(), 'finished_at': None,
-                    'state': 'staging', 'table_queries_version': 1, 'derived_units_version': 1, 'validation_version': 2, 'visual_checks_version': 1, 'visual_checks': [], 'source_version_snapshot': [], 'selected_main_version': None,
+                    'state': 'staging', 'gap_checks_version': 1, 'table_queries_version': 1, 'derived_units_version': 1, 'validation_version': 2, 'visual_checks_version': 1, 'visual_checks': [], 'source_version_snapshot': [], 'selected_main_version': None,
                     'skill_version': L.VERSION, 'tool_versions': {'reader': readers.VERSION, 'python': sys.version},
                     'model_version': request.get('model_version'), 'errors': [], 'unfinished_steps': ['session_review', 'validation', 'commit', 'export']},
             'records': {}, 'units': {}, 'artifacts': [], 'excluded': [], 'outcome': None}
@@ -210,24 +210,30 @@ def search(args):
         if getattr(args, 'limit', None) is not None:
             L.require(1 <= args.limit <= 100, 'limit must be 1..100')
         work = get_work(project)
-        versions = args.version if args.version is not None else list(dict.fromkeys(work['run'].get('active_source_version_ids', work['run']['source_version_snapshot']) + work['run'].get('changed_version_ids', []) + ([work['project']['selected_main_version']] if work['project'].get('selected_main_version') else [])))
+        from core import gap_checks
+        versions = args.version if args.version is not None else gap_checks.search_scope(work)
         L.require(set(versions) <= set(work['units']), 'Unknown search version')
         pattern = re.compile(args.pattern, re.IGNORECASE)
-        results, unread = [], []
+        target = getattr(args, 'target', 'text')
+        results = gap_checks.filename_hits(work, versions, args.pattern) if target in {'names', 'both'} else []
+        unread = []
         for vid in versions:
             for u in work['units'][vid]:
                 if u['state'] in {'unread', 'failed', 'manual_check'}:
                     unread.append({'source_version_id': vid, 'unit_id': u['id'], 'state': u['state']})
-                if pattern.search(u['text']):
+                if target != 'names' and pattern.search(u['text']):
                     hit = {'source_version_id': vid, 'unit_id': u['id'], 'locator': u['locator'], 'text': u['text']}
                     from core.derived import is_ocr, WARNING
                     if is_ocr(u): hit.update(warning=WARNING, derived_from=u['derived_from'])
                     results.append(hit)
         record_id = L.add(work, 'SearchRecord', dict(purpose=args.purpose, material_snapshot=list(versions),
                           scope=[work['records'][work['records'][v]['source_id']]['actual_name'] for v in versions],
-                          keywords=[args.pattern], method='regex over extracted text and OCR locator units; images and unextracted units are not searched',
+                          keywords=[args.pattern], method=('regex over source filenames; filename hits are locators only' if target == 'names' else
+                              ('regex over source filenames plus extracted text and OCR locator units' if target == 'both' else
+                               'regex over extracted text and OCR locator units') + '; image content and unextracted units are not searched'),
                           tool='review.py search', queried_at=L.now(), results=results, unread_parts=unread,
-                          task_ids=[], claim_ids=[], external=False))
+                          task_ids=[], claim_ids=[], external=False,
+                          search_target=target, search_version=2))
         save_work(project, work)
         if getattr(args, 'limit', None) is not None:
             from core.inspection import search_page
@@ -376,6 +382,7 @@ def import_web(args):
 
 
 def assess(args, commit=False):
+    from core.gap_checks import summary
     project = args.project.resolve()
     assessment = load(args.assessment)
     with L.lock(project):
@@ -389,8 +396,8 @@ def assess(args, commit=False):
                 check_files(project, work)
                 validation = L.validate_records(work)
                 if not commit:
-                    return dict(validation, state='validated_candidate', persisted=False,
-                                pending_ids=work['run']['update_summary']['pending_ids'],
+                    return dict(validation, state='validated_candidate', persisted=False, **summary(work),
+                                impact_pending_ids=work['run']['update_summary']['pending_ids'],
                                 calculations=[{'id': r['id'], 'purpose': r['purpose'], 'result': r['result']} for r in work['records'].values() if r['kind'] == 'Calculation'])
                 from core import history
                 return history.finalize(project, work, sys.modules[__name__])
@@ -399,14 +406,14 @@ def assess(args, commit=False):
             if ledger.get('schema_version') in {'evidence-ledger-2.0', 'evidence-ledger-3.0'}: write_exports(project, ledger)
             check_files(project, work, check_outputs=True)
             L.validate_records(work)
-            return {'state': 'completed', 'idempotent_replay': True, 'run_id': work['run']['id']}
+            return {'state': 'completed', 'commit_state': 'completed', 'idempotent_replay': True, 'run_id': work['run']['id'], **summary(work)}
         work = get_work(project)
         L.require(work['run']['state'] == 'staging', 'Begin failed; preserve logs and start a new project after remedy')
         work = L.materialize(work, assessment, project=project)
         check_files(project, work)
         validation = L.validate_records(work)
         if not commit:
-            return dict(validation, state='validated_candidate', persisted=False,
+            return dict(validation, state='validated_candidate', persisted=False, **summary(work),
                         calculations=[{'purpose': r['purpose'], 'result': r['result']} for r in work['records'].values() if r['kind'] == 'Calculation'])
         work['run'].update(state='completed', finished_at=L.now(), unfinished_steps=[])
         exports = L.render(work, project)
@@ -426,7 +433,7 @@ def assess(args, commit=False):
         write_exports(project, ledger)
         receipt = load(project / 'staging/transaction.json'); receipt['state'] = 'completed'
         L.atomic_json(project / 'staging/transaction.json', receipt)
-        return {'state': 'completed', 'run_id': work['run']['id'], 'ledger': str(ledger_path),
+        return {'state': 'completed', 'commit_state': 'completed', **summary(work), 'run_id': work['run']['id'], 'ledger': str(ledger_path),
                 'review': str(project / 'outputs' / work['run']['id'] / 'review.md'), **validation}
 
 
@@ -443,6 +450,7 @@ def validate(args, export=False):
         result = L.validate_records(work)
         check_files(project, work)
         compact_requested = export and getattr(args, 'compact', False)
+        L.require(not getattr(args, 'renderer', None) or compact_requested, '--renderer requires explicit export --compact')
         if compact_requested:
             portable_requested = False
         elif export and getattr(args, 'portable', False):
@@ -465,24 +473,29 @@ def validate(args, export=False):
         if portable_requested:
             return export_portable(project, ledger, sys.modules[__name__])
         if compact_requested:
-            from core.reporting_v10 import export_compact
+            if getattr(args, 'renderer', None) == 11:
+                from core.reporting_v11 import export_compact
+            else:
+                from core.reporting_v10 import export_compact
             return export_compact(project, ledger, sys.modules[__name__])
-        return dict(result, state='completed', run_id=work['run']['id'], outputs='verified')
+        from core.gap_checks import summary
+        return dict(result, state='completed', commit_state='completed', run_id=work['run']['id'], outputs='verified', **summary(work))
 
 
 def main():
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, 'reconfigure'): stream.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--version', action='version', version='Evidence Reviewer package 0.5.0-beta.1; engine 0.4.0. Package version identifies the distributed skill; engine version identifies ledger and validation behavior.')
+    parser.add_argument('--version', action='version', version='Evidence Reviewer package 0.5.0-beta.2; engine 0.4.1. Package version identifies the distributed skill; engine version identifies ledger and validation behavior.')
     sub = parser.add_subparsers(dest='command', required=True)
     for name in ['begin', 'update', 'annotate-sources', 'inspect', 'read', 'search', 'search-results', 'select-main', 'render', 'import-web', 'check-assessment', 'finalize', 'validate', 'export', 'recover', 'ocr', 'table-query', 'scaffold']:
         p = sub.add_parser(name)
         p.add_argument('--project', type=Path, required=True)
         if name == 'export':
+            p.add_argument('--renderer', type=int, choices=[10, 11], help='Explicit compact view renderer; default remains 10 for compatibility')
             views = p.add_mutually_exclusive_group()
             views.add_argument('--portable', action='store_true', help='Create legacy portable views in a new directory; preserve ledger and historical outputs')
-            views.add_argument('--compact', action='store_true', help='Create renderer-10 views in a new directory; preserve ledger, historical outputs and current pointer')
+            views.add_argument('--compact', action='store_true', help='Create new views (default renderer 10; --renderer 11 opts in); preserve ledger, historical outputs and current pointer')
         if name == 'annotate-sources': p.add_argument('--annotations', type=Path, required=True)
         if name in {'begin', 'update'}: p.add_argument('--request', type=Path, required=True)
         if name in {'inspect', 'search'}: p.add_argument('--version', action='append')
@@ -503,6 +516,7 @@ def main():
         if name == 'recover':
             p.add_argument('--abort', action='store_true'); p.add_argument('--reason')
         if name == 'search':
+            p.add_argument('--target', choices=['text', 'names', 'both'], default='text', help='Search extracted text, source names or both; filename hits are locator-only candidates')
             p.add_argument('--pattern', required=True)
             p.add_argument('--purpose', required=True)
             p.add_argument('--limit', type=int, help='Bound response only; retain all results in SearchRecord')

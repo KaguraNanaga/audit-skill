@@ -132,7 +132,7 @@ class Inspection(unittest.TestCase):
         directory=self.project/'outputs'/result['run_id']
         before={p.name:p.read_bytes() for p in directory.iterdir()}
         raw=json.loads((self.project/'ledger/ledger.json').read_text(encoding='utf-8'));work=L.thaw(raw)
-        self.assertEqual({r['renderer_version'] for r in work['records'].values() if r['kind']=='OutputRecord'},{10})
+        self.assertEqual({r['renderer_version'] for r in work['records'].values() if r['kind']=='OutputRecord'},{11})
         self.assertEqual(sum(r.get('output_kind')=='history' for r in work['records'].values()),1)
         rows=[json.loads(line) for line in (directory/'records.jsonl').read_text(encoding='utf-8').splitlines()]
         self.assertEqual(rows,[r for r in work['records'].values() if r['kind']!='OutputRecord'])

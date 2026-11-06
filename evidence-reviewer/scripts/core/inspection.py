@@ -134,7 +134,10 @@ def search_page(args, work, record, scope_selection=None):
     offset, limit = bounds(args, len(values))
     rows = []
     for index, hit in enumerate(values[offset:offset + limit], offset):
-        if section == 'results' and isinstance(hit, dict) and 'unit_id' in hit:
+        if section == 'results' and isinstance(hit, dict) and hit.get('match_type') == 'filename':
+            rows.append(dict(index=index, source_version_id=hit['source_version_id'], match_type='filename',
+                             actual_name=preview(hit['actual_name'], 512), warning=hit['warning']))
+        elif section == 'results' and isinstance(hit, dict) and 'unit_id' in hit:
             import re
             text = hit.get('text', '')
             match = re.search(record['keywords'][0], text, re.IGNORECASE)

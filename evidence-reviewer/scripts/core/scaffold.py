@@ -36,6 +36,8 @@ def run(args,api):
 3. 填写答案和真实依据。需要任务、主张、计算时按assessment接口新增；判断字段留空的骨架应被check-assessment拒绝。
 4. 更新轮次逐项填写screening、impact_review；实际延期和不受影响理由由执行会话判断。
 5. 选择范围及截断见下表。未纳入骨架不表示不相关、已读或无需核查。
+6. 提出缺证前用 search --target names（或 both）检索目录，按 gap_type/candidate_reviews 逐项处理完整候选，包括分页后部；未读与工具受阻进入执行待办。
+7. 尚有 partial/not_started 或待核缺口时继续可行核查；需阶段性保存则填写 delivery:{status:"partial",reason:"实际原因",next_step:"具体来源与续办动作"}。不能把台账提交成功当作业务完成。
 
 '''
         instructions+=f'候选单元：{len(candidates)}；预填：{len(selected)}；未纳入：{len(candidates)-len(selected)}。\n\n'

@@ -12,7 +12,7 @@ from pathlib import Path
 from urllib.parse import quote as urlquote
 
 SCHEMA = 'evidence-ledger-1.0'
-VERSION = '0.4.0'
+VERSION = '0.4.1'
 MODES = {'query', 'verify', 'coverage', 'draft', 'review', 'rules'}
 KINDS = {'Source', 'SourceVersion', 'ReadRecord', 'ReviewTask', 'Claim', 'Evidence', 'EvidenceLink',
          'SearchRecord', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding', 'HumanDecision', 'OutputRecord', 'OCRAttempt', 'TableQuery'}
@@ -128,7 +128,7 @@ def materialize(work, assessment, project=None):
         return updates.materialize(work, assessment, project=project)
     work = copy.deepcopy(work)
     allowed = {'source_annotations', 'observations', 'tasks', 'claims', 'evidence', 'links', 'gaps',
-               'calculations', 'rules', 'findings', 'human_decisions', 'answers', 'draft', 'review_checks', 'limitations', 'link_retirements'}
+               'calculations', 'rules', 'findings', 'human_decisions', 'answers', 'draft', 'review_checks', 'limitations', 'link_retirements', 'delivery'}
     require(isinstance(assessment, dict) and not set(assessment) - allowed, 'Unknown assessment fields')
     require(not assessment.get('link_retirements') or work.get('_applying_update'), 'Link retirement requires an update')
     mapping = {}
@@ -195,7 +195,7 @@ def materialize(work, assessment, project=None):
             if kind == 'Evidence': bind(work, body, project)
             if kind == 'Calculation':
                 for inp in body.get('inputs', []): bind(work, inp, project)
-            if kind == 'EvidenceGap': body['validation_version'] = 2
+            if kind == 'EvidenceGap': body['validation_version'] = 3 if work['run'].get('gap_checks_version') else 2
             if kind == 'Calculation':
                 values = {}
                 for item in body.get('inputs', []):
@@ -217,6 +217,7 @@ def materialize(work, assessment, project=None):
                 add(work, kind, body, mapping[raw['key']])
     work['outcome'] = {k: resolve(assessment.get(k, default)) for k, default in
                        [('answers', []), ('draft', None), ('review_checks', []), ('limitations', [])]}
+    if 'delivery' in assessment: work['outcome']['delivery'] = resolve(assessment['delivery'])
     work['assessment_sha256'] = checksum(assessment)
     if work.get('_applying_update'): work['_assessment_aliases'] = mapping
     return work
@@ -454,6 +455,8 @@ def validate_records(work):
     validate_queries(work)
     from .visual_checks import validate as validate_visual_checks
     validate_visual_checks(work)
+    from .gap_checks import validate as validate_gaps
+    validate_gaps(work)
     from .reporting import reading_coverage
     coverage = reading_coverage(work)
     return {'entities': len(records), 'calculations': sum(r['kind'] == 'Calculation' for r in records.values()), 'errors': [],
@@ -511,10 +514,13 @@ def locator_text(locator):
 
 def output_renderer(work):
     outputs = [x for x in work['records'].values() if x['kind'] == 'OutputRecord' and x.get('run_id') == work['run']['id']]
-    return work.get('_renderer_version', outputs[0].get('renderer_version', 1) if outputs else 10)
+    return work.get('_renderer_version', outputs[0].get('renderer_version', 1) if outputs else (11 if work['run'].get('gap_checks_version') else 10))
 
 
 def render(work, project_path):
+    if output_renderer(work) == 11:
+        from . import reporting_v11
+        return reporting_v11.render(work, project_path)
     if output_renderer(work) == 10:
         from . import reporting_v10
         return reporting_v10.render(work, project_path)

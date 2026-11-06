@@ -156,7 +156,8 @@ class PublicCLI(unittest.TestCase):
             source_version_ids=[source["version"]["id"]], record_ids=[])],
             "answers": [dict(text="Image registered; approval status remains unverified.", evidence_ids=[],
                              calculation_ids=[], rule_ids=[], task_ids=["pending"])],
-            "limitations": ["No actual visual reading in this automated test"]}
+            "limitations": ["No actual visual reading in this automated test"],
+            "delivery": dict(status="partial", reason="Visual review not performed in this structural test", next_step="Open original image")}
         final = self.finalize(assessment)
         self.assertTrue(final["structure_valid"])
         self.assertNotEqual(final["material_reading"], "complete")
@@ -232,6 +233,7 @@ if __name__ == "__main__":
     import test_formats
     import test_stage6
     import test_inspection
+    import test_gap_checks
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(PublicCLI)
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_platform))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_structure))
@@ -241,6 +243,7 @@ if __name__ == "__main__":
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_formats))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_stage6))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_inspection))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_gap_checks))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     print(json.dumps({"tests_run": result.testsRun,
                       "passed": result.testsRun - len(result.skipped) - len(result.failures) - len(result.errors),

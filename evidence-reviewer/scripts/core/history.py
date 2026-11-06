@@ -154,6 +154,8 @@ def thaw(ledger):
         if i: validate_visual(aswork, current_checks(as_of(ledger, order[i-1])))
         if i and ledger['runs'][order[i-1]].get('visual_checks_version'):
             L.require(run.get('visual_checks_version') == 1, 'Visual check persistence cannot be disabled')
+        if i and ledger['runs'][order[i-1]].get('gap_checks_version'):
+            L.require(run.get('gap_checks_version') == 1, 'Gap checks cannot be disabled in subsequent runs')
         retirements = run.get('evidence_link_retirements', [])
         if i:
             previous_retirements = ledger['runs'][order[i-1]].get('evidence_link_retirements', [])
@@ -327,7 +329,8 @@ def finalize(project, work, api):
     L.atomic_json(project / 'staging/transaction.json', receipt)
     L.atomic_json(project / 'ledger/transactions' / (work['run']['id'] + '.json'), receipt)
     work['run']['state'] = 'completed'; api.save_work(project, work)
-    return dict(state='completed', run_id=work['run']['id'], review=str(project / 'outputs' / work['run']['id'] / 'review.md'), errors=[])
+    from .gap_checks import summary
+    return dict(state='completed', commit_state='completed', run_id=work['run']['id'], review=str(project / 'outputs' / work['run']['id'] / 'review.md'), errors=[], **summary(work))
 
 
 def recover(args, api):

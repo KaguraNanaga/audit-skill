@@ -152,3 +152,15 @@ L.output_renderer从本轮已有OutputRecord读取版本；没有本轮输出时
 read和目录的输出有界不等于进程内存有界：get_work/thaw仍整体加载台账，materialize和历史构建仍有副本，所有导出内容仍先在内存形成字符串。资源测量工具仅使用合成输入，报告实际环境、峰值RSS和文件大小；不得据一次样本外推任意材料上限。无resource模块的平台明确记录峰值未验证。
 
 资源抽查发现新增完整附录时提交峰值仍受整台账JSON副本放大，随后将checksum和atomic_json改为分块编码、哈希和写入。encoded_chunks的UTF-8字节与既有encoded逐字节相同（sort_keys、indent、Unicode、末尾换行均保留）；编码失败删除临时文件，旧权威文件不变，fsync/替换/故障注入语义沿用。此修复没有改变台账格式、指纹算法或字段，也没有使整体JSON读取变为流式。旧1–9指纹回归和实际资源复测分别验证兼容与效果。
+
+## 候选核查与阶段性交付（2026-11-06）
+
+包0.5.0-beta.2、引擎0.4.1。台账仍使用schema3容器，新增run.gap_checks_version=1、新SearchRecord.search_version=2/search_target、新建或修订EvidenceGap.validation_version=3及gap_type/candidate_reviews、outcome.delivery。旧schema1/2/3及Gap1/2原样读取/validate，不静默增加记录或修改历史。history.thaw检查已启用的轮次不能在后轮关闭检查。新轮旗标在begin/update创建，不由assessment降级。
+
+core/gap_checks.py只检查搜索覆盖、完整命中对应候选、引用范围、原页观察、类型一致性及显式部分交付。目录命中按不可变来源版本名称和检索式重新计算；limit只限终端，不缩小候选。引用的本地文字命中也纳入候选。新增活动版本使旧目录搜索不足时拒绝当前v3缺口；执行者可重查并把尚未核的候选明确记为待办。旧Gap仍可保留，renderer11将尚未按新规则复核的旧缺口列待核，避免将旧断言转成新的对外请求。
+
+新单元索引只保存candidate_reviews所需单元。校验不判断关键词选择、语义充分性、候选关联是否合理或用户是否真的调用过图像工具；这依赖宿主日志与人工复核，不作自动审计判断。observations须对应原件单元和已登记图像，OCR/查询派生单元不能替代。
+
+事务state=completed保持原语义；新增commit_state及独立review_state，pending_items覆盖未完成任务、待复核对象和执行缺口。显式partial还需reason/next_step，不能用“提交成功”替代业务完成。初次和增量候选均走同一校验，历史输出重建仍用当时记录的renderer。
+
+renderer11独立于冻结的1–10；新轮使用11，旧轮不自动变化。export --compact默认10以保留旧用法；--renderer 11显式创建新目录及派生manifest，不更改权威台账、历史目录和current指针。正文分执行待办与必要补证，完整候选保存于records.jsonl。新增测试和固定renderer10样本验证这条边界。

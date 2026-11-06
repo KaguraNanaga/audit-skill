@@ -1,6 +1,6 @@
 # 公开版验证记录
 
-当前发布包：0.5.0-beta.1；引擎：0.4.0。下文保留各阶段实际环境和结果，旧版本数字是当时的历史记录。阶段6正式模型评测与人工评审尚未执行。
+当前发布包：0.5.0-beta.2；引擎：0.4.1。下文保留各阶段实际环境和结果，旧版本数字是当时的历史记录。阶段6正式模型评测与人工评审尚未执行。
 
 包版本：0.4.0-beta.1；运行引擎：0.3.1；执行日期：2026-10-13。
 
@@ -411,3 +411,26 @@ public的4个跳过为原生Windows共享文件占用、实际RapidOCR、实际T
 - [Optional local OCR / Python 3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/42000150729/job/127153029294)：2通过/0跳过，实际执行对应可选工具测试。
 
 本节回填之后只修改RELEASE_NOTES、VALIDATION和发布清单；运行代码、测试和skill不变。最终文档提交的CI另以交付链接核对，不在此预填尚未执行结果。上述测试不代表多宿主准确率、真实OFD渲染或正式人工评审已完成。
+
+## 候选核查与部分交付修复（2026-11-06）
+
+本轮实现文件名/正文搜索、EvidenceGap候选核查、原页观察门槛、部分交付字段和renderer11。基线为此前已验收提交cb202048ba4c59c0c0d95f9b443be4c8009a6cea的222文件发布清单；修改前副本逐文件哈希验证通过。未改真实业务项目/旧报告；公开回归使用代码从零构造的合成输入。
+
+实际环境：macOS26.6.2 arm64、Python3.14.3、pypdf6.12.1、openpyxl3.1.5、pdftoppm26.04.0。本机真实LibreOffice转换已执行；OCR后端和实际OFD渲染器缺失。Pillow12.2.0仅临时读取合成扫描像素，未新增运行依赖。
+
+| 实际执行 | 结果 |
+|---|---|
+| python3 -B tests/test_public.py | 93项：89通过、4跳过，0失败/错误 |
+| python3 -B tests/test_gap_checks.py | 11通过、0跳过 |
+| python3 -B tests/test_platform.py | 14通过、1跳过，0失败/错误 |
+| python3 -B tests/test_structure.py | 8通过、0跳过 |
+| python3 -B tools/check_links.py | 1597个本地链接有效；后续文档回填后再次核验 |
+| python3 -B tools/check_release.py | 231份文件通过，清单同步；后续记录更新时再次核验 |
+| skill-creator quick_validate.py、git diff --check | 实际执行并通过 |
+| 既有冻结输入及历史renderer文件对照 | 全部与修改前字节相同 |
+
+public的4个skip分别为原生Windows共享占用测试、实际RapidOCR、实际Tesseract、实际OFD渲染；platform只跳过同一Windows项。skip未计为通过。首次受限环境的LibreOffice启动失败未计为通过；放开本机工具启动限制后，完整回归中的实际DOC/XLS及三条WPS兼容转换测试均通过。旧引擎兼容测试使用旧assessment格式，新引擎测试显式填写delivery，未修改旧基线。
+
+11项新回归检查了：纯扫描PDF的正文零命中与文件名定位；分页后部候选和完整范围；组合搜索的正文候选；无关候选与真实无候选；已核不足及足够证明的矛盾；扫描原页观察和只核首页的拒绝；工具受阻与阶段性原因/下一步；新增材料使旧搜索失效；renderer10旧账不重新导出仍validate、原字节重建及显式11视图。含模拟observations的测试只证明引用/状态门槛，不代表实际视觉业务复核。中文PDF已实际渲染查看，过程及边界见[测试说明](tests/README.md#候选核查与部分交付回归2026-11-06)。
+
+新版本多宿主/弱模型行为对照、真实业务结论准确率、独立人工评审：**待执行**。脚本不能证明关键词充分、附件语义核全或阅读记录真实。大表空表头/金额规范化问题未在本轮修改。三系统CI将在实际执行后追加结果，不预填成功。

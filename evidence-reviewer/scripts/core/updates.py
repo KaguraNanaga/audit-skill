@@ -112,7 +112,7 @@ def start(args, api):
         run_id = L.uid(); work['_known_run_ids'].append(run_id)
         work['run'] = dict(id=run_id, previous_run_id=base['latest_run_id'], event_id=request['event_id'],
                            input_fingerprint=fingerprint, reason=request['reason'], started_at=L.now(), finished_at=None,
-                           state='staging', table_queries_version=1, derived_units_version=1, validation_version=2, visual_checks_version=1, visual_checks=visual_checks, evidence_link_retirements=copy.deepcopy(original['run'].get('evidence_link_retirements', [])),
+                           state='staging', gap_checks_version=1, table_queries_version=1, derived_units_version=1, validation_version=2, visual_checks_version=1, visual_checks=visual_checks, evidence_link_retirements=copy.deepcopy(original['run'].get('evidence_link_retirements', [])),
                            intake_issues=copy.deepcopy(original['run'].get('intake_issues', original['run'].get('errors', []))), source_version_snapshot=list(original['units']), active_source_version_ids=active_versions(original),
                            selected_main_version=original['project'].get('selected_main_version'), scope_revision=original['project']['scope_revision'],
                            skill_version=L.VERSION, tool_versions=dict(original['run']['tool_versions'], reader=readers.VERSION, python=sys.version), model_version=None,

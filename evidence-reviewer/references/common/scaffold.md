@@ -16,3 +16,5 @@ JSON预填实际版本、unit ID；已登记查询单元另带真实query_id及r
 更新轮次另预填真实change_id、影响候选target_id，筛查结论和决策留空。阅读后按[评估字段](assessment.md)填写实际结果，删除未采用的空对象并补必要任务、计算和观察。未填好的骨架应被check-assessment拒绝；程序不会自动把它提交。查询来源见[表查询](table-query.md)，图像和OCR见[OCR定位](ocr.md)。
 
 发现型任务先按[发现型流程](../evidence-review/discovery.md)制定程序，再根据实际阅读的unit ID定向生成骨架。scaffold默认前20单元不是样本设计，也不会自动创建完整审计方案；tasks、反证关系、合理解释及未完成项由执行会话据实填写。读取采用[有界接口](workflow.md#有界读取与续读)，保留长单元和分页的续读位置。
+
+骨架说明会提醒目录搜索、候选核查和阶段性交付字段；它不会自动认定某份材料无关、创建假observations或填写完成状态。缺口与delivery按[评估字段](assessment.md#6-发现型程序与未完成项)据实补齐。

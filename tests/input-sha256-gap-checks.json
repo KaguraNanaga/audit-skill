@@ -1,0 +1,10 @@
+{
+  "frozen_on": "2026-11-06",
+  "files": {
+    "tests/gap-fixtures/legacy-10.json": "780fceb78a0c74c8b2f07c0db45e176ad0d79ee8741791050d03e244e968e3a8",
+    "tests/gap-fixtures/receipt-raster.json": "f2d7861a9167b0159dde04f73698a5fd44ca60ff6caae6859bc820980f5e1b01",
+    "tests/gap-fixtures/sources/合成 凭证目录.txt": "9835aec52779e054cc7b642ed14a5d34ed7e82000c75d04ea112990f45ad88c5",
+    "tests/gap-fixtures/sources/合成 收款凭证.pdf": "10ac87fa0a8edbe6310c51514203f7f44aa8252559759dec1dc8949a3322ac5a"
+  },
+  "baseline_manifest_sha256": "febc14b67b71c46df6253ac4905b90d420bd166827969a7bdd49b92933264cdd"
+}

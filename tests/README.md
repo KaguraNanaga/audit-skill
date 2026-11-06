@@ -130,3 +130,11 @@ python3 -B tools/prepare_evaluation.py --case stage6-02 --output NEW_EVALUATION_
 `usability-fixtures/project-spec.json`只保存合成参数，`generate_usability_fixtures.py --output NEW_DIRECTORY`从零生成96份文本、一个12000行合成表及一个长Unicode单元。测试实际生成两遍比较输入哈希，不复制真实业务材料。`usability-fixtures/legacy-7-9.json`由本轮修改前经213文件发布清单验证的包实际生成，基线清单指纹记录在冻结清单中；生成器的--baseline只接受本地且清单验证通过的目录。旧1–6继续使用原冻结夹具。
 
 资源测量与模型行为抽查的实际结果见根目录VALIDATION.md；程序测试不等于审计准确率评测，分发目录不包含真实业务数据。
+
+## 候选核查与部分交付回归（2026-11-06）
+
+新增test_gap_checks.py，覆盖正文零命中/文件名命中、分页后部候选、全活动范围、正文候选、扫描件真实观察及只核首页的拒绝门槛、无关候选和真实无命中、已核不足、矛盾的足够证明、工具受阻、阶段性交付、新来源与旧搜索、旧renderer10验证/重建/显式新视图字节保持。候选观察测试采用明确标注的结构模拟，不声称模型实际完成审计阅读。旧1–9兼容仍由既有回归验证。
+
+[input-sha256-gap-checks.json](input-sha256-gap-checks.json)单独冻结2026-11-06的新输入，含[纯图像收款凭证](<gap-fixtures/sources/合成 收款凭证.pdf>)、合成目录、像素来源及renderer10旧账。金额、主体、编号均从代码构造，无真实业务数据；未修改既有冻结输入。generate_gap_fixtures.py --output NEW_DIRECTORY按固定像素重建，--baseline VERIFIED_DIRECTORY --output NEW_JSON使用已核发布清单的修改前代码生成旧账及输出；基线清单哈希保存在新冻结清单中。
+
+PDF实际渲染检查：macOS26.6.2 arm64、Python3.14.3、pdftoppm26.04.0。先从代码文本生成临时PDF并以-singlefile -scale-to 1500 -gray取得固定像素（Pillow12.2.0仅临时读取像素，无新增运行依赖）；最终纯图像PDF再次用-singlefile -scale-to 1500 -png渲染，实际打开1/1页检查。中文标题、合成声明、合同号、12345.67金额、2040-03-15日期均清晰，无空白首页或缺字方框。Fontconfig出现缓存不可写警告，渲染退出码0且图像实际查看通过。原文本PDF未嵌入字体；发布的扫描PDF是固定像素且无文字层。其他系统的视觉渲染本轮未验证。

@@ -12,7 +12,7 @@ Synthetic materials, not real business. Verbatim excerpt from the actual generat
 
 中文说明见 [README.zh-CN.md](README.zh-CN.md)。
 
-Public package version: **0.5.0-beta.1**. The ledger engine is **0.4.0**; the two numbers identify the release package and the runtime engine separately. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for changes and [VALIDATION.md](VALIDATION.md) for what was actually tested and what was not.
+Public package version: **0.5.0-beta.2**. The ledger engine is **0.4.1**; the two numbers identify the release package and the runtime engine separately. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for changes and [VALIDATION.md](VALIDATION.md) for what was actually tested and what was not.
 
 ## Scope
 
@@ -114,7 +114,7 @@ Explicit portable export: `python -B evidence-reviewer/scripts/review.py export 
 
 When a dependency is missing or a read fails, keep the failure record, continue with what can be verified, and do not treat a read failure as proof that an event does not exist. Encrypted PDFs without a usable password cannot be read; this package does not bypass passwords. Install required system tools through channels your environment allows; they are not in `requirements.txt`.
 
-OFD/WPS/XML commands, locators and optional rendering are documented in [format support](evidence-reviewer/references/common/formats.md). These add no Python dependencies. OFD rendering requires a local Python adapter reporting `--version` and accepting `INPUT --output_dir DIR --pages N...`; no OFD renderer is bundled. An older project retains its unread units until an explicit `update` with `relation=reparse`; schema remains unchanged and new runs use renderer 10. `table-query` continues to accept CSV/TSV/XLSX source versions.
+OFD/WPS/XML commands, locators and optional rendering are documented in [format support](evidence-reviewer/references/common/formats.md). These add no Python dependencies. OFD rendering requires a local Python adapter reporting `--version` and accepting `INPUT --output_dir DIR --pages N...`; no OFD renderer is bundled. An older project retains its unread units until an explicit `update` with `relation=reparse`; schema remains unchanged and new runs use renderer 11. `table-query` continues to accept CSV/TSV/XLSX source versions.
 
 ## Workflow and minimal example
 
@@ -152,7 +152,7 @@ Then have the host continue verification using `tests/cases/financial/request.md
 
 When a ledger is needed, prepare the request per [workflow.md](evidence-reviewer/references/common/workflow.md) and run `begin`, `inspect`, and `scaffold`; fill the real-ID template from this round's actual reading, then `check-assessment`, `finalize`, `validate`, and `export`. `begin` only prepares snapshots and read units—it does not emit automatic audit conclusions; facts and judgments in `assessment.json` must come from actual review. Keep the project **outside** the materials directory and use a new project path.
 
-Ledger outputs include `review.md`, `handoff.md`, `changes.md`, and `history.md`; draft tasks also get `draft.md`. User deliverables can still be one verification table or replaceable paragraphs. Inside the project, original snapshots, caches, and history are sensitive audit material; renderer 10 uses relative links and supports moving the whole project. Renderers 1–9 keep their historical bytes; explicit `export --compact` produces renderer-10 views in a new directory, while `export --portable` keeps its existing behavior.
+Ledger outputs include `review.md`, `handoff.md`, `changes.md`, and `history.md`; draft tasks also get `draft.md`. User deliverables can still be one verification table or replaceable paragraphs. Inside the project, original snapshots, caches, and history are sensitive audit material; renderer 11 uses relative links and supports moving the whole project. Renderers 1–10 keep their historical bytes; explicit `export --compact --renderer 11` produces renderer-11 views in a new directory, while `export --portable` keeps its existing behavior.
 
 ## Testing and validation
 
@@ -181,13 +181,13 @@ To upgrade an existing install, back up the old evidence-reviewer folder and rep
 
 ## Optional OCR locators (stage 3)
 
-Engine 0.4.0 supports local Tesseract with chi_sim+eng and optional RapidOCR via requirements-ocr.txt. Python 3.13+ uses Tesseract. OCR adds searchable derived locators; it never marks original pages viewed. See the [OCR contract](evidence-reviewer/references/common/ocr.md). Package version is 0.5.0-beta.1; the ledger engine remains 0.4.0. Stage 6 adds evaluation fixtures and a protocol, not completed model or human evaluation.
+Engine 0.4.1 supports local Tesseract with chi_sim+eng and optional RapidOCR via requirements-ocr.txt. Python 3.13+ uses Tesseract. OCR adds searchable derived locators; it never marks original pages viewed. See the [OCR contract](evidence-reviewer/references/common/ocr.md). Package version is 0.5.0-beta.2; the ledger engine remains 0.4.1. Stage 6 adds evaluation fixtures and a protocol, not completed model or human evaluation.
 
 Stage 6 adds six independently frozen synthetic cases: PDF instruction injection versus management assertions, a late image-only supplement, continued financial tables with unit differences, a true negative with explained distractors, a 50,000-row ledger with 60 attachments including two OFD invoices, and a raw-material discovery baseline with four cross-document issues. There is no dedicated discovery capability in this version. See [case construction and actual PDF rendering checks](tests/README.md) and the [evaluation protocol](VALIDATION.md#阶段6评测协议). All 18 planned independent runs, blind scoring and at least one human review per case remain pending. Tests of data handling do not establish audit accuracy.
 
 ## Table queries and assessment scaffolds (stage 4)
 
-New table-query and scaffold commands provide local CSV/TSV/XLSX filters, exact Decimal sums/counts, saved result provenance and real-ID templates with blank judgments. Terminal previews are bounded. See [table queries](evidence-reviewer/references/common/table-query.md) and [scaffolds](evidence-reviewer/references/common/scaffold.md). No new dependencies; renderer10 preserves historical renderers1–9.
+New table-query and scaffold commands provide local CSV/TSV/XLSX filters, exact Decimal sums/counts, saved result provenance and real-ID templates with blank judgments. Terminal previews are bounded. See [table queries](evidence-reviewer/references/common/table-query.md) and [scaffolds](evidence-reviewer/references/common/scaffold.md). No new dependencies; renderer11 preserves historical renderers1–10.
 
 ## Discovery workflow and bounded reading
 
@@ -195,4 +195,12 @@ For requests without a draft report, the [discovery workflow](evidence-reviewer/
 
 For large collections, start with `inspect --summary --limit 20`, then `read --version V --limit 20 --chars 12000` and follow the returned continuation. `search --limit 10` bounds the preview while retaining every match; `search-results --search-id ID` continues that saved search. Existing full inspect/search calls remain available. Output bounds do not bound the memory required to load the JSON ledger.
 
-New runs use renderer 10: review.md contains results, procedures, findings and limitations; handoff.md points to outstanding work. Complete reading, search and derived-source records are retained in fingerprinted appendices. Renderers 1–9 preserve historical bytes. Explicit `export --compact` creates a separate new view. Unavailable tools, unread material and unperformed procedures remain distinct; host compatibility is limited to [actual validation](VALIDATION.md), not a guarantee for every agent.
+New runs use renderer 11: review.md contains results, procedures, findings and limitations; handoff.md points to outstanding work. Complete reading, search and derived-source records are retained in fingerprinted appendices. Renderers 1–10 preserve historical bytes. Explicit `export --compact --renderer 11` creates a separate new view. Unavailable tools, unread material and unperformed procedures remain distinct; host compatibility is limited to [actual validation](VALIDATION.md), not a guarantee for every agent.
+
+## Candidate review before requesting missing evidence
+
+Use `search --target both --limit 10` to locate filenames and extracted text; `names` searches filenames only and the default `text` preserves existing behavior. Filename hits are locators, not proof that a page was read. New open gaps require full current filename-search coverage and dispositions for all saved candidates, including later result pages. Reviewed candidates cite original units and Evidence; scanned or unread units also require matching page observations.
+
+`pending_read` and `tool_blocked` appear as execution to-dos; `not_provided` and `insufficient` become external requests only after the candidate checks. Partial work requires `delivery` with an actual reason and concrete next step. `commit_state=completed` means the ledger was committed; `review_state` separately reports partial, completed registered procedures, or unassessed scope. Neither confirms an audit conclusion. See the [field contract](evidence-reviewer/references/common/assessment.md#6-发现型程序与未完成项).
+
+Engine 0.4.1 adds versioned fields while retaining schema 1/2/3 compatibility. Old projects validate without edits; explicit `export --compact --renderer 11` writes a separate view, while plain `export --compact` still defaults to renderer 10. A host must still choose meaningful search terms, review related attachments and make evidence judgments. These structural gates do not detect fabricated reading or guarantee discovery. This change does not address empty table headers or amount-normalization failures.

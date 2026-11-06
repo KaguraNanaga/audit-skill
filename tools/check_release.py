@@ -113,7 +113,7 @@ def main():
     current = hashes(files)
     if args.write_manifest:
         MANIFEST.write_text(json.dumps({
-            "package_version": "0.5.0-beta.1", "engine_version": "0.4.0",
+            "package_version": "0.5.0-beta.2", "engine_version": "0.4.1",
             "scope": "Selected public package; manifest excludes itself. No authenticity or audit-accuracy guarantee.",
             "files": current,
         }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

@@ -34,7 +34,7 @@ class Formats(unittest.TestCase):
         return type('Args', (), dict(project=self.project, version=source['version']['id'], pages=None, ofd_renderer=None, **kwargs))()
 
     def pending(self, source):
-        return dict(tasks=[dict(key='pending', objective='Synthetic page review remains pending', procedure='Automated structure check only',
+        return dict(delivery=dict(status="partial",reason="Synthetic visual review remains pending",next_step="Open original page"),tasks=[dict(key='pending', objective='Synthetic page review remains pending', procedure='Automated structure check only',
             population='synthetic package', sampling_basis='all pages registered', actual_scope='XML text layer', uncovered_scope='page appearance',
             execution_state='partial', result='undetermined', basis='No actual visual review in this test', next_step='Open actual page rendering',
             source_version_ids=[source['version']['id']], record_ids=[])], answers=[dict(text='Synthetic page appearance remains unverified', task_ids=['pending'])])
@@ -262,7 +262,7 @@ class Formats(unittest.TestCase):
         old('begin', '--request', request)
         source = old('inspect')['sources'][0]
         self.assertEqual(source['units'][0]['state'], 'unread')
-        first = old('finalize', '--assessment', self.json_file('a.json', self.pending(source)))
+        first = old('finalize', '--assessment', self.json_file('a.json', {k:v for k,v in self.pending(source).items() if k!='delivery'}))
         authority = (self.project / 'ledger/ledger.json').read_bytes()
         exports = {p: p.read_bytes() for p in (self.project / 'outputs' / first['run_id']).glob('*.md')}
         self.call('validate')

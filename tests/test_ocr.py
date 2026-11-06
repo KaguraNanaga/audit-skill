@@ -24,7 +24,7 @@ class OCRContract(unittest.TestCase):
             return ocr.run(self.args(source),review)
 
     def pending(self,source):
-        return dict(tasks=[dict(key='pending',objective='Synthetic image remains unviewed',procedure='Structural test only',population='one image',sampling_basis='all',actual_scope='registered',uncovered_scope='visual facts',execution_state='partial',result='undetermined',basis='No actual human or model visual review in this test',next_step='Open original image',source_version_ids=[source['version']['id']],record_ids=[])],answers=[dict(text='Synthetic original remains unverified',task_ids=['pending'])])
+        return dict(delivery=dict(status="partial",reason="Synthetic visual review remains pending",next_step="Open original page"),tasks=[dict(key='pending',objective='Synthetic image remains unviewed',procedure='Structural test only',population='one image',sampling_basis='all',actual_scope='registered',uncovered_scope='visual facts',execution_state='partial',result='undetermined',basis='No actual human or model visual review in this test',next_step='Open original image',source_version_ids=[source['version']['id']],record_ids=[])],answers=[dict(text='Synthetic original remains unverified',task_ids=['pending'])])
 
     def test_frozen_fixture(self):
         manifest=json.loads((ROOT/'tests/input-sha256-stage3.json').read_text())
@@ -133,13 +133,13 @@ class OCRContract(unittest.TestCase):
             p=subprocess.run([sys.executable,'-B',str(Path(baseline)/'evidence-reviewer/scripts/review.py'),command,'--project',str(self.project),*map(str,args)],capture_output=True,text=True,encoding='utf-8',check=True)
             return json.loads(p.stdout)
         old('begin','--request',request);source=old('inspect')['sources'][0]
-        old('finalize','--assessment',self.json_file('old.json',self.pending(source)))
+        old('finalize','--assessment',self.json_file('old.json',{k:v for k,v in self.pending(source).items() if k!='delivery'}))
         for i in range(2):
             base=json.loads((self.project/'ledger/ledger.json').read_text());self.assertEqual(base['schema_version'],'evidence-ledger-'+str(i+1)+'.0')
             before=(self.project/'ledger/ledger.json').read_bytes();self.call('validate');self.assertEqual(before,(self.project/'ledger/ledger.json').read_bytes())
             if not i:
                 old('update','--request',self.json_file('old-update.json',dict(event_id='old-update',reason='Synthetic old schema2')))
-                old('finalize','--assessment',self.json_file('old2.json',dict(self.pending(source),screening=[],impact_review=[])))
+                old('finalize','--assessment',self.json_file('old2.json',dict({k:v for k,v in self.pending(source).items() if k!='delivery'},screening=[],impact_review=[])))
         self.call('update','--request',self.json_file('u.json',dict(event_id='add-ocr',reason='Explicit new-schema OCR update')))
         self.simulate(source)
         self.finalize(dict(self.pending(source),screening=[],impact_review=[]));self.call('validate')
