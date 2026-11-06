@@ -193,6 +193,16 @@ class GapChecks(unittest.TestCase):
         self.assertNotIn('Legacy synthetic request',view.split('## 必要补充材料')[1])
         self.assertEqual(authority,{rel:(self.project/rel).read_bytes() for rel in authority})
         self.call('validate')
+        self.call('update','--request',self.json_file('legacy-update.json',dict(event_id='legacy-gap',reason='Continue synthetic old gap review')))
+        work=review.get_work(self.project);gap=next(r for r in work['records'].values() if r['kind']=='EvidenceGap')
+        a=dict(answers=[dict(text='Synthetic old gap still pending candidate review',task_ids=gap['task_ids'])],screening=[],impact_review=[],
+               review_checks=[dict(target_id=gap['task_ids'][0],reason='Check remaining legacy scope',result='Partial; no new business conclusion')],
+               delivery=dict(status='partial',reason='Old gap not rechecked yet',next_step='Search filenames and review original candidates'))
+        self.assertEqual(self.finalize(a)['review_state'],'partial')
+        self.assertEqual(self.call('validate')['review_state'],'partial')
+        current=L.thaw(json.loads((self.project/'ledger/ledger.json').read_text(encoding='utf-8')))
+        self.assertEqual((current['records'][gap['id']]['validation_version'],L.output_renderer(current)),(2,11))
+        self.assertEqual({r:authority[r] for r in f['files']},{r:(self.project/r).read_bytes() for r in f['files']})
 
 
 if __name__=='__main__':unittest.main(verbosity=2)

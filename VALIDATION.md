@@ -433,4 +433,25 @@ public的4个skip分别为原生Windows共享占用测试、实际RapidOCR、实
 
 11项新回归检查了：纯扫描PDF的正文零命中与文件名定位；分页后部候选和完整范围；组合搜索的正文候选；无关候选与真实无候选；已核不足及足够证明的矛盾；扫描原页观察和只核首页的拒绝；工具受阻与阶段性原因/下一步；新增材料使旧搜索失效；renderer10旧账不重新导出仍validate、原字节重建及显式11视图。含模拟observations的测试只证明引用/状态门槛，不代表实际视觉业务复核。中文PDF已实际渲染查看，过程及边界见[测试说明](tests/README.md#候选核查与部分交付回归2026-11-06)。
 
-新版本多宿主/弱模型行为对照、真实业务结论准确率、独立人工评审：**待执行**。脚本不能证明关键词充分、附件语义核全或阅读记录真实。大表空表头/金额规范化问题未在本轮修改。三系统CI将在实际执行后追加结果，不预填成功。
+新版本多宿主/弱模型行为对照、真实业务结论准确率、独立人工评审：**待执行**。脚本不能证明关键词充分、附件语义核全或阅读记录真实。大表空表头/金额规范化问题未在本轮修改。三系统CI实际结果如下。
+
+### 本轮三系统CI实际结果
+
+[运行42136427939](https://github.com/KaguraNanaga/audit-skill/actions/runs/42136427939)，提交40c1d3234c1bcd389322fb6ed0a7c3a7ffd175ec，9个任务全部成功。已读取各任务实际日志，skip不计入通过。
+
+| 任务 | public通过/跳过 | platform通过/跳过 | structure通过/跳过 |
+|---|---|---|---|
+| [macOS / Python3.11](https://github.com/KaguraNanaga/audit-skill/actions/runs/42136427939/job/127625636198) | 86/7 | 12/3 | 8/0 |
+| [macOS / Python3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/42136427939/job/127625636126) | 86/7 | 12/3 | 8/0 |
+| [Ubuntu / Python3.11](https://github.com/KaguraNanaga/audit-skill/actions/runs/42136427939/job/127625636199) | 86/7 | 12/3 | 8/0 |
+| [Ubuntu / Python3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/42136427939/job/127625635976) | 86/7 | 12/3 | 8/0 |
+| [Ubuntu / Python3.14](https://github.com/KaguraNanaga/audit-skill/actions/runs/42136427939/job/127625636148) | 86/7 | 12/3 | 8/0 |
+| [Windows / Python3.11](https://github.com/KaguraNanaga/audit-skill/actions/runs/42136427939/job/127625636221) | 87/6 | 13/2 | 8/0 |
+| [Windows / Python3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/42136427939/job/127625636301) | 87/6 | 13/2 | 8/0 |
+
+七组均通过历史结构对照、1598个本地链接及231份发布文件校验。具体系统构建与依赖版本见日志。基础环境缺LibreOffice、Poppler、OCR及OFD实际渲染器的测试明确跳过；Windows实际执行共享文件占用测试。
+
+- [实际OCR / Python3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/42136427939/job/127625635865)：2通过、0跳过，实际Tesseract及RapidOCR。
+- [实际LibreOffice / Python3.12](https://github.com/KaguraNanaga/audit-skill/actions/runs/42136427939/job/127625635698)：1通过、0跳过，三条WPS兼容转换路径。
+
+该CI提交之后，同一个renderer10兼容用例追加了旧开放Gap续办断言：旧v2缺口保留，新轮显式partial，旧导出原字节保持；已在本机定向和完整套件中实际通过（93项，89通过/4跳过）。此后回填维护记录和清单，运行代码及skill未变。最终提交CI另以交付记录中的实际运行链接核对，不预填尚未执行结果。

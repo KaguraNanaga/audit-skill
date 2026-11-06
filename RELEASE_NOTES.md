@@ -124,3 +124,5 @@ VALIDATION新增评测协议：每案至少3次独立运行，保留实际调用
 - 新轮renderer11将执行待办与对外补证分开；旧renderer1–10原字节保持，显式export --compact --renderer 11才创建新视图。默认compact10保持原用法。
 - 新增独立冻结的合成扫描回单、旧renderer10台账及回归；无新增依赖、网络、遥测或上传接口。升级请完整替换skill同名目录，保留原业务项目；不自动重新评估旧判断。大表空表头/金额读取问题不在本轮范围内。
 - 实际执行与未验证范围见VALIDATION；结构校验不保证宿主阅读真实性、业务发现能力或审计结论正确性。
+
+本轮实际验收：本机public93项（89通过/4跳过）、platform14通过/1跳过、structure8通过；[CI42136427939](https://github.com/KaguraNanaga/audit-skill/actions/runs/42136427939)的9任务全部成功，macOS/Ubuntu public86通过/7跳过，Windows87通过/6跳过，独立OCR2通过、Office1通过。旧Gap续办补充断言及最终CI核对说明见VALIDATION。
