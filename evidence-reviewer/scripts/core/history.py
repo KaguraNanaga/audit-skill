@@ -10,9 +10,10 @@ from . import ledger as L
 
 SCHEMA = 'evidence-ledger-2.0'
 DERIVED_SCHEMA = 'evidence-ledger-3.0'
-SCHEMAS = {SCHEMA, DERIVED_SCHEMA}
-BUSINESS = {'ReviewTask', 'Claim', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding'}
-IMMUTABLE = {'SourceVersion', 'Evidence', 'EvidenceLink', 'ReadRecord', 'SearchRecord', 'HumanDecision', 'OutputRecord', 'OCRAttempt', 'TableQuery'}
+DISCOVERY_SCHEMA = 'evidence-ledger-4.0'
+SCHEMAS = {SCHEMA, DERIVED_SCHEMA, DISCOVERY_SCHEMA}
+BUSINESS = {'ReviewTask', 'Claim', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding', 'Standard', 'CheckExecution', 'DiscoveryClue'}
+IMMUTABLE = {'SourceVersion', 'Evidence', 'EvidenceLink', 'ReadRecord', 'SearchRecord', 'HumanDecision', 'OutputRecord', 'OCRAttempt', 'TableQuery', 'PackSnapshot', 'PlanVersion', 'PlanConfirmation'}
 
 
 def fault(name):
@@ -43,7 +44,7 @@ def upgrade(base):
         out.update(run_order=[base['latest_run_id']], run_snapshots={base['latest_run_id']: snapshot(w, base['current'])})
     for snap in out['run_snapshots'].values():
         snap.setdefault('unit_ids', {v: [u['id'] for u in base['units'][v]] for v in snap['unit_version_ids']})
-    out['schema_version'] = DERIVED_SCHEMA
+    out['schema_version'] = DISCOVERY_SCHEMA if base['schema_version'] == DISCOVERY_SCHEMA else DERIVED_SCHEMA
     return out
 
 
@@ -67,6 +68,7 @@ def append_revision(ledger, body, run, reason, triggers):
 
 def build(base, work):
     out = upgrade(base)
+    if work['run'].get('discovery_version'): out['schema_version'] = DISCOVERY_SCHEMA
     run = work['run']
     for version, units in base['units'].items():
         L.require(work['units'].get(version, [])[:len(units)] == units, 'Historical units cannot be changed or removed; append new derived units only')
@@ -122,10 +124,12 @@ def thaw(ledger):
     positions = {r: i for i, r in enumerate(order)}
     for i, rid in enumerate(order):
         run = ledger['runs'][rid]
+        if run.get('discovery_version'):
+            L.require(ledger['schema_version'] == DISCOVERY_SCHEMA and run['discovery_version'] == 1, '检查计划需要 schema 4/version 1')
         if run.get('table_queries_version'):
-            L.require(ledger['schema_version'] == DERIVED_SCHEMA and run['table_queries_version'] == 1, 'Table queries require schema 3/version 1')
+            L.require(ledger['schema_version'] in {DERIVED_SCHEMA, DISCOVERY_SCHEMA} and run['table_queries_version'] == 1, 'Table queries require schema 3+/version 1')
         if run.get('derived_units_version'):
-            L.require(ledger['schema_version'] == DERIVED_SCHEMA and run['derived_units_version'] == 1, 'Derived-unit runs require schema 3/version 1')
+            L.require(ledger['schema_version'] in {DERIVED_SCHEMA, DISCOVERY_SCHEMA} and run['derived_units_version'] == 1, 'Derived-unit runs require schema 3+/version 1')
         L.require(run['id'] == rid and run['state'] == 'completed', 'Uncommitted run in authoritative ledger')
         L.require(run['previous_run_id'] == (order[i-1] if i else None), 'Broken run chain')
         if run.get('event_id'):
@@ -137,7 +141,7 @@ def thaw(ledger):
             rev = ledger['revisions'].get(rev_id)
             L.require(rev and rev['entity_id'] == eid and positions[rev['run_id']] <= i, 'Historical snapshot cites a future/missing revision')
         L.require(set(snap['unit_version_ids']) == set(run['source_version_snapshot']), 'Historical material snapshot mismatch')
-        if ledger['schema_version'] == DERIVED_SCHEMA:
+        if ledger['schema_version'] in {DERIVED_SCHEMA, DISCOVERY_SCHEMA}:
             L.require(set(snap.get('unit_ids', {})) == set(snap['unit_version_ids']), 'Missing historical unit-ID scope')
             for v, ids in snap['unit_ids'].items():
                 wanted=set(ids)
@@ -156,6 +160,8 @@ def thaw(ledger):
             L.require(run.get('visual_checks_version') == 1, 'Visual check persistence cannot be disabled')
         if i and ledger['runs'][order[i-1]].get('gap_checks_version'):
             L.require(run.get('gap_checks_version') == 1, 'Gap checks cannot be disabled in subsequent runs')
+        if i and ledger['runs'][order[i-1]].get('discovery_version'):
+            L.require(run.get('discovery_version') == 1, '发现型流程不能在后续轮次关闭')
         retirements = run.get('evidence_link_retirements', [])
         if i:
             previous_retirements = ledger['runs'][order[i-1]].get('evidence_link_retirements', [])
@@ -188,7 +194,7 @@ def thaw(ledger):
             tail = previous
     L.require(reachable == set(ledger['revisions']), 'Orphan revision')
     current = ledger['run_snapshots'][order[-1]]
-    if ledger['schema_version'] == DERIVED_SCHEMA:
+    if ledger['schema_version'] in {DERIVED_SCHEMA, DISCOVERY_SCHEMA}:
         L.require(current['unit_ids'] == {v: [u['id'] for u in units] for v, units in ledger['units'].items()}, 'Latest unit snapshot differs from ledger units')
     for field in ('current', 'record_order', 'project', 'outcome', 'assessment_sha256'):
         L.require(ledger[field] == current[field], 'Latest snapshot/top-level mismatch: ' + field)

@@ -100,3 +100,7 @@ python3 scripts/review.py search-results --project /项目 --search-id 实际搜
 renderer11的evidence.md、calculations.md、rules.md分别保留完整摘录/证明边界、复算输入/舍入及规则适用细节；正文保留结果、出处和限制。完整记录、单元、图像登记、读取限制及修订分别存入records.jsonl、units.jsonl、artifacts.jsonl、coverage.jsonl和history.jsonl；sources.md为目录。全部纳入输出指纹校验，详细数据不删减。正文列答案、程序、发现与限制，交接指向具体待办。附录可能很大，按以上接口定位，不一次性加载。
 
 普通export按每轮原renderer恢复已登记文件，不自动更新旧项目。显式`export --compact`在outputs/compact-<ID>/各轮目录创建renderer10视图及派生manifest；要采用新的候选核查与阶段性交付显示，显式加`--renderer 11`；不更改台账、旧输出或current指针。既有`export --portable`保持原兼容行为，两参数互斥。
+
+## 发现型计划入口
+
+请求增加workflow=discovery及可选packs路径，按[检查计划接口](../evidence-review/check-plans.md)使用plan-scaffold、check-plan、freeze-plan。计划确认前只做方案阅读与材料盘点，确认冻结后再执行程序。新导出包含[覆盖矩阵](../evidence-review/check-results.md)。

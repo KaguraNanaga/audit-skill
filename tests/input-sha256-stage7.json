@@ -1,0 +1,17 @@
+{
+  "frozen_on": "2026-11-09",
+  "description": "新增stage7方案；stage6-06原始材料按冻结字节复制，旧输入不改。",
+  "files": {
+    "tests/cases/stage7-06/request.md": "688b578cb80561c3d8f50920f2fad4db756d0cc8618b0818bd16c1d97fbf4e84",
+    "tests/cases/stage7-06/sources/主体文件.md": "788c43ce22ad11dd36e6a06e4ec64597914892cb5f92db573e0b7ea9ea6397cc",
+    "tests/cases/stage7-06/sources/付款流水.csv": "8bcc7ee877425c54eed58954129822bee578761b90d10a690279a624029e8b8f",
+    "tests/cases/stage7-06/sources/发票记录.csv": "fe255424130222f66c39992fc484e914db791ca9004e4b5f9fdb76ee5467734c",
+    "tests/cases/stage7-06/sources/合同台账.csv": "e86795ba5a8125325f0e79a91bfbd3c5f0e40a23eda94cd3b9e8ac4c9460ef62",
+    "tests/cases/stage7-06/sources/合同条件与变更.md": "94285648d28fdb03487a5d4919c30ec1f229c8c6d6d5399d608e15999ffc927d",
+    "tests/cases/stage7-06/sources/合成审计方案.md": "b01c36139b5c7e71aec67aa524736330c051df44c1c9b855917d97e67539adc3",
+    "tests/cases/stage7-06/sources/审批记录.csv": "9f4282c210c4b4d7b97dc76c488c9c44e27f6031dad1ff6830005c5b3f23153b",
+    "tests/cases/stage7-06/sources/采购付款制度.md": "e6f01749b7a6fe92ad025355dc3ea8d6f9cda8652834b71bc0403684ce1323ef",
+    "tests/cases/stage7-06/sources/需求与采购方式.md": "a8bfd805f82a5af4d67a1b5554e48f73e0caebf34c2ed379be4b84fdd4bd1f47",
+    "tests/expected/stage7.json": "7350c85539e3be72591181165a2fcbb0ef5a159e6959d285125bb5db722a49ad"
+  }
+}

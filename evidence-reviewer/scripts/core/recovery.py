@@ -41,6 +41,8 @@ def reconstruct_base(candidate, wanted_hash):
                 units=work['units'], artifacts=work['artifacts'])
     for field in ('current', 'record_order', 'project', 'outcome', 'assessment_sha256'): base[field] = snap[field]
     variants = [base]
+    derived = copy.deepcopy(base); derived['schema_version'] = H.DERIVED_SCHEMA
+    variants.append(derived)
     legacy = copy.deepcopy(base); legacy['schema_version'] = H.SCHEMA
     for snap in legacy['run_snapshots'].values(): snap.pop('unit_ids', None)
     variants.append(legacy)

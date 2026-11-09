@@ -12,7 +12,7 @@ Synthetic materials, not real business. Verbatim excerpt from the actual generat
 
 中文说明见 [README.zh-CN.md](README.zh-CN.md)。
 
-Public package version: **0.5.0-beta.2**. The ledger engine is **0.4.1**; the two numbers identify the release package and the runtime engine separately. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for changes and [VALIDATION.md](VALIDATION.md) for what was actually tested and what was not.
+Public package version: **0.6.0-beta.1**. The ledger engine is **0.5.0**; the two numbers identify the release package and the runtime engine separately. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for changes and [VALIDATION.md](VALIDATION.md) for what was actually tested and what was not.
 
 ## Scope
 
@@ -204,3 +204,9 @@ Use `search --target both --limit 10` to locate filenames and extracted text; `n
 `pending_read` and `tool_blocked` appear as execution to-dos; `not_provided` and `insufficient` become external requests only after the candidate checks. Partial work requires `delivery` with an actual reason and concrete next step. `commit_state=completed` means the ledger was committed; `review_state` separately reports partial, completed registered procedures, or unassessed scope. Neither confirms an audit conclusion. See the [field contract](evidence-reviewer/references/common/assessment.md#6-发现型程序与未完成项).
 
 Engine 0.4.1 adds versioned fields while retaining schema 1/2/3 compatibility. Old projects validate without edits; explicit `export --compact --renderer 11` writes a separate view, while plain `export --compact` still defaults to renderer 10. A host must still choose meaningful search terms, review related attachments and make evidence judgments. These structural gates do not detect fabricated reading or guarantee discovery. This change does not address empty table headers or amount-normalization failures.
+
+## Inspection plans and coverage
+
+Set workflow=discovery to prepare a plan from the bundled or local JSON program packs. Show the plan, wait for actual user confirmation, freeze its fingerprint, and then execute. Standards retain original sources and six applicability judgments for each clue. Unverified authority remains pending human review. Outputs include the plan, standards, check/scheme coverage in Markdown and CSV, and separate out-of-plan findings. Keep the packs directory when installing.
+
+[Discovery workflow](evidence-reviewer/references/evidence-review/discovery.md), [program packs](evidence-reviewer/references/common/program-packs.md), [plan contract](evidence-reviewer/references/evidence-review/check-plans.md), [results](evidence-reviewer/references/evidence-review/check-results.md). No new dependencies or runtime network access. Evaluation metric templates, automatic cross-table matching and new automatic legal retrieval remain out of scope.

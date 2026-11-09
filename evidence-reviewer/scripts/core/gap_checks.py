@@ -133,7 +133,8 @@ def validate(work):
 
 
 def pending_items(work):
-    pending = []
+    from evidence_review.execution import pending as discovery_pending
+    pending = discovery_pending(work)
     for r in work['records'].values():
         if r['kind'] == 'ReviewTask' and r.get('execution_state') in {'not_started', 'partial'}:
             pending.append(r['id'])

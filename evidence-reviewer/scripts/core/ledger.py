@@ -12,10 +12,11 @@ from pathlib import Path
 from urllib.parse import quote as urlquote
 
 SCHEMA = 'evidence-ledger-1.0'
-VERSION = '0.4.1'
+VERSION = '0.5.0'
 MODES = {'query', 'verify', 'coverage', 'draft', 'review', 'rules'}
 KINDS = {'Source', 'SourceVersion', 'ReadRecord', 'ReviewTask', 'Claim', 'Evidence', 'EvidenceLink',
-         'SearchRecord', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding', 'HumanDecision', 'OutputRecord', 'OCRAttempt', 'TableQuery'}
+         'SearchRecord', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding', 'HumanDecision', 'OutputRecord', 'OCRAttempt', 'TableQuery',
+         'PackSnapshot', 'PlanVersion', 'PlanConfirmation', 'Standard', 'CheckExecution', 'DiscoveryClue'}
 ASSESSMENTS = {'unassessed', 'insufficient', 'partial', 'supported', 'refuted'}
 ROLES = {'business', 'signed', 'draft', 'department_statement', 'transcript', 'template', 'ai_analysis',
          'workpaper', 'external_rule', 'policy_explanation', 'unknown'}
@@ -128,13 +129,14 @@ def materialize(work, assessment, project=None):
         return updates.materialize(work, assessment, project=project)
     work = copy.deepcopy(work)
     allowed = {'source_annotations', 'observations', 'tasks', 'claims', 'evidence', 'links', 'gaps',
-               'calculations', 'rules', 'findings', 'human_decisions', 'answers', 'draft', 'review_checks', 'limitations', 'link_retirements', 'delivery'}
+               'calculations', 'rules', 'findings', 'human_decisions', 'answers', 'draft', 'review_checks', 'limitations', 'link_retirements', 'delivery',
+               'standards', 'executions', 'clues'}
     require(isinstance(assessment, dict) and not set(assessment) - allowed, 'Unknown assessment fields')
     require(not assessment.get('link_retirements') or work.get('_applying_update'), 'Link retirement requires an update')
     mapping = {}
     groups = {'tasks': 'ReviewTask', 'claims': 'Claim', 'evidence': 'Evidence', 'links': 'EvidenceLink',
               'gaps': 'EvidenceGap', 'calculations': 'Calculation', 'rules': 'RuleApplication', 'findings': 'Finding',
-              'human_decisions': 'HumanDecision'}
+              'human_decisions': 'HumanDecision', 'standards': 'Standard', 'executions': 'CheckExecution', 'clues': 'DiscoveryClue'}
     for group in groups:
         require(isinstance(assessment.get(group, []), list), group + ' must be a list')
         for item in assessment.get(group, []):
@@ -145,7 +147,7 @@ def materialize(work, assessment, project=None):
             if existing:
                 require(work.get('_applying_update') and existing in work['records'], 'Existing IDs require a staged update')
                 require(work['records'][existing]['kind'] == groups[group], 'Cannot change entity kind')
-                require(groups[group] in {'ReviewTask', 'Claim', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding'}, 'Evidence/event records are immutable; add a new record')
+                require(groups[group] in {'ReviewTask', 'Claim', 'EvidenceGap', 'Calculation', 'RuleApplication', 'Finding', 'Standard', 'CheckExecution', 'DiscoveryClue'}, 'Evidence/event records are immutable; add a new record')
                 require(existing not in mapping.values(), 'Duplicate update target')
             mapping[key] = existing or uid()
 
@@ -191,6 +193,16 @@ def materialize(work, assessment, project=None):
                 body = dict(work['records'][existing], **body)
                 if kind == 'Calculation' and 'result' not in raw: body.pop('result', None)
             body.pop('revision_reason', None)
+            if work['run'].get('discovery_version') and kind == 'Finding':
+                require(body.get('discovery_clue_id'), '发现型 Finding 须关联 discovery_clue_id，不用旧字段绕过标准适用性校验')
+            if kind in {'Standard', 'CheckExecution', 'DiscoveryClue'}:
+                require(work['run'].get('discovery_version') == 1, '先启用 discovery 流程')
+                if not existing:
+                    body['recorded_run_id'] = work['run']['id']
+                    body['review_freshness'] = 'current'
+                if kind in {'CheckExecution', 'DiscoveryClue'}:
+                    require(body.get('plan_version_id') == work['run'].get('plan_version_id') and bool(body.get('plan_version_id')), '执行结果须引用当前冻结计划')
+                    if existing: require(body['plan_version_id'] == work['records'][existing]['plan_version_id'], '计划改变须新增结果，不迁移历史结果')
             from .table_query import bind
             if kind == 'Evidence': bind(work, body, project)
             if kind == 'Calculation':
@@ -456,6 +468,8 @@ def validate_records(work):
     from .visual_checks import validate as validate_visual_checks
     validate_visual_checks(work)
     from .gap_checks import validate as validate_gaps
+    from evidence_review.execution import validate as validate_discovery
+    validate_discovery(work)
     validate_gaps(work)
     from .reporting import reading_coverage
     coverage = reading_coverage(work)
@@ -479,15 +493,17 @@ def freeze(work):
     if work['run'].get('derived_units_version'):
         from . import history
         ledger.update(schema_version='evidence-ledger-3.0', run_order=[work['run']['id']], run_snapshots={work['run']['id']: history.snapshot(work, ledger['current'])})
+    if work['run'].get('discovery_version'):
+        ledger['schema_version'] = 'evidence-ledger-4.0'
     return ledger
 
 
 def thaw(ledger):
-    if ledger.get('schema_version') in {'evidence-ledger-2.0', 'evidence-ledger-3.0'}:
+    if ledger.get('schema_version') in {'evidence-ledger-2.0', 'evidence-ledger-3.0', 'evidence-ledger-4.0'}:
         from . import history
         return history.thaw(ledger)
     require(ledger.get('schema_version') == SCHEMA, 'Unknown ledger schema')
-    require(not any(r.get('derived_units_version') or r.get('table_queries_version') for r in ledger['runs'].values()), 'Derived-unit runs require schema 3')
+    require(not any(r.get('derived_units_version') or r.get('table_queries_version') or r.get('discovery_version') for r in ledger['runs'].values()), 'Derived/discovery runs require a newer schema')
     unsigned = {k: v for k, v in ledger.items() if k != 'integrity_sha256'}
     require(ledger.get('integrity_sha256') == checksum(unsigned), 'Ledger integrity mismatch; preserve damaged file and inspect validated-candidate/backup, never reset to empty')
     require(set(ledger['entities']) == set(ledger['current']), 'Entity/current mismatch')
@@ -514,10 +530,13 @@ def locator_text(locator):
 
 def output_renderer(work):
     outputs = [x for x in work['records'].values() if x['kind'] == 'OutputRecord' and x.get('run_id') == work['run']['id']]
-    return work.get('_renderer_version', outputs[0].get('renderer_version', 1) if outputs else (11 if work['run'].get('gap_checks_version') else 10))
+    return work.get('_renderer_version', outputs[0].get('renderer_version', 1) if outputs else (12 if work['run'].get('discovery_version') else 11 if work['run'].get('gap_checks_version') else 10))
 
 
 def render(work, project_path):
+    if output_renderer(work) == 12:
+        from . import reporting_v12
+        return reporting_v12.render(work, project_path)
     if output_renderer(work) == 11:
         from . import reporting_v11
         return reporting_v11.render(work, project_path)

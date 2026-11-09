@@ -138,3 +138,11 @@ python3 -B tools/prepare_evaluation.py --case stage6-02 --output NEW_EVALUATION_
 [input-sha256-gap-checks.json](input-sha256-gap-checks.json)单独冻结2026-11-06的新输入，含[纯图像收款凭证](<gap-fixtures/sources/合成 收款凭证.pdf>)、合成目录、像素来源及renderer10旧账。金额、主体、编号均从代码构造，无真实业务数据；未修改既有冻结输入。generate_gap_fixtures.py --output NEW_DIRECTORY按固定像素重建，--baseline VERIFIED_DIRECTORY --output NEW_JSON使用已核发布清单的修改前代码生成旧账及输出；基线清单哈希保存在新冻结清单中。
 
 PDF实际渲染检查：macOS26.6.2 arm64、Python3.14.3、pdftoppm26.04.0。先从代码文本生成临时PDF并以-singlefile -scale-to 1500 -gray取得固定像素（Pillow12.2.0仅临时读取像素，无新增运行依赖）；最终纯图像PDF再次用-singlefile -scale-to 1500 -png渲染，实际打开1/1页检查。中文标题、合成声明、合同号、12345.67金额、2040-03-15日期均清晰，无空白首页或缺字方框。Fontconfig出现缓存不可写警告，渲染退出码0且图像实际查看通过。原文本PDF未嵌入字体；发布的扫描PDF是固定像素且无文字层。其他系统的视觉渲染本轮未验证。
+
+## 阶段7：检查计划与标准适用性
+
+新增stage7-06复用stage6-06已经冻结的原始材料字节，新增合成审计方案及request，由generate_stage7_fixtures.py生成。2026-11-09冻结于input-sha256-stage7.json；预期在tests/expected/stage7.json隔离，原有输入及冻结清单未修改。本阶段没有新增PDF，因此未新增PDF渲染结果，也不重写阶段6已有视觉验证。
+
+新增测试覆盖程序包字段/冲突/显式覆盖、真实单元计划引用、确认指纹/版本/中断、时间效力与六项适用性、导向性和制度冲突、覆盖计数/计划外分离、旧renderer11不重导出校验及显式12视图。test_public统一收集。合成确认、适用性和事实只验证程序门槛，不计人工审定或业务准确率。
+
+EVIDENCE_REVIEWER_STAGE7_BASELINE指向经231文件清单验证的阶段7前代码，CI固定提交eccea82b0ca6aa2e46e4f03e2efa801978616bf0；缺失时实际旧引擎比较显式跳过。独立行为抽查使用prepare_evaluation --case stage7-06隔离输入；包内没有expected、生成器及开发记录。打包不是操作系统访问控制，执行宿主另按授权范围限制访问。

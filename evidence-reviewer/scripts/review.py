@@ -42,6 +42,14 @@ def local_path(project, rel):
 
 def check_files(project, work, check_outputs=False):
     for row in work['records'].values():
+        if row['kind'] in {'PackSnapshot', 'PlanVersion'}:
+            p = local_path(project, row['path'])
+            L.require(p.is_file() and readers.digest(p) == row['sha256'], '程序包/冻结计划快照缺失或被修改')
+            data = load(p)
+            if row['kind'] == 'PackSnapshot': L.require(data == row['data'], '程序包文件与台账不一致')
+            else:
+                confirmation = work['records'].get(row['confirmation_id'], {}).get('confirmation')
+                L.require(data == dict(plan=row['payload'], confirmation=confirmation, frozen_at=row['frozen_at']), '冻结计划/确认与快照不一致')
         if row['kind'] == 'SourceVersion' and row.get('local_snapshot'):
             p = local_path(project, row['local_snapshot'])
             L.require(p.is_file() and readers.digest(p) == row['sha256'], 'Source snapshot changed or unavailable: ' + str(p))
@@ -98,6 +106,8 @@ def add_units(project, work, version_id, extracted):
 def begin(args):
     project = args.project.expanduser().resolve()
     request = load(args.request)
+    L.require(request.get('workflow') in {None, 'discovery'}, '未知 workflow')
+    L.require('packs' not in request or request.get('workflow') == 'discovery', 'packs 需显式启用 workflow: discovery')
     goal = request.get('goal', request.get('user_request'))
     modes = request.get('modes', [request.get('mode', 'query')])
     L.require(L.nonempty(goal) and isinstance(modes, list) and bool(modes) and set(modes) <= L.MODES, 'Specify goal and review modes; use update command for an existing project')
@@ -128,6 +138,11 @@ def begin(args):
     with L.lock(project):
         save_work(project, work)
         try:
+            if request.get('workflow') == 'discovery':
+                from evidence_review import plans
+                from core import program_packs
+                plans.enable(work)
+                program_packs.install(project, work, request.get('packs', []), args.request)
             known_paths = set()
             for root in roots:
                 files, skipped, errors = inventory(root, excluded)
@@ -185,6 +200,12 @@ def inspect(args):
     project = args.project.resolve()
     from core import inspection
     work = inspection.load_work(args, sys.modules[__name__])
+    if getattr(args, 'plan', False):
+        from evidence_review import plans
+        plans.validate(work)
+        row = work['records'].get(getattr(args, 'plan_version', None)) if getattr(args, 'plan_version', None) else plans.active(work)
+        L.require(not row or row.get('kind') == 'PlanVersion', '计划版本引用无效')
+        return dict(plan=row, pack_snapshots=[dict(id=r['id'], pack_id=r['data']['pack_id'], version=r['data']['version'], sha256=r['pack_sha256']) for r in work['records'].values() if r['kind']=='PackSnapshot'])
     if getattr(args, 'summary', False):
         L.require(not getattr(args, 'records', False), '--summary cannot be combined with --records; full records remain available through inspect')
         return inspection.catalog(args, work)
@@ -403,7 +424,7 @@ def assess(args, commit=False):
                 return history.finalize(project, work, sys.modules[__name__])
             work = L.thaw(ledger)
             L.require(work['assessment_sha256'] == L.checksum(assessment), 'Committed assessment differs; stage a new update instead of overwriting it')
-            if ledger.get('schema_version') in {'evidence-ledger-2.0', 'evidence-ledger-3.0'}: write_exports(project, ledger)
+            if ledger.get('schema_version') in {'evidence-ledger-2.0', 'evidence-ledger-3.0', 'evidence-ledger-4.0'}: write_exports(project, ledger)
             check_files(project, work, check_outputs=True)
             L.validate_records(work)
             return {'state': 'completed', 'commit_state': 'completed', 'idempotent_replay': True, 'run_id': work['run']['id'], **summary(work)}
@@ -473,7 +494,9 @@ def validate(args, export=False):
         if portable_requested:
             return export_portable(project, ledger, sys.modules[__name__])
         if compact_requested:
-            if getattr(args, 'renderer', None) == 11:
+            if getattr(args, 'renderer', None) == 12:
+                from core.reporting_v12 import export_compact
+            elif getattr(args, 'renderer', None) == 11:
                 from core.reporting_v11 import export_compact
             else:
                 from core.reporting_v10 import export_compact
@@ -486,13 +509,13 @@ def main():
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, 'reconfigure'): stream.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--version', action='version', version='Evidence Reviewer package 0.5.0-beta.2; engine 0.4.1. Package version identifies the distributed skill; engine version identifies ledger and validation behavior.')
+    parser.add_argument('--version', action='version', version='Evidence Reviewer package 0.6.0-beta.1; engine 0.5.0. Package version identifies the distributed skill; engine version identifies ledger and validation behavior.')
     sub = parser.add_subparsers(dest='command', required=True)
-    for name in ['begin', 'update', 'annotate-sources', 'inspect', 'read', 'search', 'search-results', 'select-main', 'render', 'import-web', 'check-assessment', 'finalize', 'validate', 'export', 'recover', 'ocr', 'table-query', 'scaffold']:
+    for name in ['begin', 'update', 'annotate-sources', 'inspect', 'read', 'search', 'search-results', 'select-main', 'render', 'import-web', 'check-assessment', 'finalize', 'validate', 'export', 'recover', 'ocr', 'table-query', 'scaffold', 'plan-scaffold', 'check-plan', 'freeze-plan']:
         p = sub.add_parser(name)
         p.add_argument('--project', type=Path, required=True)
         if name == 'export':
-            p.add_argument('--renderer', type=int, choices=[10, 11], help='Explicit compact view renderer; default remains 10 for compatibility')
+            p.add_argument('--renderer', type=int, choices=[10, 11, 12], help='Explicit compact view renderer; default remains 10 for compatibility')
             views = p.add_mutually_exclusive_group()
             views.add_argument('--portable', action='store_true', help='Create legacy portable views in a new directory; preserve ledger and historical outputs')
             views.add_argument('--compact', action='store_true', help='Create new views (default renderer 10; --renderer 11 opts in); preserve ledger, historical outputs and current pointer')
@@ -506,6 +529,11 @@ def main():
             p.add_argument('--snapshot', help='Reject continuation if the run/version/unit-ID scope changed')
         if name == 'inspect':
             p.add_argument('--records', action='store_true'); p.add_argument('--summary', action='store_true')
+            p.add_argument('--plan', action='store_true'); p.add_argument('--plan-version')
+        if name == 'plan-scaffold':
+            p.add_argument('--scheme-version', action='append', required=True); p.add_argument('--out', type=Path)
+        if name in {'check-plan', 'freeze-plan'}: p.add_argument('--plan', type=Path, required=True)
+        if name == 'freeze-plan': p.add_argument('--confirmation', type=Path, required=True)
         if name == 'read':
             p.add_argument('--version', required=True); p.add_argument('--unit')
             p.add_argument('--text-offset', type=int, default=0)
@@ -534,6 +562,7 @@ def main():
             p.add_argument('--spec', type=Path, required=True)
             p.add_argument('--limit', type=int, default=10)
         if name == 'scaffold':
+            p.add_argument('--plan-version')
             p.add_argument('--version', action='append')
             p.add_argument('--unit', action='append')
             p.add_argument('--limit', type=int, default=20)
@@ -545,12 +574,18 @@ def main():
             p.add_argument('--timeout', type=float, default=120)
         if name == 'import-web': p.add_argument('--record', type=Path, required=True)
         if name in {'check-assessment', 'finalize'}: p.add_argument('--assessment', type=Path, required=True)
+    for name in ('pack-validate', 'pack-render'):
+        p = sub.add_parser(name); p.add_argument('--pack', type=Path, required=True)
+        if name == 'pack-render':
+            p.add_argument('--out', type=Path, required=True); p.add_argument('--check', action='store_true')
     args = parser.parse_args()
     try:
         from core import updates
         from core import history
         from core import table_query, scaffold, inspection
         from core import ocr
+        from core import program_packs
+        from evidence_review import plans
         commands = {'read': lambda a: inspection.read(a, sys.modules[__name__]), 'search-results': lambda a: inspection.saved_search(a, sys.modules[__name__]), 'table-query': lambda a: table_query.run(a, sys.modules[__name__]), 'scaffold': lambda a: scaffold.run(a, sys.modules[__name__]), 'ocr': lambda a: ocr.run(a, sys.modules[__name__]), 'begin': begin, 'inspect': inspect, 'search': search, 'select-main': select_main,
                     'render': render_source, 'import-web': import_web,
                     'check-assessment': assess, 'finalize': lambda a: assess(a, True),
@@ -558,6 +593,8 @@ def main():
                     'update': lambda a: updates.start(a, sys.modules[__name__]),
                     'annotate-sources': lambda a: updates.annotate(a, sys.modules[__name__]),
                     'recover': lambda a: history.recover(a, sys.modules[__name__])}
+        commands.update({name: lambda a: program_packs.command(a, sys.modules[__name__]) for name in ('pack-validate', 'pack-render')})
+        commands.update({name: lambda a: plans.command(a, sys.modules[__name__]) for name in ('plan-scaffold', 'check-plan', 'freeze-plan')})
         print(json.dumps(commands[args.command](args), ensure_ascii=False, indent=2, allow_nan=False))
     except Exception as exc:
         print(json.dumps({'state': 'failed', 'error': f'{type(exc).__name__}: {exc}', 'command': args.command}, ensure_ascii=False), file=sys.stderr)

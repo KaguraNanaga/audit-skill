@@ -28,8 +28,8 @@ def checked_file(root, relative, expected_hash):
 
 def prepare(case, destination, root=ROOT):
     root, destination = Path(root).absolute(), Path(destination).absolute()
-    if case not in {f'stage6-{i:02}' for i in range(1, 7)}:
-        raise ValueError('Unknown stage 6 case')
+    if case not in {f'stage6-{i:02}' for i in range(1, 7)} | {'stage7-06'}:
+        raise ValueError('Unknown frozen evaluation case')
     if destination.exists() or destination.is_symlink():
         raise FileExistsError('Destination already exists; choose a fresh directory')
     if destination.parent.resolve() != destination.parent.absolute():
@@ -37,7 +37,7 @@ def prepare(case, destination, root=ROOT):
     if not destination.parent.is_dir():
         raise ValueError('Create destination parent first')
     release = json.loads((root / 'RELEASE_MANIFEST.json').read_text(encoding='utf-8'))
-    freeze = json.loads((root / 'tests/input-sha256-stage6.json').read_text(encoding='utf-8'))
+    freeze = json.loads((root / ('tests/input-sha256-stage7.json' if case=='stage7-06' else 'tests/input-sha256-stage6.json')).read_text(encoding='utf-8'))
     prefix = f'tests/cases/{case}/'
     files = {}
     for rel, sha in release['files'].items():

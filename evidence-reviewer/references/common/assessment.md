@@ -69,3 +69,7 @@ calculations：`{key,purpose,inputs:[],formula,rounding:{places:2,mode:"ROUND_HA
 新引擎有未开始/部分执行任务、待复核对象或待核缺口时，提交须填`delivery:{status:"partial",reason:"实际中断或受限原因",next_step:"具体来源/页/游标及后续动作"}`。没有这些项可省略，或按实情填status=recorded_scope_complete；未登记任务时不能声明完成。done/undetermined可保留已核仍不足的补证，不等于审计意见。review_checks保存真实最终检查。
 
 check-assessment、finalize和validate返回review_state（partial/recorded_scope_complete/not_assessed）；finalize及已提交validate另返回commit_state=completed，既有state=completed仍表示事务提交。renderer11在正文/交接首部显示阶段性原因和下一步；完成只覆盖已登记程序，脚本无法验证遗漏的程序或虚构的阅读行为。
+
+## 7. 发现型计划结果
+
+workflow=discovery的项目先确认冻结计划，再填写standards、executions、clues。字段与门槛见[结果契约](../evidence-review/check-results.md)及[标准表](standards.md)。原有Evidence、observations、Calculation、Gap等证据边界继续有效；校验在check-assessment、finalize、validate一致执行。普通查询和旧台账不强制补建历史计划。

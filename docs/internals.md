@@ -164,3 +164,15 @@ core/gap_checks.py只检查搜索覆盖、完整命中对应候选、引用范�
 事务state=completed保持原语义；新增commit_state及独立review_state，pending_items覆盖未完成任务、待复核对象和执行缺口。显式partial还需reason/next_step，不能用“提交成功”替代业务完成。初次和增量候选均走同一校验，历史输出重建仍用当时记录的renderer。
 
 renderer11独立于冻结的1–10；新轮使用11，旧轮不自动变化。export --compact默认10以保留旧用法；--renderer 11显式创建新目录及派生manifest，不更改权威台账、历史目录和current指针。正文分执行待办与必要补证，完整候选保存于records.jsonl。新增测试和固定renderer10样本验证这条边界。
+
+## 阶段7：程序包、计划与覆盖
+
+包0.6.0-beta.1、引擎0.5.0；新发现型流程使用schema4和renderer12。core/program_packs处理JSON、快照、ID冲突和生成文档；core/standards校验依据与六项适用性；evidence_review/plans、execution、coverage承载发现型专用契约，review.py显式注册命令。没有自动业务判断、网络访问或新依赖。
+
+PackSnapshot、PlanVersion、PlanConfirmation是不可变事件；Standard、CheckExecution、DiscoveryClue纳入业务Revision和增量影响复核。计划前版以UUID连接，确认引用规范化计划SHA256；项目保存原包字节哈希和规范化包指纹，两者用途不同。计划冻结在项目写锁内原子写一个完整frozen.json，再更新工作包；中断前已写但未引用的快照不授权执行，明确重试相同计划与确认时可复用。after_plan_snapshot故障点用于真实进程中断测试。
+
+check-assessment、finalize、validate共享计划及结果校验；新增来源/标准变化沿既有保守影响复核处理。方案原件被替换/撤回、目标范围或包改变时清除本轮活动计划指针、保留前版，要求重新确认。纯补证沿用冻结范围但重新复核受影响结果。确认字段记录来源，不提供对宿主身份或会话内容的密码学认证。
+
+旧schema1–3只读验证、普通导出不升级。显式update/finalize建立新轮才提交schema4；历史快照保留原数据及当时renderer。schema4恢复增加精确schema3前缀候选，只有原事务哈希一致才采用。新报告在renderer11结果基础上增加计划/标准/覆盖文件，冻结的renderer1–11源文件不改；字段排序确保提交、读回、恢复、重建字节一致。CSV采用UTF-8 BOM，公式形状文本加前导单引号。
+
+通用库JSON与生成Markdown发布时逐字比较。名称扫描只是启发式，人工检查表见[库转换记录](stage7-library-review.md)。开发测试合成确认明确不计作用户授权。独立行为抽查见[实际记录](stage7-behavior-check.md)，未执行部分保持待执行。

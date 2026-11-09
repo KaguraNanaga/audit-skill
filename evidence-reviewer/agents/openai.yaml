@@ -1,4 +1,4 @@
 interface:
   display_name: "审计证据核查与复核助手"
-  short_description: "按审计目标核查材料、金额与结论，保留证据出处、复算、未核范围及变更历史"
-  default_prompt: "使用 $evidence-reviewer 按我的审计目标和适用要求核查指定材料，给出可回查出处、必要复算、结论边界及修改建议。"
+  short_description: "按确认的检查计划核查材料、依据和结论，保留证据出处、复算、覆盖矩阵及变更历史"
+  default_prompt: "使用 $evidence-reviewer 按我的审计目标和适用要求核查指定材料，发现型任务先展示检查计划并等我确认，再执行并给出来源、标准适用性、覆盖和结论边界。"

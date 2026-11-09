@@ -98,3 +98,7 @@ python3 /skill/scripts/review.py recover --project /项目
 当前引擎0.4.1读取schema1/2/3；新轮使用renderer11，历史1–10按登记指纹恢复。inspect、validate和普通export保留旧台账与旧输出。需要可移动视图时显式export --portable，写入新目录及派生manifest，保留current指针。需要简明正文及完整附录时显式export --compact，默认新建renderer10视图，加`--renderer 11`才使用新显示；见[有界读取与续读](workflow.md#有界读取与续读)。显式update/finalize才提交新轮及必要升级；历史轮只显示当时单元和事实。旧Gap缺依据保持原记录并提示复核，实际修订时补真实关闭依据。
 
 新修订缺口按[候选核查契约](assessment.md#6-发现型程序与未完成项)处理：新增来源使旧搜索覆盖不足时重查，已有v3开放缺口同样要求覆盖当前来源；仍未读则明确改为执行待办。旧v1/v2缺口原样保留时，新视图将其列为待核，部分交付须给实际原因及下一步。仅update/finalize提交新字段，不静默改写历史。
+
+## 11. 计划与标准的增量复核
+
+引擎0.5.0新增schema4，继续读取schema1/2/3。新发现型轮使用renderer12，历史renderer1–11不改。update可显式设置workflow=discovery、packs；启用后不能关闭计划门槛。程序包、目标范围或方案原件变化需新计划与确认；纯补证不自动改变计划。Standard、CheckExecution、DiscoveryClue纳入保守影响复核，仍用id/revision_reason及impact_review；新计划需新结果ID，冻结计划、包和确认不可改写。历史计划未执行部分不追认为已核。

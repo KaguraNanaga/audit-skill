@@ -234,6 +234,7 @@ if __name__ == "__main__":
     import test_stage6
     import test_inspection
     import test_gap_checks
+    import test_program_packs, test_discovery_plans, test_standards, test_discovery_results, test_discovery_compat, test_stage7
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(PublicCLI)
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_platform))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_structure))
@@ -244,6 +245,8 @@ if __name__ == "__main__":
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_stage6))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_inspection))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test_gap_checks))
+    for module in (test_program_packs, test_discovery_plans, test_standards, test_discovery_results, test_discovery_compat, test_stage7):
+        suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(module))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     print(json.dumps({"tests_run": result.testsRun,
                       "passed": result.testsRun - len(result.skipped) - len(result.failures) - len(result.errors),

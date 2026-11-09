@@ -17,6 +17,23 @@ def run(args,api):
         selected=candidates[:args.limit]
         assessment=dict(evidence=[dict(key=f'evidence_{i}',source_version_id=v,unit_id=u['id'],verbatim_quote='',reviewer_summary='',reading_method=None,verification_state=None,limitations=[]) for i,(v,u) in enumerate(selected,1)],
                         answers=[dict(text='',evidence_ids=[],calculation_ids=[],rule_ids=[],task_ids=[])],limitations=[])
+        if work['run'].get('discovery_version'):
+            from evidence_review import plans
+            from . import program_packs as P
+            plan=plans.active(work)
+            L.require(plan and (not getattr(args,'plan_version',None) or args.plan_version==plan['id']), '先确认并冻结当前检查计划；--plan-version 须为当前版本')
+            library,_=P.resolve(P.snapshots(work,plan['payload']['pack_snapshot_ids']))
+            assessment.update(tasks=[],executions=[],standards=[],clues=[])
+            for c in plan['payload']['checks']:
+                if c['selection']!='选用':continue
+                d=c['temporary'] if c['origin']=='临时程序' else library[c['check_code']]['item']
+                key='task_'+c['code']
+                assessment['tasks'].append(dict(key=key,objective=d['title'],procedure='；'.join(d['steps']),population='',sampling_basis='',
+                    actual_scope='',uncovered_scope='',execution_state=None,result=None,basis='',next_step='',source_version_ids=[],record_ids=[]))
+                assessment['executions'].append(dict(key='execution_'+c['code'],plan_version_id=plan['id'],check_code=c['code'],status=None,
+                    scope_complete=None,actual_scope='',uncovered_scope='',reason='',evidence_ids=[],calculation_ids=[],clue_ids=[],gap_ids=[],task_ids=[key]))
+        else:
+            L.require(not getattr(args,'plan_version',None),'--plan-version 仅适用于 discovery')
         for evidence,(_,unit) in zip(assessment['evidence'],selected):
             if unit['locator'].get('unit')=='table_query_derived':
                 evidence.update(query_id=unit['locator']['query_id'],result_locator=unit['locator']['result_locator'])
@@ -41,6 +58,8 @@ def run(args,api):
 
 '''
         instructions+=f'候选单元：{len(candidates)}；预填：{len(selected)}；未纳入：{len(candidates)-len(selected)}。\n\n'
+        if work['run'].get('discovery_version'):
+            instructions+='发现型骨架已引用冻结计划和真实检查实例。填写 standards、clues 的六项适用性及 executions 实际结果；未执行项移除空结果并保留部分交付，不填无异常。检查计划改变须先重新确认。详细字段见 skill 的 references/evidence-review/check-results.md。\n\n'
         instructions+='| Evidence key | 来源版本 | 单元 | 状态 |\n|---|---|---|---|\n'
         for i,(v,u) in enumerate(selected,1):instructions+=f'| evidence_{i} | {v} | {u["id"]} | {u["state"]} |\n'
         atomic_bytes(out,L.encoded(assessment));atomic_bytes(help_path,instructions.encode('utf-8'))

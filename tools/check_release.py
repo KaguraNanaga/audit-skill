@@ -58,11 +58,13 @@ def release_files():
             or s == "evidence-reviewer/agents/openai.yaml"
             or s in STAGE6_DATA
             or (rel.parent.as_posix() == "evidence-reviewer/scripts" and p.suffix == ".py")
-            or (len(rel.parts) == 4 and rel.parts[:3] == ("evidence-reviewer", "scripts", "core") and p.suffix == ".py")
+            or (len(rel.parts) == 4 and rel.parts[:2] == ("evidence-reviewer", "scripts") and rel.parts[2] in {'core','evidence_review'} and p.suffix == ".py")
+            or s in {'evidence-reviewer/packs/common/pack.json','evidence-reviewer/packs/common/checks.md'}
+            or (rel.parent.as_posix() == 'tests/cases/stage7-06/sources' and p.suffix == '.csv')
             or (len(rel.parts) == 4 and rel.parts[:2] == ("evidence-reviewer", "references") and rel.parts[2] in {"common", "evidence-review"} and p.suffix == ".md")
             or (rel.parent.as_posix() == "tests/table-fixtures" and p.suffix in {".csv", ".tsv"})
             or (rel.parent.as_posix() == "tests/format-fixtures" and p.suffix in {".ofd", ".xml", ".pptx"})
-            or s in {"docs/internals.md", "docs/rewrite-rule-mapping.md", "docs/SKILL.stage5.diff", "docs/stage5-behavior-check.md"}
+            or s in {"docs/internals.md", "docs/rewrite-rule-mapping.md", "docs/SKILL.stage5.diff", "docs/stage5-behavior-check.md", "docs/stage7-library-review.md", "docs/stage7-behavior-check.md"}
             or (rel.parent.as_posix() == "tools" and p.suffix == ".py")
             or (rel.parts[0] == "tests" and p.suffix in TEXT_SUFFIXES | {".pdf", ".png", ".xlsx", ".docx"})
         )
@@ -92,6 +94,15 @@ def check_files(files):
             if PRIVATE_PATH.search(text) or KEY_PATTERN.search(text):
                 errors.append(f"review possible private path/key: {rel} {member}")
     errors.extend(check_links(ROOT, files)["errors"])
+    sys.path.insert(0, str(ROOT/'evidence-reviewer/scripts'))
+    from core import program_packs as packs
+    try:
+        pack = packs.load(packs.COMMON)
+        if packs.COMMON.with_name('checks.md').read_bytes() != packs.markdown(pack).encode('utf-8'):
+            errors.append('Common library Markdown differs from authoritative JSON')
+        for candidate in packs.privacy_candidates(pack): errors.append('Review concrete name/person/document number in common library: '+candidate)
+        if not (ROOT/'docs/stage7-library-review.md').is_file(): errors.append('Missing common-library manual review checklist')
+    except Exception as exc: errors.append('Program pack validation: '+str(exc))
     return errors
 
 
@@ -113,7 +124,7 @@ def main():
     current = hashes(files)
     if args.write_manifest:
         MANIFEST.write_text(json.dumps({
-            "package_version": "0.5.0-beta.2", "engine_version": "0.4.1",
+            "package_version": "0.6.0-beta.1", "engine_version": "0.5.0",
             "scope": "Selected public package; manifest excludes itself. No authenticity or audit-accuracy guarantee.",
             "files": current,
         }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

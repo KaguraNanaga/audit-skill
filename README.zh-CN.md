@@ -12,7 +12,7 @@
 
 English documentation: [README.md](README.md).
 
-公开包版本：**0.5.0-beta.2**。台账引擎为 **0.4.1**；两者分别表示发布包和运行引擎版本。变更见 [RELEASE_NOTES.md](RELEASE_NOTES.md)，实际测试及未验证范围见 [VALIDATION.md](VALIDATION.md)。
+公开包版本：**0.6.0-beta.1**。台账引擎为 **0.5.0**；两者分别表示发布包和运行引擎版本。变更见 [RELEASE_NOTES.md](RELEASE_NOTES.md)，实际测试及未验证范围见 [VALIDATION.md](VALIDATION.md)。
 
 ## 适用范围
 
@@ -48,7 +48,7 @@ python3 -B evidence-reviewer/scripts/review.py --help
 
 依赖范围用于限制安装候选，并不表示区间内每个版本都测过。实际验证版本见 [VALIDATION.md](VALIDATION.md)。依赖安装会访问你配置的软件源；可按单位环境要求改用离线安装。
 
-Codex 当前支持从项目的 `.agents/skills/` 或个人的 `~/.agents/skills/` 发现本地 Skill。将 **`evidence-reviewer` 子目录**复制到其中一个位置，保留它的 `SKILL.md`、`LICENSE`、`references/`、`scripts/` 和 `agents/`。例如，在目标不存在时，从本包根目录执行：
+Codex 当前支持从项目的 `.agents/skills/` 或个人的 `~/.agents/skills/` 发现本地 Skill。将 **`evidence-reviewer` 子目录**复制到其中一个位置，保留它的 `SKILL.md`、`LICENSE`、`references/`、`scripts/`、`packs/` 和 `agents/`。例如，在目标不存在时，从本包根目录执行：
 
 ```sh
 mkdir -p "$HOME/.agents/skills"
@@ -204,3 +204,9 @@ python3 -B tools/check_release.py
 pending_read与tool_blocked进入执行待办；not_provided与insufficient通过候选核查后才列对外补证。部分成果须填写delivery的实际原因和具体下一步。commit_state=completed表示台账提交成功，review_state另报部分完成、已登记程序完成或未评估；均不确认审计结论。具体见[字段契约](evidence-reviewer/references/common/assessment.md#6-发现型程序与未完成项)。
 
 引擎0.4.1增加带版本的字段，兼容旧schema1/2/3；旧项目原样validate。显式`export --compact --renderer 11`生成独立新视图，普通`export --compact`仍默认renderer10。关键词是否充分、相关附件是否核全及证据判断仍依赖宿主；结构门槛无法识别虚构阅读，也不保证发现全部问题。本轮未处理大表空表头及金额规范化失败。
+
+## 检查计划与覆盖矩阵
+
+发现型任务设置workflow=discovery：从通用或本地JSON检查项库编制计划，展示并取得用户确认后冻结，再执行检查。标准表逐条记录原文及六项适用性；未核实依据保持待核，不因结构校验通过升级结论。输出计划、标准表、检查项/方案条目两种Markdown与CSV矩阵，以及单独的计划外发现。
+
+[发现型流程](evidence-reviewer/references/evidence-review/discovery.md) · [程序包](evidence-reviewer/references/common/program-packs.md) · [计划接口](evidence-reviewer/references/evidence-review/check-plans.md) · [结果接口](evidence-reviewer/references/evidence-review/check-results.md)。完整安装须保留packs目录。无新增依赖或运行网络；评价指标模板、跨表自动匹配和新的法规自动检索不在本阶段范围。

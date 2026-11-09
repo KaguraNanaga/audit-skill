@@ -72,7 +72,7 @@ def start(args, api):
     project = args.project.resolve()
     request = api.load(args.request)
     allowed = {'event_id', 'reason', 'source_roots', 'source_bindings', 'scope', 'goal', 'modes', 'main_document',
-               'withdraw_sources', 'unavailable_sources', 'check_local_availability', 'changed_entity_ids', 'exclusions', 'source_annotations'}
+               'withdraw_sources', 'unavailable_sources', 'check_local_availability', 'changed_entity_ids', 'exclusions', 'source_annotations', 'workflow', 'packs'}
     L.require(isinstance(request, dict) and not set(request) - allowed, 'Unknown update request fields')
     L.require(L.nonempty(request.get('event_id')) and L.nonempty(request.get('reason')), 'Update needs a stable event_id and reason')
     roots = [Path(p).expanduser().resolve() for p in request.get('source_roots', [])]
@@ -86,9 +86,18 @@ def start(args, api):
         skipped.extend(omit); scan_errors.extend(dict(e, root=str(root)) for e in errors)
     files = list({f['path']: f for f in files}.values())
     inputs = dict(request=request, files=[{'path': f['path'], 'sha256': f['sha256']} for f in files], inventory_errors=scan_errors)
+    if 'packs' in request:
+        from . import program_packs as P
+        L.require(isinstance(request['packs'], list) and all(L.nonempty(p) for p in request['packs']), 'packs 必须为路径列表')
+        paths = [P.COMMON] + [(args.request.resolve().parent / Path(p).expanduser()).resolve() for p in request['packs']]
+        inputs['packs'] = [dict(path=str(p), sha256=readers.digest(p)) for p in paths]
     fingerprint = L.checksum(inputs)
     with L.lock(project):
         base = api.load(project / 'ledger/ledger.json'); original = L.thaw(base)
+        L.require(request.get('workflow') in {None, 'discovery'}, '未知 workflow')
+        if original['run'].get('discovery_version') and 'workflow' in request:
+            L.require(request['workflow'] == 'discovery', '发现型流程不能关闭')
+        L.require('packs' not in request or request.get('workflow') == 'discovery' or original['run'].get('discovery_version'), 'packs 需启用 discovery')
         api.check_files(project, original, check_outputs=True)
         for run in base['runs'].values():
             if run.get('event_id') == request['event_id']:
@@ -123,6 +132,18 @@ def start(args, api):
         work.pop('assessment_sha256', None)
         api.save_work(project, work)
         try:
+            if request.get('workflow') == 'discovery' or original['run'].get('discovery_version'):
+                from evidence_review import plans
+                from . import program_packs as P
+                plans.enable(work)
+                for key in ('pack_snapshot_ids', 'plan_version_id'):
+                    if key in original['run']: work['run'][key] = copy.deepcopy(original['run'][key])
+                if 'packs' in request or not work['run'].get('pack_snapshot_ids'):
+                    P.install(project, work, request.get('packs', []), args.request)
+                changed = work['run'].get('pack_snapshot_ids') != original['run'].get('pack_snapshot_ids')
+                if changed or any(k in request and request[k] != original['project'].get(k) for k in ('scope','goal','modes')):
+                    work['run']['previous_plan_id'] = work['run'].pop('plan_version_id', None)
+                    add_change(work, 'inspection_plan_changed', '程序包/委托范围改变，须重新确认检查计划')
             bindings = {str(Path(x['path']).expanduser().resolve()): x for x in request.get('source_bindings', [])}
             L.require(len(bindings) == len(request.get('source_bindings', [])), 'Duplicate source binding path')
             L.require(set(bindings) <= {f['path'] for f in files}, 'Source binding path is outside supplied files')
@@ -226,6 +247,12 @@ def start(args, api):
             for eid in request.get('changed_entity_ids', []):
                 L.require(eid in work['_base_records'], 'Unknown changed entity')
                 add_change(work, 'judgment_input_changed', request['reason'], entity_id=eid)
+            if work['run'].get('plan_version_id'):
+                plan = work['records'][work['run']['plan_version_id']]
+                scheme_versions = {s['source_ref']['source_version_id'] for s in plan['payload']['scheme_items']}
+                if not scheme_versions <= set(work['run']['active_source_version_ids']):
+                    work['run']['previous_plan_id'] = work['run'].pop('plan_version_id')
+                    add_change(work, 'inspection_scheme_changed', '方案原文被替换或撤回，须重新确认检查计划')
             stage_annotations(work, request.get('source_annotations', []), request['reason'])
             acquired_paths = {f['path'] for f in files}
             work['run']['intake_issues'] = [e for e in work['run']['intake_issues'] if str(Path(e.get('root', '')) / e.get('path', '')) not in acquired_paths]

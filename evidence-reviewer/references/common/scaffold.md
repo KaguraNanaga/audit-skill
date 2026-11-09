@@ -18,3 +18,7 @@ JSON预填实际版本、unit ID；已登记查询单元另带真实query_id及r
 发现型任务先按[发现型流程](../evidence-review/discovery.md)制定程序，再根据实际阅读的unit ID定向生成骨架。scaffold默认前20单元不是样本设计，也不会自动创建完整审计方案；tasks、反证关系、合理解释及未完成项由执行会话据实填写。读取采用[有界接口](workflow.md#有界读取与续读)，保留长单元和分页的续读位置。
 
 骨架说明会提醒目录搜索、候选核查和阶段性交付字段；它不会自动认定某份材料无关、创建假observations或填写完成状态。缺口与delivery按[评估字段](assessment.md#6-发现型程序与未完成项)据实补齐。
+
+## 发现型骨架
+
+已启用discovery时先确认冻结计划，可加--plan-version指定当前版本；骨架预填真实计划和检查实例，tasks与executions的判断留空。新增standards、clues按[结果字段](../evidence-review/check-results.md)填写；未执行项不伪填无异常。
