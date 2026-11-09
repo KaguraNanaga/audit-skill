@@ -34,4 +34,4 @@
 
 任一适用性未知，或依据尚未核对原文，线索填写 `basis_pending:true`、`verification_status:"待核实"`，输出为需人工判断事项。明确不适用的依据不能支撑已核实结论。导向性政策可作评价依据，不能单独支持 `conclusion_type:"违规"`。
 
-识别本单位制度与其他层级规定冲突时，线索另填 `institutional_inconsistency:{description,standard_ids:[]}`，说明“制度与上位规定不一致”并引用双方依据；不能只留下执行人员违规。是否更严格或冲突属于判断，程序只核验已登记的关系与输出一致性。
+识别本单位制度与上位规定（法律至上级单位制度）冲突时，线索另填 `institutional_inconsistency:{description,standard_ids:[]}`，说明“制度与上位规定不一致”并引用双方依据；不能只留下执行人员违规。与合同的冲突仍登记在relationships中，不把合同自动视为上位规定。是否更严格或冲突属于判断，程序只核验已登记的关系与输出一致性。

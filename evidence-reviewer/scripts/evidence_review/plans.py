@@ -29,6 +29,7 @@ def active(work):
 def enable(work):
     work['project']['workflow'] = 'discovery'
     work['run']['discovery_version'] = 1
+    work['run']['scheme_coverage_version'] = 1
 
 
 def validate_payload(work, plan, current=False):

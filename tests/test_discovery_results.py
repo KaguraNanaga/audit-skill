@@ -39,6 +39,7 @@ class Results(Helpers,unittest.TestCase):
     def test_cannot_execute_requires_reason_and_is_uncovered(self):
         self.seed();self.freeze();a=self.assessment()
         a['executions'][0].update(status='无法执行',scope_complete=False,actual_scope='',uncovered_scope='合成工具受阻',reason='合成不可执行原因',evidence_ids=[])
+        a['executions'][0]['scheme_results'][0].update(state='未覆盖',actual_scope='',uncovered_scope='合成工具受阻')
         a['tasks'][0].update(execution_state='partial',result='undetermined',uncovered_scope='合成工具受阻')
         a['delivery']=dict(status='partial',reason='合成工具受阻',next_step='修复后继续')
         self.check(a);work=L.materialize(review.get_work(self.project),a,project=self.project)
@@ -65,6 +66,37 @@ class Results(Helpers,unittest.TestCase):
         work=review.get_work(self.project);self.assertIsNone(work['run'].get('plan_version_id'))
         from evidence_review.execution import validate
         with self.assertRaisesRegex(ValueError,'尚未冻结'):validate(work)
+
+    def test_one_program_keeps_unexecuted_objective_uncovered(self):
+        self.seed()
+        self.plan['scheme_items'].append(dict(self.plan['scheme_items'][0],code='S2',objective='核对实际收款方'))
+        self.plan['checks'][0]['scheme_links'].append(dict(self.plan['checks'][0]['scheme_links'][0],scheme_code='S2'))
+        self.freeze();a=self.assessment(True)
+        a['executions'][0].update(scope_complete=False,uncovered_scope='尚未核对实际收款方')
+        a['executions'][0]['scheme_results'].append(dict(scheme_code='S2',state='未覆盖',actual_scope='',uncovered_scope='缺实际收款方记录',reason='尚未实施该目标'))
+        a['delivery']=dict(status='partial',reason='第二目标未实施',next_step='取得收款记录后实施第二目标')
+        self.check(a);work=L.materialize(review.get_work(self.project),a,project=self.project)
+        rows=matrix(work)[1];self.assertEqual([r['覆盖情况'] for r in rows],['已覆盖','未覆盖'])
+        self.assertEqual(rows[1]['实际执行范围'],'');self.assertIn('缺实际收款方记录',rows[1]['剩余范围'])
+        for mutation in ('missing','duplicate','false_complete'):
+            bad=copy.deepcopy(a)
+            if mutation=='missing':bad['executions'][0].pop('scheme_results')
+            elif mutation=='duplicate':bad['executions'][0]['scheme_results'].append(copy.deepcopy(bad['executions'][0]['scheme_results'][0]))
+            else:bad['executions'][0]['scope_complete']=True;bad['executions'][0]['uncovered_scope']=''
+            self.check(bad,False)
+
+    def test_legacy_draft_coverage_bytes_validate_and_explicit_upgrade(self):
+        self.seed();self.freeze()
+        work=review.get_work(self.project);work['run'].pop('scheme_coverage_version')
+        L.atomic_json(self.project/'staging/working.json',work)
+        a=self.assessment();a['executions'][0].pop('scheme_results')
+        done=self.finalize(a);out=self.project/'outputs'/done['run_id']
+        before={p:p.read_bytes() for p in out.iterdir()};self.call('validate');self.call('export')
+        self.assertTrue(all(p.read_bytes()==v for p,v in before.items()))
+        self.call('update','--request',self.json_file('granular.json',dict(event_id='granular',reason='补登记逐目标执行范围')))
+        work=review.get_work(self.project);self.assertEqual(work['run']['scheme_coverage_version'],1)
+        self.assertEqual(matrix(work)[1][0]['覆盖情况'],'未覆盖')
+        self.assertTrue(all(p.read_bytes()==v for p,v in before.items()))
 
 
 if __name__=='__main__':unittest.main(verbosity=2)

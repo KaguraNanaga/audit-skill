@@ -32,6 +32,8 @@ def run(args,api):
                     actual_scope='',uncovered_scope='',execution_state=None,result=None,basis='',next_step='',source_version_ids=[],record_ids=[]))
                 assessment['executions'].append(dict(key='execution_'+c['code'],plan_version_id=plan['id'],check_code=c['code'],status=None,
                     scope_complete=None,actual_scope='',uncovered_scope='',reason='',evidence_ids=[],calculation_ids=[],clue_ids=[],gap_ids=[],task_ids=[key]))
+                if work['run'].get('scheme_coverage_version'):
+                    assessment['executions'][-1]['scheme_results']=[dict(scheme_code=l['scheme_code'],state=None,actual_scope='',uncovered_scope='',reason='') for l in c['scheme_links']]
         else:
             L.require(not getattr(args,'plan_version',None),'--plan-version 仅适用于 discovery')
         for evidence,(_,unit) in zip(assessment['evidence'],selected):

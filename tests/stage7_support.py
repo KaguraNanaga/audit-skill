@@ -48,6 +48,7 @@ class Helpers:
             review_checks=[dict(target_id='t',reason='合成最终检查',result='结构断言',evidence_ids=['e'])],
             executions=[dict(key='x',plan_version_id=self.frozen['plan_version_id'],check_code='C1',status='发现线索并已核实' if with_clue else '已执行未发现异常',
                 scope_complete=True,actual_scope='合成一笔付款',uncovered_scope='',reason='合成执行',evidence_ids=['e'],calculation_ids=[],
+                scheme_results=[dict(scheme_code='S1',state='已覆盖',actual_scope='合成一笔付款',uncovered_scope='',reason='合成逐目标执行')],
                 clue_ids=['c'] if with_clue else [],gap_ids=[],task_ids=['t'])])
         if with_clue:
             s=dict(key='s',summary='合成标准',level='合同',name='合成合同',document_number=None,article='合成条款',effective_at='2031-01-01',repealed_at='2032-01-01',

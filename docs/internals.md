@@ -175,4 +175,6 @@ check-assessment、finalize、validate共享计划及结果校验；新增来源
 
 旧schema1–3只读验证、普通导出不升级。显式update/finalize建立新轮才提交schema4；历史快照保留原数据及当时renderer。schema4恢复增加精确schema3前缀候选，只有原事务哈希一致才采用。新报告在renderer11结果基础上增加计划/标准/覆盖文件，冻结的renderer1–11源文件不改；字段排序确保提交、读回、恢复、重建字节一致。CSV采用UTF-8 BOM，公式形状文本加前导单引号。
 
+行为抽查发现程序级部分执行会错误传播到完全未执行的方案目标。最终新轮增加scheme_coverage_version=1，CheckExecution的scheme_results逐项对应冻结映射，记录目标状态、已做/剩余范围及理由；scaffold只预填真实目标编号。历史候选缺该轮次旗标时保留原renderer12格式和指纹；显式update启用新旗标后，旧结果未补目标信息不能推定已覆盖，也不能声明完整交付。修订只登记已有真实执行范围，不调整冻结范围或追写原目录。
+
 通用库JSON与生成Markdown发布时逐字比较。名称扫描只是启发式，人工检查表见[库转换记录](stage7-library-review.md)。开发测试合成确认明确不计作用户授权。独立行为抽查见[实际记录](stage7-behavior-check.md)，未执行部分保持待执行。

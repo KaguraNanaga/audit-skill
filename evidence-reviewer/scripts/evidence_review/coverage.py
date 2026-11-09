@@ -27,6 +27,26 @@ def matrix(work):
             '计划版本':plan['id']})
     for s in payload['scheme_items']:
         related=[(c,l) for c in payload['checks'] for l in c['scheme_links'] if l['scheme_code']==s['code'] and c['selection']=='选用']
+        if work['run'].get('scheme_coverage_version'):
+            details=[]
+            for c,l in related:
+                r=results.get(c['code'])
+                d=next((x for x in r.get('scheme_results',[]) if x['scheme_code']==s['code']),None) if r else None
+                current=bool(r and r['review_freshness']=='current' and r['status'] not in {'无法执行','未选用'})
+                details.append((c,l,r,d,current))
+            executed=[x for x in details if x[4] and x[3] and x[3]['state']!='未覆盖']
+            state='评价类待模板' if s['type']=='评价描述' else '未覆盖'
+            if s['type']!='评价描述' and executed:
+                state='已覆盖' if len(executed)==len(related) and all(d['state']=='已覆盖' and l['coverage']=='完整' for c,l,r,d,current in executed) else '部分覆盖'
+            remaining=[l['remaining_scope'] for c,l in related if l['remaining_scope']]
+            remaining += [d['uncovered_scope'] if d and current else '待复核或未登记逐目标执行范围' if r else '尚未执行该目标' for c,l,r,d,current in details if not d or not current or d['uncovered_scope']]
+            schemes.append({'方案条目':s['code'],'独立检查目标':s['objective'],'类型':s['type'],'原文':s['original_text'],'覆盖情况':state,
+                            '对应检查项':'；'.join(c['code']+'/'+c['check_code'] for c,l in related),
+                            '实际执行范围':'；'.join(c['code']+'：'+d['actual_scope'] for c,l,r,d,current in executed),
+                            '剩余范围':'；'.join(dict.fromkeys(remaining)),
+                            '逐目标说明':'；'.join(c['code']+'：'+d['reason'] for c,l,r,d,current in details if d),
+                            '计划版本':plan['id']})
+            continue
         executed=[(c,l) for c,l in related if (r:=results.get(c['code'])) and r['status'] not in {'无法执行','未选用'} and r['review_freshness']=='current']
         state='评价类待模板' if s['type']=='评价描述' else '未覆盖'
         if s['type']!='评价描述' and executed:

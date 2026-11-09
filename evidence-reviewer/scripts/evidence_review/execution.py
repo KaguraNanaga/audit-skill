@@ -62,6 +62,25 @@ def validate(work):
             key=(row['plan_version_id'],code);L.require(key not in unique,'同一计划检查实例有重复执行结果');unique.add(key)
             c=checks[code];status=row['status'];L.require(status in STATES and L.nonempty(row['reason']),'执行状态/原因无效')
             L.require(type(row['scope_complete']) is bool and isinstance(row['actual_scope'],str) and isinstance(row['uncovered_scope'],str),'执行范围字段无效')
+            details=row.get('scheme_results')
+            if work['run'].get('scheme_coverage_version') and row['recorded_run_id']==work['run']['id']:
+                L.require(details is not None,'执行结果须逐个填写 scheme_results，不能把程序状态传播到未执行目标')
+            if details is not None:
+                L.require(isinstance(details,list),'scheme_results 须为列表')
+                codes=[]
+                for detail in details:
+                    P.fields(detail,('scheme_code','state','actual_scope','uncovered_scope','reason'),'逐目标执行')
+                    codes.append(detail['scheme_code'])
+                    L.require(detail['state'] in {'已覆盖','部分覆盖','未覆盖'} and L.nonempty(detail['reason']),'逐目标状态/原因无效')
+                    L.require(isinstance(detail['actual_scope'],str) and isinstance(detail['uncovered_scope'],str),'逐目标范围须为文字')
+                    if detail['state']=='未覆盖':
+                        L.require(detail['actual_scope']=='' and L.nonempty(detail['uncovered_scope']),'未覆盖目标须留空已执行范围并说明剩余范围')
+                    else:
+                        L.require(L.nonempty(detail['actual_scope']),'已执行目标须说明实际范围')
+                        L.require((detail['uncovered_scope']=='') if detail['state']=='已覆盖' else L.nonempty(detail['uncovered_scope']),'逐目标完成状态与剩余范围矛盾')
+                    if status in {'无法执行','未选用'}:L.require(detail['state']=='未覆盖','无法执行/未选用不能产生已执行目标')
+                    if row['scope_complete']:L.require(detail['state']=='已覆盖','完整执行不能包含未完成目标')
+                L.require(all(isinstance(x,str) for x in codes) and len(codes)==len(set(codes)) and set(codes)=={l['scheme_code'] for l in c['scheme_links']},'逐目标结果须与冻结方案映射一一对应')
             clues=refs(work,row['clue_ids'],'DiscoveryClue')
             refs(work,row['calculation_ids'],'Calculation');refs(work,row['gap_ids'],'EvidenceGap');refs(work,row['task_ids'],'ReviewTask',True)
             evidence=facts(work,row['evidence_ids'],False)
@@ -101,6 +120,7 @@ def pending(work):
         if c['selection']!='选用':continue
         r=results.get(c['code'])
         if not r or not r['scope_complete'] or r['status']=='发现线索待核实' or r.get('review_freshness')=='needs_review':out.append('check:'+c['code'])
+        elif work['run'].get('scheme_coverage_version') and 'scheme_results' not in r:out.append('check:'+c['code'])
     out += ['scheme:'+s['code'] for s in plan['payload']['scheme_items'] if s['type']=='评价描述']
     out += ['scheme:'+l['scheme_code'] for c in plan['payload']['checks'] if c['selection']=='选用' for l in c['scheme_links'] if l['coverage']=='部分']
     out += [r['id'] for r in rows.values() if r['kind']=='DiscoveryClue' and r['plan_version_id']==plan['id'] and (r['basis_pending'] or r['verification_status']=='待核实')]

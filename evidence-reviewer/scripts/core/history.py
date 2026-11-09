@@ -126,6 +126,8 @@ def thaw(ledger):
         run = ledger['runs'][rid]
         if run.get('discovery_version'):
             L.require(ledger['schema_version'] == DISCOVERY_SCHEMA and run['discovery_version'] == 1, '检查计划需要 schema 4/version 1')
+        if 'scheme_coverage_version' in run:
+            L.require(run.get('discovery_version') and run['scheme_coverage_version']==1,'逐目标覆盖版本无效')
         if run.get('table_queries_version'):
             L.require(ledger['schema_version'] in {DERIVED_SCHEMA, DISCOVERY_SCHEMA} and run['table_queries_version'] == 1, 'Table queries require schema 3+/version 1')
         if run.get('derived_units_version'):
@@ -162,6 +164,8 @@ def thaw(ledger):
             L.require(run.get('gap_checks_version') == 1, 'Gap checks cannot be disabled in subsequent runs')
         if i and ledger['runs'][order[i-1]].get('discovery_version'):
             L.require(run.get('discovery_version') == 1, '发现型流程不能在后续轮次关闭')
+        if i and ledger['runs'][order[i-1]].get('scheme_coverage_version'):
+            L.require(run.get('scheme_coverage_version')==1,'逐目标覆盖不能在后续轮次关闭')
         retirements = run.get('evidence_link_retirements', [])
         if i:
             previous_retirements = ledger['runs'][order[i-1]].get('evidence_link_retirements', [])

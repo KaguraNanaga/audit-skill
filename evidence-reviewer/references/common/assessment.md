@@ -9,7 +9,7 @@ assessment.json是完成实际阅读后的结构化结果，不是要求脚本�
 用户报告的“基本相符/确认有误/需要解释/证据不足”属于呈现层，不是下列枚举的新值。须按每条Claim/Finding的命题方向、实际证据及未获证范围映射，见[报告核验结论等级](../evidence-review/report-verification.md)。业务口径和最小修改可写入现有basis、summary、limitations、recommended_action等字段；不自行增加强制字段或改写已提交台账。
 
 - answers：至少一项 `{text,evidence_ids:[],calculation_ids:[],rule_ids:[],task_ids:[]}`。依据至少一类非空；材料不可读可以引用说明局限的任务。无异常不强制Finding，简单查询不强制Claim。
-- tasks：`{key,objective,procedure,population,sampling_basis,actual_scope,uncovered_scope,execution_state,result,basis,next_step,source_version_ids:[],record_ids:[]}`。可补subjects/period。execution_state为not_started/partial/done/not_applicable；result为no_exception/exception/undetermined/not_applicable。basis说明判断与边界，未覆盖与实际范围分开。
+- tasks：`{key,objective,procedure,population,sampling_basis,actual_scope,uncovered_scope,execution_state,result,basis,next_step,source_version_ids:[],record_ids:[]}`。可补subjects/period。execution_state为not_started/partial/done/not_applicable；result为no_exception/exception/undetermined/not_applicable。basis说明判断与边界，未覆盖与实际范围分开。record_ids仅接受SourceVersion、Evidence、Claim、Finding；计算放入answers/review_checks或发现型executions的calculation_ids，标准和线索使用各自专用字段关联。
 - review_checks：`{target_id,reason,result,evidence_ids:[],calculation_ids:[]}`。完整核查和记录任务需实际最终复核，reason说明选择问题或无异常任务的理由，result保存可核验复核结果，不记录内部思维过程。
 - limitations：字符串列表，保存未读、未查、抽样和不确定事项。
 

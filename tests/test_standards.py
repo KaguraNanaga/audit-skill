@@ -33,6 +33,12 @@ class Standards(Helpers,unittest.TestCase):
         self.assertIn('制度',self.check(a,False)['error'])
         a['clues'][0]['institutional_inconsistency']=dict(description='制度与上位规定不一致（合成）',standard_ids=['s','upper'])
         self.check(a)
+        bad=copy.deepcopy(a);bad['clues'][0]['institutional_inconsistency']['standard_ids'].append('missing-standard')
+        self.check(bad,False)
+        # A contract conflict is recorded, but a contract is not an upper rule.
+        a['standards'][1].update(level='合同',name='合成合同')
+        a['clues'][0].pop('institutional_inconsistency')
+        self.check(a)
 
     def test_standard_cannot_use_ai_original_and_clue_has_no_motive(self):
         self.seed();self.freeze();a=self.assessment(True)

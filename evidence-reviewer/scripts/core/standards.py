@@ -3,6 +3,7 @@ from datetime import date
 from . import ledger as L, program_packs as P
 
 LEVELS = {'法律','行政法规','部门规章','地方性法规和规章','规范性文件和政策','上级单位制度','本单位制度','合同'}
+UPPER_LEVELS = LEVELS - {'本单位制度', '合同'}
 AXES = ('subject','time','territory','matter_conditions','hierarchy','nature')
 JUDGMENTS = {'成立','不成立','无法确定'}
 
@@ -87,7 +88,8 @@ def applicability(work, clue, enforce=True):
         supports |= s['nature']=='强制性要求' and not unknown and not inapplicable and s['verification_state']=='已核对原文'
         for rel in s['relationships']:
             other=work['records'][rel['standard_id']]
-            if rel['relation']=='冲突' and {s['level'],other['level']} & {'本单位制度'} and s['level']!=other['level']:
+            levels={s['level'],other['level']}
+            if rel['relation']=='冲突' and '本单位制度' in levels and levels & UPPER_LEVELS:
                 conflicts.update((sid,other['id']))
     if enforce and clue['conclusion_type']=='违规':
         L.require(apps and any(work['records'][a['standard_id']]['nature']=='强制性要求' for a in apps), '导向性政策不能单独支撑违规类结论')
@@ -96,7 +98,8 @@ def applicability(work, clue, enforce=True):
     if enforce and conflicts:
         issue=clue.get('institutional_inconsistency')
         P.fields(issue,('description','standard_ids'),'制度与上位规定不一致')
-        L.require(L.nonempty(issue['description']) and isinstance(issue['standard_ids'],list) and conflicts<=set(issue['standard_ids']),
+        ids=issue['standard_ids']
+        L.require(L.nonempty(issue['description']) and isinstance(ids,list) and all(isinstance(i,str) and work['records'].get(i,{}).get('kind')=='Standard' for i in ids) and len(ids)==len(set(ids)) and conflicts<=set(ids),
                   '记录制度与上位规定不一致及双方依据，不只记录执行人员违规')
     if enforce: L.require(clue['basis_pending'] is pending,'依据待确认标记与依据核实/适用性不一致')
     return pending
